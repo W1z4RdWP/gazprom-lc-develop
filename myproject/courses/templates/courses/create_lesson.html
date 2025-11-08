@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}Создать урок{% endblock %}
+
+{% block content %}
+    <div class="content-section">
+        <h2>Создать урок для курса {{ course.title }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.media }}
+        
+            {% for field in form %}
+    {% if field.name == "content" %}
+            <div class="mb-3">
+                {{ field.label_tag }}
+                {{ field }}
+            </div>
+        {% else %}
+            {{ field|as_crispy_field }}
+        {% endif %}
+    {% endfor %}
+            <button type="submit" class="btn btn-primary">Создать урок</button>
+        </form>
+    </div>
+{% endblock %}

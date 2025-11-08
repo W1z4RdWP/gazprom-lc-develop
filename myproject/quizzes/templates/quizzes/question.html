@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{% block title %}Вопрос{% endblock %}
+{% load static %}
+{% block specific_styles %}
+<link rel="stylesheet" href="{% static 'quizzes/css/quiz_styles.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+     <!-- Progress bar -->
+     <div class="progress mb-4" style="height: 25px;">
+        <div class="progress-bar bg-success" 
+             role="progressbar" 
+             style="width: {{ progress_percent }}%"
+             aria-valuenow="{{ progress_percent }}" 
+             aria-valuemin="0" 
+             aria-valuemax="100">
+            Вопрос {{ current_question_number }} из {{ total_questions }}
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">{{ question.text }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'get-answer' %}">
+                {% csrf_token %}
+                <input type="hidden" name="question_id" value="{{ question.id }}">
+
+                {% if question.question_type == 'text' %}
+                    <div class="mb-3">
+                        <label for="answer_text" class="form-label">Ваш ответ:</label>
+                        <textarea class="form-control" name="answer_text" id="answer_text" rows="4" required></textarea>
+                    </div>
+                {% else %}
+                
+                <div class="list-group">
+                    {% for answer in answers %}
+                    <label class="list-group-item d-flex align-items-center">
+                        {% if question.question_type == 'multiple' %}
+                            <input class="form-check-input me-3" 
+                            type="checkbox" 
+                            name="answer_ids" 
+                            value="{{ answer.id }}">
+                        {% else %}
+                            <input class="form-check-input me-3" 
+                                type="radio" 
+                                name="answer_id" 
+                                value="{{ answer.id }}" 
+                                required>
+                        {% endif %}
+                
+                        <span>{{ answer.text }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <button type="submit" class="btn-quiz btn-primary w-100 mt-4 py-2">
+                    {% if is_last %}Завершить тест{% else %}Следующий вопрос →{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

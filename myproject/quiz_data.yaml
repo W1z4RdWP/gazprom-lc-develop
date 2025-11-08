@@ -1,0 +1,139 @@
+- model: quizzes.quiz
+  pk: 2
+  fields:
+    name: Dental Health
+
+- model: quizzes.question
+  pk: 2
+  fields:
+    quiz: 2
+    text: "How often is it recommended to visit the dentist for a check-up?"
+
+- model: quizzes.answer
+  pk: 2
+  fields:
+    question: 2
+    text: "Every 3 months"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 3
+  fields:
+    question: 2
+    text: "Every 6 months"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 4
+  fields:
+    question: 2
+    text: "Once a year"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 3
+  fields:
+    quiz: 2
+    text: "What is the primary cause of tooth decay?"
+
+- model: quizzes.answer
+  pk: 5
+  fields:
+    question: 3
+    text: "Sugar consumption"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 6
+  fields:
+    question: 3
+    text: "Bacterial plaque accumulation"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 7
+  fields:
+    question: 3
+    text: "Drinking cold water"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 4
+  fields:
+    quiz: 2
+    text: "What mineral helps strengthen tooth enamel?"
+
+- model: quizzes.answer
+  pk: 8
+  fields:
+    question: 4
+    text: "Calcium"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 9
+  fields:
+    question: 4
+    text: "Fluoride"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 10
+  fields:
+    question: 4
+    text: "Iron"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 5
+  fields:
+    quiz: 2
+    text: "What is the first stage of gum disease?"
+
+- model: quizzes.answer
+  pk: 11
+  fields:
+    question: 5
+    text: "Periodontitis"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 12
+  fields:
+    question: 5
+    text: "Gingivitis"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 13
+  fields:
+    question: 5
+    text: "Tooth abscess"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 6
+  fields:
+    quiz: 2
+    text: "What is the recommended duration for brushing teeth?"
+
+- model: quizzes.answer
+  pk: 14
+  fields:
+    question: 6
+    text: "1 minute"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 15
+  fields:
+    question: 6
+    text: "2 minutes"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 16
+  fields:
+    question: 6
+    text: "30 seconds"
+    is_correct: false

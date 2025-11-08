@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block title %}Пройти тестирование{% endblock %}
+{% load static %}
+{% block specific_styles %}
+<link rel="stylesheet" href="{% static 'quizzes/css/quiz_styles.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Выберите тест</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'quiz_start_handler' %}">
+                {% csrf_token %}
+                <div class="list-group">
+                    {% for topic in topics %}
+                        <label class="list-group-item d-flex align-items-center">
+                            <input class="form-check-input me-3" 
+                                   type="radio" 
+                                   name="quiz_id" 
+                                   value="{{ topic.id }}" 
+                                   required>
+                            <div>
+                                <h5 class="mb-1">{{ topic.name }}</h5>
+                                <small class="text-muted">{{ topic.questions_count }} вопросов</small>
+                            </div>
+                        </label>
+                    {% empty %}
+                        <div class="alert alert-warning">
+                            На данный момент нет доступных тестов
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                {% if user.is_authenticated %}
+                    <button type="submit" class="btn-quiz btn-success mt-4 w-100 py-2">
+                        Начать
+                    </button>
+                {% else %}
+                    <h3>Чтобы приступить к тестированию, необходимо авторизоваться</h3>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Страница не найдена{% endblock %}
+
+{% block content %}
+    <div class="alert alert-danger text-center">
+        <h1>Ошибка 404</h1>
+        <p>К сожалению, запрашиваемая страница не найдена.</p>
+        <a href="{% url 'home' %}" class="btn btn-primary">Вернуться на главную</a>
+    </div>
+{% endblock %}

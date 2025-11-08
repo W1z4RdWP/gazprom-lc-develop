@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% block title %}Ответ{% endblock %}
+{% load static %}
+{% block specific_styles %}
+<link rel="stylesheet" href="{% static 'quizzes/css/quiz_styles.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    <div class="progress mb-4" style="height: 25px;">
+        <div class="progress-bar bg-success" 
+             style="width: {% if question.question_type == 'text' %}100%;{% else %}{{ progress_percent }}%{% endif %}">
+            Вопрос {% if question.question_type != 'text' %}{{ current_question_number }} из {{ total_questions }}{% else %} открытый{%endif%}
+        </div>
+    </div>
+    <form method="POST" action="{% url 'get-questions' %}">
+        {% csrf_token %}
+        <input type="hidden" name="quiz_id" value="{{ correct_answer.question.quiz.id }}">
+        
+        <div class="answer-result" style="color: black;">
+            <h3 class="mb-4">{{ correct_answer.question.text }}</h3>
+
+            {% if question.question_type == 'multiple' %}
+                <div class="card mb-4 {% if is_correct %}border-success{% else %}border-danger{% endif %}">
+                    {% if is_correct %}
+                    <div class="alert alert-success">
+                        ✅ Правильный ответ!
+                    </div>
+                    <h5>Правильные ответы:</h5>
+                    {% for answer in correct_answers %}
+                        <ul>
+                            <li class="mb-0">{{ answer.text }}</li>
+                        </ul>
+                    {% endfor %}
+                    {% else %}
+                    <div class="alert alert-danger">
+                        ❌ Неверно!
+                        <p class="mb-0 mt-2">{{ correct_answer.text }}</p>
+                    </div>
+                    <div class="card-body">
+                        <h5>Правильные ответы:</h5>
+                        {% for answer in correct_answers %}
+                            <ul>
+                                <li class="mb-0">{{ answer.text }}</li>
+                            </ul>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                </div>
+            {% else %}
+            <div class="card mb-4 {% if is_correct %}border-success{% elif question.question_type == 'text' %}border-warning{% else %}border-danger{% endif %}">
+                <div class="card-body">
+                    {% if question.question_type == 'text' %}
+                        <h5 class='p-3' align='center'>Ответ записан!</h5>
+                    {% else %}
+                        <h5>Ваш ответ:</h5>
+                        <p class="mb-0">{{ submitted_answer.text }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+                {% if is_correct %}
+                <div class="alert alert-success">
+                    ✅ Правильный ответ!
+                </div>
+                {% elif question.question_type == 'text' %}
+                        <br/>
+                {% else %}
+                <div class="alert alert-danger">
+                    ❌ Неверно! Правильный ответ:
+                    <p class="mb-0 mt-2">{{ correct_answer.text }}</p>
+                </div>
+                {% endif %}
+            {% endif %}
+            <button type="submit" class="btn-quiz btn-primary w-100">
+                {% if is_last %}Завершить тест{% else %}Следующий вопрос →{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

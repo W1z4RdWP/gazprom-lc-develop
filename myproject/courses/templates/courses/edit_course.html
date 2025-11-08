@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Редактировать курс{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Добавляем form.media для загрузки CKEditor5 -->
+        {{ form.media }}
+        
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Редактировать курс {{ course.title }}</legend>
+            
+            <!-- Используем crispy для рендеринга формы -->
+            {{ form|crispy }}
+        </fieldset>
+        
+        <div class="form-group mt-3">
+            <button class="btn btn-primary" type="submit">Сохранить</button>
+            <a href="{% url 'course_detail' course.slug %}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock content %}

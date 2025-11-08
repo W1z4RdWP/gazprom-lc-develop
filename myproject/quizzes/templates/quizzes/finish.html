@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block specific_styles %}<link rel="stylesheet" href="{% static 'quizzes/css/quiz_styles.css' %}"> {% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h2>Тестирование завершено!</h2>
+    </div>
+    <div class="result-summary">
+        {% if not is_all_question_text %}
+            <p style="color: black;">Количество правильных ответов: <span class="highlight">{{ score }}/{{ questions_count }}</span></p>
+            <p style="color: black;">Процент правильных ответов: <span class="highlight">{{ percent_score }}%</span></p>
+        {% else %}
+            <h4 style='color: #333;'>Результаты записаны</h4>
+        {% endif %}
+        <div class="progress-bar-finish">
+            <div class="progress-bar-finish__progress" style="width: {{ percent_score }}%"></div>
+        </div>
+        <a href="{% url 'quizzes' %}" class="btn-quiz finish-btn">
+            ← Вернуться к списку тестов
+        </a>
+    </div>
+</div>
+<script>
+    function disableButton(form) {
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = 'Loading...';
+    }
+</script>
+{% endblock %}
+
+
+
+<!-- TODO: Разобраться что дает закомментированная область -->
+
+<!-- <div>
+    <p>Quiz complete. You scored {{ percent_score }}%</p>
+    <p>({{ score }} correct / {{ questions_count }} questions)</p>
+  
+    <a class="btn-quiz" href="{% url 'start' %}"> Start another quiz </a>
+</div> -->

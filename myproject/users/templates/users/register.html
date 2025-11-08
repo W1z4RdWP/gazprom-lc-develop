@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Добро пожаловать</legend>
+                {{ form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Регистрация</button>
+            </div>
+        </form>
+        <div class="border-top pt-3">
+            <small class="text-muted login-out-actions">
+                <span style="color: whitesmoke;">Уже есть аккаунт?</span> 
+                <a class="btn btn-info btn-sm ml-2" href="{% url 'login' %}">
+                    Вход
+                </a>
+            </small>
+            <small style="color: whitesmoke; margin-left: 2%;">
+                После регистрации ваш аккаунт будет проверен администратором. 
+                Вы получите доступ после подтверждения.
+            </small>
+        </div>
+    </div>
+{% endblock content %}

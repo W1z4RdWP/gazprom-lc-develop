@@ -1,0 +1,445 @@
+- model: quizzes.quiz
+  pk: 1
+  fields:
+    name: Здоровье полости рта
+
+- model: quizzes.question
+  pk: 1
+  fields:
+    quiz: 1
+    text: "Как часто рекомендуется посещать стоматолога для профилактического осмотра?"
+
+- model: quizzes.answer
+  pk: 1
+  fields:
+    question: 1
+    text: "Каждые 3 месяца"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 2
+  fields:
+    question: 1
+    text: "Каждые 6 месяцев"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 3
+  fields:
+    question: 1
+    text: "1 раз в год"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 2
+  fields:
+    quiz: 1
+    text: "Как называется основной минерал, укрепляющий эмаль зубов?"
+
+- model: quizzes.answer
+  pk: 4
+  fields:
+    question: 2
+    text: "Кальций"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 5
+  fields:
+    question: 2
+    text: "Фтор"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 6
+  fields:
+    question: 2
+    text: "Железо"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 3
+  fields:
+    quiz: 1
+    text: "Как называется начальная стадия заболеваний дёсен?"
+
+- model: quizzes.answer
+  pk: 7
+  fields:
+    question: 3
+    text: "Пародонтит"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 8
+  fields:
+    question: 3
+    text: "Гингивит"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 9
+  fields:
+    question: 3
+    text: "Абсцесс зуба"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 4
+  fields:
+    quiz: 1
+    text: "Как долго рекомендуется чистить зубы?"
+
+- model: quizzes.answer
+  pk: 10
+  fields:
+    question: 4
+    text: "1 минута"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 11
+  fields:
+    question: 4
+    text: "2 минуты"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 12
+  fields:
+    question: 4
+    text: "30 секунд"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 5
+  fields:
+    quiz: 1
+    text: "Как называется основная причина кариеса зубов?"
+
+- model: quizzes.answer
+  pk: 13
+  fields:
+    question: 5
+    text: "Употребление сладкого"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 14
+  fields:
+    question: 5
+    text: "Накопление зубного налёта"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 15
+  fields:
+    question: 5
+    text: "Питьё холодной воды"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 6
+  fields:
+    quiz: 1
+    text: "Как называется процесс удаления зубного камня?"
+
+- model: quizzes.answer
+  pk: 16
+  fields:
+    question: 6
+    text: "Пломбирование"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 17
+  fields:
+    question: 6
+    text: "Шлифовка"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 18
+  fields:
+    question: 6
+    text: "Ультразвуковая чистка"
+    is_correct: true
+
+- model: quizzes.question
+  pk: 7
+  fields:
+    quiz: 1
+    text: "Как часто нужно менять зубную щётку?"
+
+- model: quizzes.answer
+  pk: 19
+  fields:
+    question: 7
+    text: "Каждые 3 месяца"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 20
+  fields:
+    question: 7
+    text: "Каждые 6 месяцев"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 21
+  fields:
+    question: 7
+    text: "1 раз в год"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 8
+  fields:
+    quiz: 1
+    text: "Как называется воспаление дёсен, вызванное зубным налётом?"
+
+- model: quizzes.answer
+  pk: 22
+  fields:
+    question: 8
+    text: "Пародонтит"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 23
+  fields:
+    question: 8
+    text: "Гингивит"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 24
+  fields:
+    question: 8
+    text: "Пульпит"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 9
+  fields:
+    quiz: 1
+    text: "Как называется профессиональная чистка зубов?"
+
+- model: quizzes.answer
+  pk: 25
+  fields:
+    question: 9
+    text: "Ультразвуковая чистка"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 26
+  fields:
+    question: 9
+    text: "Шлифовка"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 27
+  fields:
+    question: 9
+    text: "Пломбирование"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 10
+  fields:
+    quiz: 1
+    text: "Как называется зубной налёт, образующийся на зубах?"
+
+- model: quizzes.answer
+  pk: 28
+  fields:
+    question: 10
+    text: "Пласт"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 29
+  fields:
+    question: 10
+    text: "Налёт"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 30
+  fields:
+    question: 10
+    text: "Камень"
+    is_correct: false
+
+
+# Второй квиз (5 вопросов)
+- model: quizzes.quiz
+  pk: 2
+  fields:
+    name: История искусства
+
+- model: quizzes.question
+  pk: 11
+  fields:
+    quiz: 2
+    text: "Как называется стиль живописи, характеризующийся мелкими точками и смещением цвета?"
+
+- model: quizzes.answer
+  pk: 31
+  fields:
+    question: 11
+    text: "Кубизм"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 32
+  fields:
+    question: 11
+    text: "Пуантилизм"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 33
+  fields:
+    question: 11
+    text: "Импрессионизм"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 12
+  fields:
+    quiz: 2
+    text: "Какой художник написал картину «Звёздная ночь»?"
+
+- model: quizzes.answer
+  pk: 34
+  fields:
+    question: 12
+    text: "Леонардо да Винчи"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 35
+  fields:
+    question: 12
+    text: "Винсент ван Гог"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 36
+  fields:
+    question: 12
+    text: "Пабло Пикассо"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 13
+  fields:
+    quiz: 2
+    text: "Как называется эпоха искусства, предшествующая Ренессансу?"
+
+- model: quizzes.answer
+  pk: 37
+  fields:
+    question: 13
+    text: "Барокко"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 38
+  fields:
+    question: 13
+    text: "Готика"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 39
+  fields:
+    question: 13
+    text: "Рококо"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 14
+  fields:
+    quiz: 2
+    text: "Какой скульптор создал статую «Давид»?"
+
+- model: quizzes.answer
+  pk: 40
+  fields:
+    question: 14
+    text: "Микеланджело"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 41
+  fields:
+    question: 14
+    text: "Донателло"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 42
+  fields:
+    question: 14
+    text: "Бернини"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 15
+  fields:
+    quiz: 2
+    text: "Как называется знаменитая картина Леонардо да Винчи, изображающая женщину с загадочной улыбкой?"
+
+- model: quizzes.answer
+  pk: 43
+  fields:
+    question: 15
+    text: "Мона Лиза"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 44
+  fields:
+    question: 15
+    text: "Сикстинская мадонна"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 45
+  fields:
+    question: 15
+    text: "Тайная вечеря"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 16
+  fields:
+    quiz: 2
+    text: "Как называется направление искусства, возникшее в XX веке, характеризующееся геометрическими формами?"
+
+- model: quizzes.answer
+  pk: 46
+  fields:
+    question: 16
+    text: "Кубизм"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 47
+  fields:
+    question: 16
+    text: "Сюрреализм"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 48
+  fields:
+    question: 16
+    text: "Экспрессионизм"
+    is_correct: false
+  
+

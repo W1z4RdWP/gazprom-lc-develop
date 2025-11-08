@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>Результат теста: {{ quiz.title }}</h1>
+<p>Ваш результат: {{ result.score }} из {{ quiz.questions.count }}</p>
+<p>Дата прохождения: {{ result.completed_at|date:"d.m.Y H:i" }}</p>
+<script>
+    function disableButton(form) {
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = 'Loading...';
+    }
+</script>
+{% endblock %}

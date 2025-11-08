@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>{{ quiz.title }}</h1>
+<form method="post">
+    {% csrf_token %}
+    {% for question in questions %}
+    <div class="question">
+        <h3>{{ question.text }}</h3>
+        {% for answer in question.answers.all %}
+        <label>
+            <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}">
+            {{ answer.text }}
+        </label><br>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    <button type="submit">Отправить</button>
+</form>
+<script>
+    function disableButton(form) {
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = 'Loading...';
+    }
+</script>
+{% endblock %}

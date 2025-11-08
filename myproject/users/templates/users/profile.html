@@ -1,0 +1,152 @@
+{% extends "layout.html" %}
+{% block title %}Ваш профиль{% endblock %}
+{% load crispy_forms_tags %}
+{% load paginator_tags %}
+{% block content %}
+{% load static %}
+    <link rel="stylesheet" href="{% static 'users/css/profile.css' %}">
+    <script src="{% static 'users/js/scripts.js' %}" defer></script>
+    <div class="content-section">
+        <div class="media">
+            <img class="rounded-circle account-img" src="{{ user.profile.image.url|default:'https://via.placeholder.com/150' }}" alt="Profile Image">
+            <div class="media-body">
+                <h2 class="account-heading">{{ user.username }}</h2>
+                <p class="text-secondary">{{ user.email }}</p>
+                <p class="text-secondary">{{ user.profile.bio|default:'О себе: нет информации' }}</p>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <button class="btn btn-outline-info" id="edit-profile-btn">Редактировать</button>
+            <button class="btn btn-outline-info" id="toggle-quizzes-btn">Показать тесты</button>
+            <button class="btn btn-outline-info" id="toggle-courses-btn">Показать завершенные курсы</button>
+        </div>
+        <div class="progress-bar-user">
+            <h3>
+                Уровень: {{ level }} | Опыт: {{ exp }}
+            </h3>
+            <div class="inner" style="width: {{ progress }}%;" nonce="{{ request.csp_nonce }}" ></div>
+        </div>
+        
+        
+        <!-- Форма для обновления профиля -->
+        <div id="edit-profile-form" style="display: none;">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4">Информация профиля</legend>
+                    {{ user_form|crispy }}
+                    {{ profile_form|crispy }}
+                </fieldset>
+                <div class="form-group">
+                    <button class="btn btn-outline-info" type="submit">Обновить</button>
+                    <button class="btn btn-outline-secondary" id="cancel-edit-btn">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="container mt-4">
+        <h2>Ваш прогресс</h2>
+        
+        <!-- Блок для незавершенных курсов -->
+        <div id="unfinished-courses">
+            {% if unfinished_courses %}
+                {% for progress in unfinished_courses %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ progress.course.title }}</h5>
+                        <div class="progress">
+                            <div class="progress-bar" 
+                                style="width: {{ progress.percent }}%" 
+                                aria-valuenow="{{ progress.percent }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100">
+                                {{ progress.percent }}%
+                            </div>
+                        </div>
+                        <p class="mt-2">
+                            Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
+                        </p>
+                        {% if progress.course.final_quiz %}
+                            <div class="quiz-status">
+                            {% if progress.quiz_passed %}
+                                <span class="badge bg-success">Тест пройден</span>
+                            {% else %}
+                                <span class="badge bg-warning">Требуется тест</span>
+                                <a href="{% url 'quiz_start' progress.course.final_quiz.id %}" 
+                                class="btn btn-sm btn-primary">
+                                Пройти тест</a>
+                            {% endif %}
+                            </div>
+                        {% endif %}
+                        <div class="btn-group">
+                            <a href="{% url 'course_detail' progress.course.slug %}" 
+                            class="btn btn-primary">
+                                Перейти к курсу
+                            </a>
+                            {% if progress.percent == 100 and finished_courses %}
+                            <span class="btn btn-success disabled">
+                                Курс завершен
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">Вы еще не начали ни одного курса</div>
+            {% endif %}
+        </div>
+
+        <!-- Блок для завершенных курсов (изначально скрыт) -->
+        <div id="finished-courses" style="display: none;">
+            {% if finished_courses %}
+                {% for progress in finished_courses %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ progress.course.title }}</h5>
+                        <div class="progress">
+                            <div class="progress-bar" 
+                                 style="width: {{ progress.percent }}%" 
+                                 aria-valuenow="{{ progress.percent }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ progress.percent }}%
+                            </div>
+                        </div>
+                        <p class="mt-2">
+                            Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
+                        </p>
+                        <div class="btn-group">
+                            <a href="{% url 'course_detail' progress.course.slug %}" 
+                               class="btn btn-primary">
+                                Перейти к курсу
+                            </a>
+                            <span class="btn btn-success disabled">
+                                Курс завершен
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">Вы еще не завершили ни одного курса</div>
+            {% endif %}
+        </div>
+ 
+
+    </div>
+
+    <div class="container mt-4 quiz-history-container" style="display: none;">
+        <h2>История тестов</h2>
+        <div id="quiz-history-content">
+            {% if page_obj %}
+                {% include 'users/includes/_quiz_history.html' %}
+            {% else %}
+                <div class="alert alert-info">Вы еще не проходили тесты</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}

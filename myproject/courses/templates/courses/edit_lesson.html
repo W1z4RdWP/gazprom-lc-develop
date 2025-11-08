@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Редактирование урока{% endblock %}
+
+{% block content %}
+    <div class="content-section">
+        <h2>Редактирование урока в курсе {{ course.title }}</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.media }}
+            {% for field in form %}
+                {% if field.name == "content" %}
+                    <div class="mb-3">
+                        {{ field.label_tag }}
+                        <div class="django-ckeditor-widget">
+                            {{ field }}
+                        </div>
+                    </div>
+                {% else %}
+                    {{ field|as_crispy_field }}
+                {% endif %}
+            {% endfor %}
+            
+            <div class="button-group mt-4">
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                <a href="{% url 'lesson_detail' course.slug lesson.id %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

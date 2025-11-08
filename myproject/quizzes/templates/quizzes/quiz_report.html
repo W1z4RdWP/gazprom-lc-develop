@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block title %}Отчёт по тесту: {{ result.quiz_title }}{% endblock %}
+
+{% block content %}
+<div class="card-body">
+    <div class="progress mb-3">
+        <div class="progress-bar bg-success" style="width: {{ result.percent|stringformat:"d" }}%">
+            {{ result.percent|floatformat:0 }}%
+        </div>
+    </div>
+    <p class="mb-1">Правильных: {{ result.score }}/{{ result.total_questions }}</p>
+    <small class="small">Дата: {{ result.completed_at|date:"d.m.Y H:i" }}</small>
+</div>
+
+<h5 class="mt-4">История ответов:</h5>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Вопрос</th>
+            <th>Ваш ответ</th>
+            <th>Правильный ответ</th>
+            <th>Результат</th>
+        </tr>
+    </thead>
+    <tbody> 
+    {% for ans in answers %}
+        <tr>
+            <td>{{ ans.question.text }}</td>
+            <td>
+                {% if ans.selected_answer %}
+                    {{ ans.selected_answer.text }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% for correct in ans.question.answer_set.all %}
+                    {% if correct.is_correct %}
+                        {{ correct.text }}<br>
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>
+                {% if ans.is_correct %}
+                    <span class="text-success">Верно</span>
+                {% else %}
+                    <span class="text-danger">Ошибка</span>
+                {% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="4">Ответы не найдены</td></tr>
+    {% endfor %}
+</tbody>
+</table>
+{% endblock %}

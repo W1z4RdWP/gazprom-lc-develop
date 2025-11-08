@@ -1,0 +1,231 @@
+/* static/css/profile.css */
+
+.content-section {
+    background: #dad7d7;
+    padding: 20px;
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.media {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.rounded-circle.account-img {
+    width: 100px;
+    height: 100px;
+    border: 3px solid #007bff;
+    margin-right: 20px;
+}
+
+.account-heading {
+    font-size: 2rem;
+    color: #333;
+}
+
+.text-secondary {
+    color: #6c757d;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+legend{
+    color: #333;
+}
+
+.btn-outline-info {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-outline-info:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.profile-actions{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#check-finished-courses-btn{
+    margin-bottom: 20px;
+}
+
+#edit-profile-btn {
+    margin-bottom: 20px;
+}
+
+#cancel-edit-btn {
+    margin-left: 10px;
+}
+
+.progress-bar {
+    transition: width 0.5s ease-in-out;
+    background-color: #4CAF50;
+}
+
+.progress {
+    height: 25px;
+    border-radius: 12px;
+    overflow: visible;
+}
+
+.progress-bar-user {
+    place-self: center;
+    height: 5vh;
+    width: 90%;
+    border: 2px solid #333;
+    margin-top: 1vh; 
+    
+    position: relative; /* Делаем контейнер относительным для позиционирования текста */
+}
+
+.progress-bar-user h3 {
+    position: absolute; /* Абсолютное позиционирование текста */
+    top: 50%; /* Размещаем текст по центру по вертикали */
+    left: 10px; /* Отступ слева */
+    transform: translateY(-50%); /* Смещаем текст вверх на половину его высоты */
+    margin: 0; /* Убираем отступы */
+    z-index: 2; /* Убедимся, что текст поверх .inner */
+    color: #333; /* Цвет текста */
+}
+
+.progress-bar-user .inner {
+    height: 100%;
+    background-color: #4CAF50;
+    position: relative; /* Относительное позиционирование */
+    z-index: 1; /* Убедимся, что .inner ниже текста */
+}
+
+/* Блок с кнопками "Перейти к курсу" и "Курс завершен" */
+.btn-group {
+    display: flex;
+    width: 100%;
+    /* background-color: red; */
+    justify-content: space-between;
+    gap: 25%;
+}
+
+.quiz-status{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    /* border: 1px solid gray; */
+    margin-bottom: 0.5%;
+
+}
+
+
+.quiz-status span{ /* Выравнивание текста "Требуется тест" по центру внутри своего контейнера */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+@media (max-width: 768px){
+    .content-section {
+        background: #dad7d7;
+        padding: 10px;
+        border: 1px solid #dddddd;
+        border-radius: 8px;
+        margin-top: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .media {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .rounded-circle.account-img {
+        width: 70px;
+        height: 70px;
+        border: 2px solid #007bff;
+        margin-right: 10px;
+    }
+    
+    .account-heading {
+        font-size: 1.5rem;
+        color: #333;
+    }
+    
+    
+    .form-group {
+        margin-bottom: 8px;
+    }
+    
+    
+    
+    .profile-actions{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 10%;
+        
+        
+    }
+    
+
+
+    #toggle-courses-btn{
+        overflow: hidden;
+        font-size: 0.8em;
+        margin-bottom: 10px;
+        height: 50px;
+    }
+    
+    #edit-profile-btn {
+        font-size: 0.8em;
+        margin-bottom: 10px;
+        height: 50px;
+    }
+    
+    #cancel-edit-btn {
+        margin-left: 5px;
+    }
+    
+    
+    .progress {
+        height: 20px;
+        border-radius: 10px;
+        overflow: visible;
+    }
+    
+    .progress-bar-user {
+        place-self: center;
+        height: 5vh;
+        width: 90%;
+        border: 2px solid #333;
+        margin-top: 1vh;
+        
+        position: relative; /* Делаем контейнер относительным для позиционирования текста */
+    }
+    
+    .progress-bar-user h3 {
+        position: absolute; /* Абсолютное позиционирование текста */
+        font-size: 1em; 
+        top: 50%; /* Размещаем текст по центру по вертикали */
+        left: 10px; /* Отступ слева */
+        transform: translateY(-50%); /* Смещаем текст вверх на половину его высоты */
+        margin: 0; /* Убираем отступы */
+        z-index: 2; /* Убедимся, что текст поверх .inner */
+        color: #333; /* Цвет текста */
+    }
+    
+    .progress-bar-user .inner {
+        height: 100%;
+        background-color: #4CAF50;
+        position: relative; /* Относительное позиционирование */
+        z-index: 1; /* Убедимся, что .inner ниже текста */
+    }
+    
+}

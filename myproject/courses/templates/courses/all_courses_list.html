@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h1>Список Курсов</h1>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Доступные курсы</h3>
+            <div class="list-group">
+                {% if not user.course %}
+                    <p>Вам пока еще не назначили ни одного курса. Обратитесь к администрации сайта</p>
+                {% endif %}
+                {% for course in courses %}
+                <a href="{% url 'course_detail' course.slug %}"
+                   class="list-group-item list-group-item-action">
+                    {{ course.title }}
+                    {% if user.is_authenticated and course.id in completed_courses %}
+                        <span class="badge bg-success float-end">Завершен</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+<br><br>
+    {% comment %} <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    {% if request.user.is_authenticated %}
+                        <p>Выберите курс</p>
+                    {% else %}
+                    <p>Чтобы начать курс, пожалуйста, войдите.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div> {% endcomment %}
+{% endblock %}

@@ -1,0 +1,1141 @@
+- model: quizzes.quiz
+  pk: 1
+  fields:
+    name: Наставничество и обучение стажеров
+
+- model: quizzes.question
+  pk: 1
+  fields:
+    quiz: 1
+    text: "Какую роль играют открытые и закрытые вопросы в процессе наставничества?"
+
+- model: quizzes.answer
+  pk: 1
+  fields:
+    question: 1
+    text: "Помогают оценить кандидатов и направлять стажеров."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 2
+  fields:
+    question: 1
+    text: "Не имеют значения в процессе найма."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 2
+  fields:
+    quiz: 1
+    text: "Почему важно правильно задавать вопросы стажеру?"
+
+- model: quizzes.answer
+  pk: 3
+  fields:
+    question: 2
+    text: "Чтобы заинтересовать новичка и поддерживать диалог."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 4
+  fields:
+    question: 2
+    text: "Чтобы проверить его знания."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 5
+  fields:
+    question: 2
+    text: "Чтобы засыпать его информацией."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 3
+  fields:
+    quiz: 1
+    text: "Какой тип вопросов помогает быстро выяснить факт?"
+
+- model: quizzes.answer
+  pk: 6
+  fields:
+    question: 3
+    text: "Закрытые вопросы."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 7
+  fields:
+    question: 3
+    text: "Открытые вопросы."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 8
+  fields:
+    question: 3
+    text: "Обсуждающие вопросы."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 4
+  fields:
+    quiz: 1
+    text: "Какую пользу приносят открытые вопросы?"
+
+- model: quizzes.answer
+  pk: 9
+  fields:
+    question: 4
+    text: "Проверяют реальное понимание и развивают навыки самостоятельного мышления."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 10
+  fields:
+    question: 4
+    text: "Позволяют получить короткие ответы."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 11
+  fields:
+    question: 4
+    text: "Упрощают процесс обучения."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 5
+  fields:
+    quiz: 1
+    text: "Какой процент вопросов рекомендуется делать открытыми при работе со стажером?"
+
+- model: quizzes.answer
+  pk: 12
+  fields:
+    question: 5
+    text: "90%"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 13
+  fields:
+    question: 5
+    text: "50%"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 14
+  fields:
+    question: 5
+    text: "100%"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 6
+  fields:
+    quiz: 1
+    text: "Какой пример закрытого вопроса приведен для администратора?"
+
+- model: quizzes.answer
+  pk: 15
+  fields:
+    question: 6
+    text: "Ты сможешь открыть клинику самостоятельно?"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 16
+  fields:
+    question: 6
+    text: "Как ты объяснишь пациенту, почему важно записываться заранее?"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 17
+  fields:
+    question: 6
+    text: "Какие документы нужны для первичного приема и почему они важны?"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 7
+  fields:
+    quiz: 1
+    text: "Какой вопрос помогает стажеру осознать важность своей работы?"
+
+- model: quizzes.answer
+  pk: 18
+  fields:
+    question: 7
+    text: "Как ты объяснишь пациенту, почему важно записываться заранее?"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 19
+  fields:
+    question: 7
+    text: "Ты знаешь, как провести уборку?"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 20
+  fields:
+    question: 7
+    text: "Ты помнишь документы для приема?"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 8
+  fields:
+    quiz: 1
+    text: "Какой из следующих вопросов является открытым?"
+
+- model: quizzes.answer
+  pk: 21
+  fields:
+    question: 8
+    text: "Как правильно проверить срок годности анестезии? На что стоит обратить особое внимание?"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 22
+  fields:
+    question: 8
+    text: "Ты помнишь, как проверить срок годности анестезии?"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 23
+  fields:
+    question: 8
+    text: "Ты знаешь, как провести стерилизацию инструментов?"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 9
+  fields:
+    quiz: 1
+    text: "Какой метод рекомендуется использовать для комбинирования вопросов?"
+
+- model: quizzes.answer
+  pk: 24
+  fields:
+    question: 9
+    text: "Сначала уточняем закрытым, потом раскрываем открытым."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 25
+  fields:
+    question: 9
+    text: "Только закрытые вопросы."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 26
+  fields:
+    question: 9
+    text: "Только открытые вопросы."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 10
+  fields:
+    quiz: 1
+    text: "Какой основной принцип лежит в основе метода \"Клевер наставничества\"?"
+
+- model: quizzes.answer
+  pk: 27
+  fields:
+    question: 10
+    text: "Он сочетает онлайн-обучение и практику."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 28
+  fields:
+    question: 10
+    text: "Он основан только на теоретическом обучении."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 29
+  fields:
+    question: 10
+    text: "Он не требует контроля со стороны наставника."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 11
+  fields:
+    quiz: 1
+    text: "Сколько этапов включает процесс обучения по методу \"Клевер наставничества\"?"
+
+- model: quizzes.answer
+  pk: 30
+  fields:
+    question: 11
+    text: "4 этапа."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 31
+  fields:
+    question: 11
+    text: "3 этапа."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 32
+  fields:
+    question: 11
+    text: "5 этапов."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 12
+  fields:
+    quiz: 1
+    text: "Что происходит на этапе \"Сделай сам, расскажи\"?"
+
+- model: quizzes.answer
+  pk: 33
+  fields:
+    question: 12
+    text: "Стажер выполняет задачу без инструкции и объясняет свои действия."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 34
+  fields:
+    question: 12
+    text: "Стажер изучает тему в учебном центре."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 35
+  fields:
+    question: 12
+    text: "Наставник показывает процесс работы."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 13
+  fields:
+    quiz: 1
+    text: "Какую роль играет наставник на этапе \"Сделай сам, я подскажу\"?"
+
+- model: quizzes.answer
+  pk: 36
+  fields:
+    question: 13
+    text: "Он наблюдает и корректирует действия стажера при необходимости."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 37
+  fields:
+    question: 13
+    text: "Он полностью контролирует процесс."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 38
+  fields:
+    question: 13
+    text: "Он не участвует в процессе."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 14
+  fields:
+    quiz: 1
+    text: "Какой из следующих примеров относится к этапу \"Я покажу, ты смотришь\"?"
+
+- model: quizzes.answer
+  pk: 39
+  fields:
+    question: 14
+    text: "Наставник демонстрирует процесс утренней уборки."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 40
+  fields:
+    question: 14
+    text: "Стажер сам выполняет уборку по инструкции."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 41
+  fields:
+    question: 14
+    text: "Стажер изучает памятку в учебном центре."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 15
+  fields:
+    quiz: 1
+    text: "Какой первый этап включает метод \"Цикл Колба\"?"
+
+- model: quizzes.answer
+  pk: 42
+  fields:
+    question: 15
+    text: "Пробуем – столкновение с реальной задачей или проблемой."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 43
+  fields:
+    question: 15
+    text: "Думаем – анализ своих действий, ошибок, затруднений."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 44
+  fields:
+    question: 15
+    text: "Учимся – изучение правил, инструкций, алгоритмов."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 16
+  fields:
+    quiz: 1
+    text: "Какой этап следует после анализа действий на этапе \"Думаем\"?"
+
+- model: quizzes.answer
+  pk: 45
+  fields:
+    question: 16
+    text: "Пробуем снова."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 46
+  fields:
+    question: 16
+    text: "Учимся – изучение правил, инструкций, алгоритмов."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 47
+  fields:
+    question: 16
+    text: "Пробуем."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 17
+  fields:
+    quiz: 1
+    text: "В каких ситуациях применяется метод \"Цикл Колба\"?"
+
+- model: quizzes.answer
+  pk: 48
+  fields:
+    question: 17
+    text: "Когда важно понять логику процесса и научиться анализировать свои действия."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 49
+  fields:
+    question: 17
+    text: "Только для механического запоминания алгоритмов."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 50
+  fields:
+    question: 17
+    text: "Исключительно для теоретического обучения."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 18
+  fields:
+    quiz: 1
+    text: "Какое из следующих утверждений является правильным определением задачи?"
+
+- model: quizzes.answer
+  pk: 51
+  fields:
+    question: 18
+    text: "Задача = глагол + описание результата + измеримые характеристики."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 52
+  fields:
+    question: 18
+    text: "Задача = описание результата + ответственный."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 53
+  fields:
+    question: 18
+    text: "Задача = только глагол и ответственный."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 19
+  fields:
+    quiz: 1
+    text: "Что необходимо сделать после постановки задачи?"
+
+- model: quizzes.answer
+  pk: 54
+  fields:
+    question: 19
+    text: "Спросить у стажера: \"Что ты понял?\""
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 55
+  fields:
+    question: 19
+    text: "Сразу перейти к выполнению."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 56
+  fields:
+    question: 19
+    text: "Игнорировать стажера и ждать результата."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 20
+  fields:
+    quiz: 1
+    text: "Какой элемент не входит в алгоритм формулировки задач?"
+
+- model: quizzes.answer
+  pk: 57
+  fields:
+    question: 20
+    text: "Метод выполнения задачи."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 58
+  fields:
+    question: 20
+    text: "Глагол."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 59
+  fields:
+    question: 20
+    text: "Описание результата."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 21
+  fields:
+    quiz: 1
+    text: "Почему четкая формулировка задач важна?"
+
+- model: quizzes.answer
+  pk: 60
+  fields:
+    question: 21
+    text: "Она экономит время и исключает ошибки."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 61
+  fields:
+    question: 21
+    text: "Стажер всегда должен понимать, что от него требуется."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 62
+  fields:
+    question: 21
+    text: "Она не имеет значения для выполнения задач."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 22
+  fields:
+    quiz: 1
+    text: "Почему правильно сформулированная задача важна?"
+
+- model: quizzes.answer
+  pk: 63
+  fields:
+    question: 22
+    text: "Она помогает сотруднику быстрее и качественнее выполнять работу."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 64
+  fields:
+    question: 22
+    text: "Она позволяет избежать обратной связи."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 65
+  fields:
+    question: 22
+    text: "Она не имеет значения для выполнения задач."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 23
+  fields:
+    quiz: 1
+    text: "Что нужно делать при давании обратной связи?"
+
+- model: quizzes.answer
+  pk: 66
+  fields:
+    question: 23
+    text: "Говорить про действия, а не про человека."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 67
+  fields:
+    question: 23
+    text: "Говорить о личности сотрудника."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 68
+  fields:
+    question: 23
+    text: "Игнорировать ошибки."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 24
+  fields:
+    quiz: 1
+    text: "Какой из следующих вариантов является правильным примером конкретной обратной связи?"
+
+- model: quizzes.answer
+  pk: 69
+  fields:
+    question: 24
+    text: "Правильно: \"Ты четко объяснил пациенту разницу между двумя видами пломб.\""
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 70
+  fields:
+    question: 24
+    text: "Неправильно: \"Ты молодец!\""
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 71
+  fields:
+    question: 24
+    text: "Неправильно: \"Ты плохо работаешь.\""
+    is_correct: false
+
+- model: quizzes.question
+  pk: 25
+  fields:
+    quiz: 1
+    text: "Что нужно делать сразу после ситуации?"
+
+- model: quizzes.answer
+  pk: 72
+  fields:
+    question: 25
+    text: "Обсуждать произошедшее немедленно."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 73
+  fields:
+    question: 25
+    text: "Ждать несколько дней, чтобы не быть эмоциональным."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 74
+  fields:
+    question: 25
+    text: "Игнорировать ситуацию, если она незначительна."
+    is_correct: false
+
+- model: quizzes.question
+  pk: 26
+  fields:
+    quiz: 1
+    text: "Почему нельзя использовать метод \"бутерброда\" в обратной связи?"
+
+- model: quizzes.answer
+  pk: 75
+  fields:
+    question: 26
+    text: "Стажер может сосредоточиться только на критике, а похвала пройдет мимо."
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 76
+  fields:
+    question: 26
+    text: "Это лучший способ дать обратную связь."
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 77
+  fields:
+    question: 26
+    text: "Сравнения между похвалой и критикой всегда полезны."
+    is_correct: false
+
+- model: quizzes.quiz
+  pk: 2
+  fields:
+    name: Здоровье полости рта
+
+- model: quizzes.question
+  pk: 27
+  fields:
+    quiz: 2
+    text: "Как часто рекомендуется посещать стоматолога для профилактического осмотра?"
+
+- model: quizzes.answer
+  pk: 78
+  fields:
+    question: 27
+    text: "Каждые 3 месяца"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 79
+  fields:
+    question: 27
+    text: "Каждые 6 месяцев"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 80
+  fields:
+    question: 27
+    text: "1 раз в год"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 28
+  fields:
+    quiz: 2
+    text: "Как называется основной минерал, укрепляющий эмаль зубов?"
+
+- model: quizzes.answer
+  pk: 81
+  fields:
+    question: 28
+    text: "Кальций"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 82
+  fields:
+    question: 28
+    text: "Фтор"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 83
+  fields:
+    question: 28
+    text: "Железо"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 29
+  fields:
+    quiz: 2
+    text: "Как называется начальная стадия заболеваний дёсен?"
+
+- model: quizzes.answer
+  pk: 84
+  fields:
+    question: 29
+    text: "Пародонтит"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 85
+  fields:
+    question: 29
+    text: "Гингивит"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 86
+  fields:
+    question: 29
+    text: "Абсцесс зуба"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 30
+  fields:
+    quiz: 2
+    text: "Как долго рекомендуется чистить зубы?"
+
+- model: quizzes.answer
+  pk: 87
+  fields:
+    question: 30
+    text: "1 минута"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 88
+  fields:
+    question: 30
+    text: "2 минуты"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 89
+  fields:
+    question: 30
+    text: "30 секунд"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 31
+  fields:
+    quiz: 2
+    text: "Как называется основная причина кариеса зубов?"
+
+- model: quizzes.answer
+  pk: 90
+  fields:
+    question: 31
+    text: "Употребление сладкого"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 91
+  fields:
+    question: 31
+    text: "Накопление зубного налёта"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 92
+  fields:
+    question: 31
+    text: "Питьё холодной воды"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 32
+  fields:
+    quiz: 2
+    text: "Как называется процесс удаления зубного камня?"
+
+- model: quizzes.answer
+  pk: 93
+  fields:
+    question: 32
+    text: "Пломбирование"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 94
+  fields:
+    question: 32
+    text: "Шлифовка"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 95
+  fields:
+    question: 32
+    text: "Ультразвуковая чистка"
+    is_correct: true
+
+- model: quizzes.question
+  pk: 33
+  fields:
+    quiz: 2
+    text: "Как часто нужно менять зубную щётку?"
+
+- model: quizzes.answer
+  pk: 96
+  fields:
+    question: 33
+    text: "Каждые 3 месяца"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 97
+  fields:
+    question: 33
+    text: "Каждые 6 месяцев"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 98
+  fields:
+    question: 33
+    text: "1 раз в год"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 34
+  fields:
+    quiz: 2
+    text: "Как называется воспаление дёсен, вызванное зубным налётом?"
+
+- model: quizzes.answer
+  pk: 99
+  fields:
+    question: 34
+    text: "Пародонтит"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 100
+  fields:
+    question: 34
+    text: "Гингивит"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 101
+  fields:
+    question: 34
+    text: "Пульпит"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 35
+  fields:
+    quiz: 2
+    text: "Как называется профессиональная чистка зубов?"
+
+- model: quizzes.answer
+  pk: 102
+  fields:
+    question: 35
+    text: "Ультразвуковая чистка"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 103
+  fields:
+    question: 35
+    text: "Шлифовка"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 104
+  fields:
+    question: 35
+    text: "Пломбирование"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 36
+  fields:
+    quiz: 2
+    text: "Как называется зубной налёт, образующийся на зубах?"
+
+- model: quizzes.answer
+  pk: 105
+  fields:
+    question: 36
+    text: "Пласт"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 106
+  fields:
+    question: 36
+    text: "Налёт"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 107
+  fields:
+    question: 36
+    text: "Камень"
+    is_correct: false
+
+- model: quizzes.quiz
+  pk: 3
+  fields:
+    name: История искусства
+
+- model: quizzes.question
+  pk: 37
+  fields:
+    quiz: 3
+    text: "Как называется стиль живописи, характеризующийся мелкими точками и смещением цвета?"
+
+- model: quizzes.answer
+  pk: 108
+  fields:
+    question: 37
+    text: "Кубизм"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 109
+  fields:
+    question: 37
+    text: "Пуантилизм"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 110
+  fields:
+    question: 37
+    text: "Импрессионизм"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 38
+  fields:
+    quiz: 3
+    text: "Какой художник написал картину «Звёздная ночь»?"
+
+- model: quizzes.answer
+  pk: 111
+  fields:
+    question: 38
+    text: "Леонардо да Винчи"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 112
+  fields:
+    question: 38
+    text: "Винсент ван Гог"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 113
+  fields:
+    question: 38
+    text: "Пабло Пикассо"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 39
+  fields:
+    quiz: 3
+    text: "Как называется эпоха искусства, предшествующая Ренессансу?"
+
+- model: quizzes.answer
+  pk: 114
+  fields:
+    question: 39
+    text: "Барокко"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 115
+  fields:
+    question: 39
+    text: "Готика"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 116
+  fields:
+    question: 39
+    text: "Рококо"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 40
+  fields:
+    quiz: 3
+    text: "Какой скульптор создал статую «Давид»?"
+
+- model: quizzes.answer
+  pk: 117
+  fields:
+    question: 40
+    text: "Микеланджело"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 118
+  fields:
+    question: 40
+    text: "Донателло"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 119
+  fields:
+    question: 40
+    text: "Бернини"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 41
+  fields:
+    quiz: 3
+    text: "Как называется знаменитая картина Леонардо да Винчи, изображающая женщину с загадочной улыбкой?"
+
+- model: quizzes.answer
+  pk: 120
+  fields:
+    question: 41
+    text: "Мона Лиза"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 121
+  fields:
+    question: 41
+    text: "Сикстинская мадонна"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 122
+  fields:
+    question: 41
+    text: "Тайная вечеря"
+    is_correct: false
+
+- model: quizzes.question
+  pk: 42
+  fields:
+    quiz: 3
+    text: "Как называется направление искусства, возникшее в XX веке, характеризующееся геометрическими формами?"
+
+- model: quizzes.answer
+  pk: 123
+  fields:
+    question: 42
+    text: "Кубизм"
+    is_correct: true
+
+- model: quizzes.answer
+  pk: 124
+  fields:
+    question: 42
+    text: "Сюрреализм"
+    is_correct: false
+
+- model: quizzes.answer
+  pk: 125
+  fields:
+    question: 42
+    text: "Экспрессионизм"
+    is_correct: false

@@ -1,0 +1,1383 @@
+:root{
+    --btn-width-at-lesson-detail: 140px;
+    --btn-height-at-lesson-detail: 45px;
+    --primary-color: #333;
+    --secondary-color: #4CAF50;
+    --text-color: whitesmoke;
+    --primary-font: "Onest", sans-serif;
+}
+
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+
+body {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    flex-direction: column;
+    font-family: var(--primary-font);
+}
+
+.captcha{
+    width:clamp(50px,100px,200px);
+    height: clamp(30px, 50px, 100px);
+}
+
+/* Цвет наименования полей во crispy form */
+.form-label{
+    color: rgb(255, 0, 0);
+}
+
+button{
+    cursor: default;
+}
+
+header{
+    display: flex;
+    place-content: center;
+    width: 100%;
+}
+
+.navbar {
+    background-color: #333 !important; /* Переопределяем фон */
+    width: 100%;
+    padding: 0.5rem 1rem;
+}
+
+.navbar #logopng{
+    width: clamp(100px, 15vw, 200px);
+    transition: width 0.3s ease;
+}
+
+.navbar #logolink{
+    position: relative;
+    font-size: 2em;
+    color:#797878;
+}
+
+.navbar-nav .nav-link {
+    color: var(--text-color) !important; /* Цвет текста */
+    padding: 0.5rem 1rem !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: rgb(227, 92, 121) !important; /* Цвет текста при наведении */
+}
+
+.form-group{
+    width: 50%;
+    place-self: center;
+    margin-bottom: 10px;
+}
+
+main {
+    flex: 1;
+    padding: 2rem 1rem;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+main section {
+    display: flex;
+    position: relative;
+    width: 95%;
+    height: 80vh;
+    /* border: 5px solid red; */
+    justify-self: center;
+}
+
+section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+
+
+#clinicajpg {
+    width: 40%;
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+
+    transition: all 0.5s ease 0s;
+}
+
+#doc1_image {
+    width: 260px;
+    height: 360px;
+    position: absolute;
+    bottom: 30%;
+    right: 75%;
+    border: 1px solid darkgoldenrod;
+    border-radius: 10%;
+    box-shadow: -5px 10px 5px -5px rgb(0 0 100 / 0.6);
+
+    transition: all 0.5s ease 0.5s;
+}
+
+#doc2_image {
+    width: 220px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border: 1px solid darkgoldenrod;
+    border-radius: 10%;
+    box-shadow: -5px 10px 5px -5px rgb(0 0 100 / 0.6);
+
+    transition: all 0.5s ease 0.5s;
+}
+
+.section__inner-text{
+    position: absolute;
+    font-size: .9rem;
+    left: 37%;
+    top: 35%;
+    width: 30%;
+    height: 400px;
+}
+
+
+#section-3{
+    height: 50vh;
+}
+
+    /* Стили только для новой карусели сотрудников */
+    #staffCarousel {
+        width: 97vw;
+        margin-left: calc(-50vw + 50%);
+        height: 75vh;
+        overflow: hidden;
+        position: relative;
+    }
+
+    #staffCarousel .carousel-inner,
+    #staffCarousel .carousel-item {
+        height: 100%;
+        
+    }
+
+    #staffCarousel .carousel-item img {
+        width: 80%;
+        place-self: center;
+        height: 40vh;
+        object-fit: cover;
+    }
+
+
+
+    /* Кастомные индикаторы только для этой карусели */
+    #staffCarousel .staff-indicators {
+        bottom: 35%;
+        gap: 12px;
+    }
+
+    #staffCarousel .staff-indicators button {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #fff;
+        background: transparent;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    #staffCarousel .staff-indicators .active {
+        background: #fff;
+        opacity: 1;
+        transform: scale(1.2);
+    }
+
+    /* Стили для текстового блока */
+    #staffCarousel .text-overlay {
+        position: absolute;
+        top: 27%;
+        left: 29%;
+        transform: translate(-50%, -50%);
+        width: 70%;
+        max-width: 30%;
+        max-height: 50%;
+        background: rgba(50, 50, 50, 0.8);
+        padding: 2rem;
+        border-radius: 10px;
+        z-index: 2;
+        color: white;
+
+        overflow: hidden;
+    }
+
+    #staffCarousel .text-overlay p {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        text-align: center;
+    }
+
+    #staffCarousel .text-overlay ul {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    #staffCarousel .text-overlay li {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.8rem;
+        line-height: 1.4;
+    }
+
+    #staffCarousel .text-overlay li:before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #4CAF50;
+        font-size: 1.2rem;
+    }
+
+
+    /* отображение видео в деталях урока */
+.video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 соотношение */
+    height: 0;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.scale_on_hover:hover{
+    scale: 1.5;
+}
+
+.fixed {
+	position: fixed;
+	width: 100%;
+	left: 0;
+	top: 0;
+    z-index: 500;
+}
+
+
+.persons__item {
+	opacity: 0;
+	transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+
+.persons__item.animation-class {
+	opacity: 1;
+	transform: translateX(-30px);
+	transition: opacity 0.3s ease-in-out, transform 1.3s ease-in-out;
+}
+
+
+
+.persons__item.animation-class:nth-child(2) {
+	transform: translateX(30px);
+    transition-delay: 1s;
+}
+
+
+main > section > .text-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    max-width: 50%;
+    font-size: 1.3em;
+}
+
+main > section > .text-block-2 {
+    position: absolute;
+    top: 0;
+    left: 70%;
+    padding: 10px;
+    max-width: 50%;
+    font-size: 1.3em;
+}
+
+
+.cards-box{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15%;
+    margin-bottom: 15%;
+}
+
+
+.cards-box .box{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 30vw;
+    height: 28vh;
+    border: 3px solid gray;
+    border-radius: 15%;
+}
+
+.cards-box > .box > svg{
+    margin: auto;
+}
+
+.box h5{
+    text-align: center;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.box p{
+    margin-bottom: 15%;
+    text-align: center;
+    font-size: 0.8em;
+    
+}
+.hidden {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 1.2s ease-in-out 0.2s;
+}
+
+.show {
+    opacity: 1;
+    transform: scale(1);
+}
+/* course_detail.html styles */
+.progress {
+    height: 25px;
+    border-radius: 12px;
+}
+
+.progress-bar {
+    background-color: #4CAF50;
+    transition: width 0.5s ease-in-out;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+
+.list-group-item-action {
+    transition: all 0.3s ease;
+}
+
+.badge {
+    font-size: 0.9em;
+    padding: 0.5em 0.75em;
+}
+
+
+/* --- */
+.content-section{
+    font-family: var(--primary-font);
+}
+
+.content-section h1{
+    text-align: center;
+    margin-bottom: 2vh;
+    padding-bottom: 2vh;
+    border-bottom: 1px solid #706f6f;
+}
+
+.lesson-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.lesson-navigation .btn {
+    min-width: 200px;
+}
+
+.lesson-actions {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+}
+
+.lesson-actions form{
+    display: inline-block;
+}
+
+.lesson-actions .btn-success {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+}
+
+
+.login-out-actions .btn {
+    border-radius: 20px; /* Закругленные края */
+    font-weight: bold;  /* Жирный текст */
+    transition: all 0.3s ease; /* Плавный переход при наведении */
+}
+
+.login-out-actions .btn:hover {
+    background-color: #0056b3; /* Цвет при наведении */
+    color: #fff; /* Цвет текста при наведении */
+}
+
+/* Footer */
+footer {
+    display: flex;
+    align-items: center; /* Выравниваем элементы по вертикали */
+    justify-content: flex-start; /* Элементы начинаются с левого края */
+    /* padding: 1.5rem; */
+    background-color: var(--primary-color);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    width: 100%;
+    
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between; /* Распределяем пространство между элементами */
+    width: 100%; /* Ширина контейнера */
+    /* max-width: 1200px; Максимальная ширина контейнера */
+    margin: 0 auto; /* Центрируем контейнер */
+    gap: 1rem;
+}
+
+.footer-logo {
+    width: clamp(80px, 10vw, 200px);
+}
+
+
+.footer__social-media{
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-right: 1vw;
+}
+
+.footer__social-media-elem{
+    width: clamp(40px, 4vw, 100px);
+}
+
+.footer-text {
+    position: absolute;
+    bottom: 0;
+    left: 50%; /* Сдвигаем текст на 50% вправо */
+    transform: translateX(-50%); /* Центрируем текст */
+    transform: translateY(120%);
+
+
+    font-size: clamp(4px, 0.8em, 8px);
+    font-style: italic;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.warning-info-about{
+    position: relative;
+    margin-top: 90px;
+    left: 70%;
+    padding: 15px;
+    display: flex;
+    /* border: 5px dotted rgb(162, 159, 159); */
+    align-self: center;
+    flex-direction: column;
+    font-family: cursive;
+    font-style: italic;
+}
+
+.warning-info-about a a:hover{
+    cursor: default;
+}
+
+#show_all_courses_btn{
+    background-color: #0056b3;
+    width: fit-content;
+    height: fit-content;
+}
+
+.course-info-block {
+    place-self: center;
+    text-align: center;
+    height: 150px;
+    width: 80%;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #706f6f;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.course-info-block h5 {
+    font-family: 'Montserrat', serif;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.course-info-block a{
+    text-decoration: none;
+}
+
+.course-info-block p {
+    font-size: 1em;
+    font-family: 'Open Sans', sans-serif; /* Хорошо читаемый шрифт */
+    color: var(--text-color);
+    
+}
+
+.carousel-item img {
+    /* max-width: 700px; */
+    height: 400px;
+    object-fit: cover; /* Чтобы сохранить пропорции */
+    border-radius: 10%;
+    box-shadow: 3px 3px 10px whitesmoke;
+}
+
+.carousel-control-prev,
+.carousel-control-next{
+    height: 35%;
+    padding-top: 13%;
+}
+
+#show_all_courses_btn:hover{
+    color:white;
+}
+
+#course_detail_img{
+    width: 90%;
+    max-height: 400px;
+    margin-left: 15px;
+    margin-top: 10px;
+}
+
+.course-detail-content{
+    place-self: center;
+}
+
+.course-detail-content li {
+    padding: 5px;
+}
+
+/* Для правильного отображения кнопок */
+.course-actions, .lesson-actions {
+    margin: 20px 0;
+}
+
+.course-actions{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    font: 1em sans-serif;
+}
+
+.card .btn{
+    width: 100px;
+}
+
+.card-body a{
+    cursor: default;
+}
+
+.course-actions a, .course-actions .btn {
+    cursor: default;
+}
+
+.lesson-actions{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+/* Кнопка удаления */
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}
+
+/* Цвет текста по умолчанию для ввода поля ввода в форме создании урока */
+.ck-editor__main {
+    color: #333 !important;
+    background-color: white !important;
+}
+
+    /* Стили для выравнивания изображений */
+    /* Выравнивание изображений */
+    .image-style-align-left {
+        float: left;
+        margin-right: 1.5rem;
+        margin-bottom: 1rem;
+        max-width: 50%;
+    }
+
+    .image-style-align-right {
+        float: right !important;
+        margin-left: 1.5rem !important;
+        margin-bottom: 1rem !important;
+        max-width: 50%;
+        clear: right;
+    }
+
+    .image-style-align-center {
+        display: block;
+        margin: 1rem auto;
+        max-width: 80%;
+    }
+
+    figure.image img{
+        width: 100%;
+        height: auto;
+    }
+
+    /* Очистка потока */
+    .lesson-content::after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    /* Размеры шрифта */
+    .ck-content {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .ck-content p, .ck-content li {
+        font-size: inherit;
+    }
+
+    .ck-content h1 { font-size: 2.0em; }
+    .ck-content h2 { font-size: 1.8em; }
+    .ck-content h3 { font-size: 1.6em; }
+
+    /* Исправление конфликтов с Bootstrap */
+    .lesson-content p {
+        overflow: auto;
+    }
+
+    
+
+    .lesson-content img {
+        max-width: 100%;
+        height: auto;
+    }
+
+.lesson-btns{
+    height: var(--btn-height-at-lesson-detail);
+    width: var(--btn-width-at-lesson-detail);
+}
+
+/* Анимация завершения курса */
+.completion-animation {
+    /* Убираем display: none из стилей */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex; /* По умолчанию видим */
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    animation: fadeIn 0.5s ease-in-out;
+    cursor: pointer;
+}
+
+.completion-message {
+    cursor: default;
+    pointer-events: none; 
+    text-align: center;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    animation: scaleUp 0.5s ease-in-out;
+}
+
+.completion-message h2 {
+    font-size: 2rem;
+    color: #4CAF50;
+    margin-bottom: 1rem;
+}
+
+.completion-message p {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.confetti {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: url("confetti.08a1e6cd65ac.gif") no-repeat center center;
+    background-size: cover;
+    z-index: -1;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.8); }
+    to { transform: scale(1); }
+}
+/* ---- */
+
+
+#id_image_helptext{
+    color: whitesmoke;
+}
+
+
+#id_video_id_helptext{
+    color: var(--text-color);
+}
+
+/* во вкладке регистрации текст с информацией о требованиях к имени пользователя */
+#id_username_helptext{
+    color: #333;
+}
+/* во вкладке регистрации текст с информацией о требованиях к паролю */
+#id_password1_helptext{
+    color: var(--text-color);
+}
+/* во вкладке регистрации текст с информацией о подтверждении пароля */
+#id_password2_helptext{
+    color: var(--text-color);
+}
+/* Текст "Уже есть аккаунт" стилизуется непосредственно в templates/users/register.html */
+
+/* Для больших экранов */
+@media (min-width: 2300px){
+    main section #clinicajpg {
+        width: 700px;
+        position: absolute;
+        bottom: 5%;
+        right: 0;
+    }
+
+    .section__inner-text{
+        font-size: 1.3rem;
+    }
+
+    #doc1_image {
+        width: 360px;
+        height: 500px;
+        position: absolute;
+        bottom: 25%;
+        right: 80%;
+        
+        
+
+    }
+    
+    #doc2_image {
+        width: 360px;
+        position: absolute;
+        bottom: 5%;
+        right: 0;
+        
+         z-index: 2;  /* Индекс для наложения поверх текста section__inner-text во время наведения курсора*/
+
+    }
+
+    main > section > .text-block-2 {
+        position: absolute;
+        top: -20%;
+        left: 50%;
+        padding: 10px;
+        max-width: 50%;
+    }
+    
+    
+}
+
+@media (min-width: 1700px){
+    main > section > .text-block-2 {
+        position: absolute;
+        top: 20%;
+        left: 70%;
+        padding: 10px;
+        max-width: 50%;
+        font-size: 1.3em;
+    }
+}
+
+@media (max-width: 768px) {
+    
+    body {
+        display: flex;
+        height: 100vh;
+        max-width: 768px;
+    }
+
+    .navbar .navbar-toggler{
+        font-size: smaller;
+    }
+
+    /* .navbar #logopng{
+        width: 100px;
+    } */
+
+    /* Карточка с действиями курса в course-details */
+    .card{
+        margin-top: 1vh;
+    }
+
+    main {
+        flex: 1;
+        place-content: center;
+        padding: 5px;
+        position: relative;
+    
+    }
+
+    
+
+    #clinicajpg {
+        width: 260px;
+        position: absolute;
+        bottom: 5%;
+        right: 0;
+    }
+
+    
+    /* Стили только для новой карусели сотрудников */
+    #staffCarousel {
+        width: 900px;
+        margin-left: calc(-50vw + 40%);
+        height: 75vh;
+        overflow: hidden;
+        position: relative;
+    }
+
+    #staffCarousel .carousel-inner,
+    #staffCarousel .carousel-item {
+        height: 100%;
+        
+    }
+
+    #staffCarousel .carousel-item img {
+        width: 100%;
+        place-self: center;
+        height: 20vh;
+        object-fit: cover;
+    }
+
+
+
+    /* Кастомные индикаторы только для этой карусели */
+    #staffCarousel .staff-indicators {
+        bottom: 55%;
+        gap: 12px;
+    }
+
+    #staffCarousel .staff-indicators button {
+        width: 7px;
+        height: 7px;
+        border: 2px solid #fff;
+        background: transparent;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    #staffCarousel .staff-indicators .active {
+        background: #fff;
+        opacity: 1;
+        transform: scale(1.2);
+    }
+
+    /* Стили для текстового блока */
+    #staffCarousel .text-overlay {
+        position: absolute;
+        top: 12%;
+        left: 38%;
+        transform: translate(-50%, -50%);
+        width: 40%;
+        height: 20%;
+        max-width: 580px;
+        max-height: 240px;
+        background: rgba(50, 50, 50, 0.8);
+        padding: 2rem;
+        border-radius: 10px;
+        z-index: 2;
+        color: white;
+        font-size: 0.5em;
+
+        overflow: scroll;
+    }
+
+    #staffCarousel .text-overlay p {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+
+    .card .btn {
+        font-size: 0.6em;
+        width: 70px;
+        height: 40px;
+
+        overflow: hidden;
+    }
+    
+
+    #doc1_image {
+        width: 150px;
+        height: 280px;
+        position: absolute;
+        bottom: 20%;
+        right: 70%;
+
+        transition: all 0s ease 0s;
+    }
+    
+    #doc2_image {
+        width: 150px;
+        position: absolute;
+        bottom: 5%;
+        right: 0;
+
+        transition: all 0s ease 0s;
+    }
+
+    .scale_on_hover:hover{
+        scale: 1;
+    }
+
+    .carousel-block {
+        margin-left: -15px;
+        width: calc(100% + 30px);
+    }
+    
+    #staticCarousel,
+    .carousel-item {
+        height: 70vh;
+    }
+
+    main > section > .text-block {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 5px;
+        max-width: 300px;
+        font-size: 0.9em;
+    }
+
+    .login-out-actions{
+        margin-left: 2%;
+    }
+
+
+    .warning-info-about{
+        margin-top: 45px;
+        padding: 8px;
+        left: 20%;
+
+    }
+
+    .course-info-block {
+        height: 75px;
+        font-size: 1.25rem;
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    
+    .course-info-block h5 {
+        font-size: 0.8em;
+        margin-bottom: 5px;
+    }
+    
+    .course-info-block p {
+        font-size: 0.5em;
+    }
+
+    .carousel-item img {
+        max-width: 70%;
+        height: 200px;
+        object-fit: cover; /* Чтобы сохранить пропорции */
+    }
+
+    .content-section{
+        place-self: center;
+        width: 100%;
+        padding: 5%;
+    }
+
+    .content-section .form-group{
+        width: 100%;
+    }
+
+    .lesson-actions {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        align-content: center;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .lesson-actions .lesson-btns{
+        width: 85%;
+        margin-top: 3%;
+    }
+    
+    .lesson-actions form{
+        display: inline-block;
+    }
+
+    .lesson-actions .btn-danger{
+        width: 100%;
+    }
+    
+    .lesson-actions .btn-success {
+        font-size: 1rem;
+    }
+    
+    
+}
+
+@media (max-width: 512px) {
+    body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Hero section */
+    .hero {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .text-block {
+        position: static!important;
+        max-width: 100%!important;
+        padding: 15px!important;
+    }
+
+    #clinicajpg {
+        position: relative!important;
+        width: 80%!important;
+        bottom: auto!important;
+        right: auto!important;
+        margin: 10px auto;
+    }
+
+    /* Staff Carousel */
+    #staffCarousel {
+        width: 100%!important;
+        margin-left: 0!important;
+        height: 50vh!important;
+    }
+
+    #staffCarousel .text-overlay {
+        top: 45%!important;
+        left: 50%!important;
+        width: 90%!important;
+        height: auto;
+        max-height: 50%;
+        padding: 10px!important;
+        transform: translateX(-50%)!important;
+    }
+
+    #staffCarousel .text-overlay p {
+        font-size: 0.8rem!important;
+        margin-bottom: 0.5rem!important;
+    }
+
+    #staffCarousel .text-overlay ul {
+        padding-left: 15px;
+        font-size: 0.7rem;
+    }
+
+    #staffCarousel .carousel-item img {
+        height: 10vh!important;
+        max-width: 95%;
+    }
+
+    /* Section 3 - Doctors */
+    #doc1_image {
+        position: relative!important;
+        width: 40%!important;
+        height: auto!important;
+        margin-right: 110px;
+        right: auto!important;
+        bottom: auto!important;
+        top: -20%;
+    }
+
+    #doc2_image{
+        position: relative!important;
+        width: 40%!important;
+        margin-left: 10%;
+        height: auto!important;
+        margin: 10px auto!important;
+        right: auto!important;
+        bottom: auto!important;
+    }
+
+    .section__inner-text {
+        display: none;
+        padding: 0 15px;
+        text-align: center;
+        max-height: 200px;
+        overflow: auto;
+    }
+
+    /* Cards grid */
+    .cards-box {
+        flex-direction: column;
+        padding: 0 10px;
+    }
+
+    .cards-box .box {
+        width: 100%!important;
+        margin: 10px 0;
+        padding: 15px!important;
+    }
+
+    /* .cards-box svg {
+        width: 48px;
+        height: 48px;
+    } */
+
+    /* Courses Carousel */
+    #courseCarousel .course-info-block {
+        padding: 5px!important;
+        margin: 5px!important;
+    }
+
+    #courseCarousel .course-info-block h5 {
+        font-size: 0.9rem!important;
+    }
+
+    #courseCarousel .course-info-block p {
+        display: none; /* Скрываем длинное описание */
+    }
+
+    #courseCarousel img {
+        max-width: 90%!important;
+        height: 150px!important;
+    }
+
+    /* Общие правки */
+    h1 { font-size: 1.5rem!important; }
+    h5 { font-size: 1rem!important; }
+    p { font-size: 0.8rem!important; }
+
+    #show_all_courses_btn {
+        width: 90%;
+        margin: 10px auto;
+        display: block;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        display: none; /* Скрываем стрелки для экономии места */
+    }
+    /* Футер */
+    footer {
+        padding: 20px 0!important;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .footer-logo {
+        width: 100px;
+        margin-bottom: 10px;
+    }
+
+    .footer__social-media {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .footer__social-media-elem {
+        width: 32px;
+        height: 32px;
+    }
+
+    .footer-text {
+        font-size: 0.8rem!important;
+        text-align: center;
+        margin-top: 10px;
+    }
+    
+}
+
+/* Media для горизонтального отображения на телефоне */
+@media (max-width: 1200px) and (max-height: 500px){
+    
+    body {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+    }
+
+    .navbar .navbar-toggler{
+        font-size: smaller;
+    }
+
+    /* .navbar #logopng{
+        width: 100px;
+    } */
+
+    .navbar-collapse {
+        flex-direction: row !important;
+        justify-content: space-between;
+        padding: 10px;
+    }
+    .navbar-nav {
+        flex-direction: row !important;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .navbar-nav li {
+        margin-right: 20px;
+    }
+
+    main {
+        flex: 1;
+        place-content: center;
+        padding: 5px;
+        position: relative;
+    
+    }
+
+
+    main section #clinicajpg {
+        width: 260px;
+        position: absolute;
+        bottom: 5%;
+        right: 0;
+    }
+    
+    main > section > .text-block {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 5px;
+        max-width: 300px;
+        font-size: 0.9em;
+    }
+
+
+    .content-section{
+        place-self: center;
+        width: 90%;
+        padding: 5%;
+    }
+
+    .lesson-actions {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 2rem;
+        width: 100%;
+        max-height: 50px;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        overflow: hidden;
+    }
+
+    .lesson-actions .lesson-btns{
+        width: 85%;
+        height: auto;
+        margin-top: 3%;
+    }
+    
+    .lesson-actions form{
+        display: inline-block;
+        height: auto;
+    }
+
+    .lesson-actions .btn-warning{
+        width: 20%;
+        margin-bottom: 30px;
+    }
+
+    .lesson-actions .btn-danger{
+        width: 100%;
+        margin-bottom: 13px;
+    }
+    
+    .lesson-actions .btn-success {
+        font-size: 1rem;
+        margin-top: 2px;
+    }
+    
+
+    .carousel-arrows{
+        margin-bottom: 25px;
+    }
+
+
+    .warning-info-about{
+        position: absolute;
+        margin-right: 10px;
+        top: 50%;
+        padding: 8px;
+    }
+
+    .course-info-block {
+        height: 75px;
+        font-size: 1.3rem;
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    
+    .course-info-block h5 {
+        font-size: 0.8em;
+        margin-bottom: 5px;
+    }
+    
+    .course-info-block p {
+        font-size: 0.5em;
+    }
+
+    .carousel-item img {
+        max-width: 350px;
+        height: 200px;
+        object-fit: cover; /* Чтобы сохранить пропорции */
+    }
+    
+}

@@ -1,0 +1,50 @@
+services:
+ db: # первый
+   image: postgres:17 
+   environment: # переменные из .env файла
+     POSTGRES_DB: ${DJANGO_DB_NAME} 
+     POSTGRES_USER: ${DJANGO_DB_USER}
+     POSTGRES_PASSWORD: ${DJANGO_DB_PASSWD}
+   ports:
+     - "5434:5432" # проброс порта 5432 из контейнера на порт 5434 снаружи
+   volumes:
+     - postgres_data:/var/lib/postgresql/data
+   env_file:
+     - .env
+ 
+ redis:
+   restart: unless-stopped
+   image: redis:7.0.5-alpine 
+   ports:
+     - "6379:6379"  # Пробрасываем порт для внешнего доступа (опционально)
+   expose:
+     - 6379
+
+ django-web: # третий
+   build: .
+   container_name: django-docker
+   ports:
+     - "8005:8005"
+   volumes:  
+    - .:/app
+   depends_on:
+     - db
+     - redis
+   command: sh -c "python manage.py migrate &&
+         python manage.py runserver 0.0.0.0:8005" # выполняет миграции в БД и запускает тестовый инстанс на порту 8005
+   environment: # переменные из .env файла
+     DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+     DEBUG: ${DEBUG}
+     DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL}
+     DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
+     DATABASE_ENGINE: ${DATABASE_ENGINE}
+     DATABASE_NAME: ${DJANGO_DB_NAME}
+     DATABASE_USERNAME: ${DJANGO_DB_USER}
+ 
+     DATABASE_PASSWORD: ${DJANGO_DB_PASSWD}
+     DATABASE_HOST: ${DJANGO_DB_HOST}
+     DATABASE_PORT: ${DJANGO_DB_PORT}
+   env_file: # имя файла откуда берутся переменные (путь до файла, должен быть на одном уровне в компоуз)
+     - .env
+volumes:
+   postgres_data:

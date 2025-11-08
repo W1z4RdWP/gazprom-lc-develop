@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block title %}Отчёт по тесту{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Отчёт по тесту: {{ quiz_result.quiz_title }}</h2>
+    <p>Правильных ответов: {{ quiz_result.score }} из {{ quiz_result.total_questions }} ({{ quiz_result.percent|floatformat:0 }}%)</p>
+    <p>Дата прохождения: {{ quiz_result.completed_at|date:"d.m.Y H:i" }}</p>
+    <hr>
+    <h4>Детализация по вопросам:</h4>
+    <div class="list-group">
+        {# Группируем ответы по вопросам #}
+        {% regroup answers by question as grouped_answers %}
+        
+        {% for group in grouped_answers %}
+            {% with question=group.grouper answer=group.list.0 %}
+                <div class="list-group-item mb-2 
+                    {% if answer.is_correct %}list-group-item-success
+                    {% elif question.question_type == 'text' %}list-group-item-warning
+                    {% else %}list-group-item-danger
+                    {% endif %}">
+                    
+                    <strong>Вопрос {{ forloop.counter }}:</strong> {{ question.text }}<br>
+                    <strong>Ваш ответ:</strong>
+                    
+                    {# Для множественного вывода #}
+                    {% if question.question_type == 'multiple' %}
+                        {% for ans in group.list %}
+                            {{ ans.selected_answer.text }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    
+                    {# Для текстового ответа #}
+                    {% elif question.question_type == 'text' %}
+                        {{ answer.answer_text|default:"<em>Нет ответа</em>" }}
+                    
+                    {# Для одиночного выбора #}
+                    {% else %}
+                        {{ answer.selected_answer.text|default:"<em>Нет ответа</em>" }}
+                    {% endif %}
+                    
+                    <br>
+                    {% if question.question_type != 'text' %}
+                        <strong>Правильный ответ:</strong>
+                        {% for correct_ans in question.answer_set.all %}
+                            {% if correct_ans.is_correct %}
+                                {{ correct_ans.text }}{% if not forloop.last %}, {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <br>
+                    <span class="badge {% if answer.is_correct %}bg-success{% elif question.question_type == 'text' %}bg-info{% else %}bg-danger{% endif %}">
+                        {% if answer.is_correct %}Верно{% elif question.question_type == 'text' %}Результат записан{% else %}Неверно{% endif %}
+                    </span>
+                </div>
+            {% endwith %}
+        {% endfor %}
+    </div>
+    <a href="{% url 'profile' %}" class="btn btn-primary mt-3">Назад в профиль</a>
+</div>
+{% endblock %}
