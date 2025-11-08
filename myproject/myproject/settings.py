@@ -14,17 +14,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-
-SECRET_KEY = '12345asdasdasdasdad23r2rewrwerw' # DJANGO_SECRET_KEY / SECRET_DJANGO
+SECRET_KEY = os.getenv('SECRET_DJANGO') # DJANGO_SECRET_KEY / SECRET_DJANGO
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -33,20 +29,6 @@ DEBUG = True
 # ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(',')] if allowed_hosts else []
 
 ALLOWED_HOSTS = ["*"]
-
-INTERNAL_IPS = [
-    "0.0.0.0",
-    "127.0.0.1",
-    "10.0.1.100",
-    "10.1.1.30",
-    "10.0.0.40",
-    "192.168.0.100",
-    "172.18.0.4"
-]
-
-
-1
-# Application definition
 
 INSTALLED_APPS = [
 
@@ -155,23 +137,6 @@ DATABASES = {
 #             }
 #     }
 # }
-
-
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://redis:6379/1",
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#         }
-#     }
-# }
-
-
-# CACHE_MIDDLEWARE_ALIAS  = 'default' # cache alias
-# CACHE_MIDDLEWARE_SECONDS = 600 # number of seconds each page should be cached.
-# CACHE_MIDDLEWARE_KEY_PREFIX = 'myproject'  # name of site if multiple sites are used
-
 
 
 # Password validation
@@ -384,30 +349,4 @@ CKEDITOR_5_CONFIGS = {
     },
 }
 
-## main logging conf
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'file': {
-#             'level': 'DEBUG',
-#             'class': 'logging.FileHandler',
-#             'filename': '/var/log/django/errors.log',
-#         },
-#     },
-# }
-
-
-
-
-# CSRF_TRUSTED_ORIGINS = ['https://epicsite.smileterritory.ru']
-
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
-# SECURE_HSTS_SECONDS = 31536000
-
-
-
-# RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
-# RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 

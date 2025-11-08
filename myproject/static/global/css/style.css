@@ -1,10 +1,12 @@
 :root{
     --btn-width-at-lesson-detail: 140px;
     --btn-height-at-lesson-detail: 45px;
-    --primary-color: #333;
-    --secondary-color: #4CAF50;
-    --text-color: whitesmoke;
+    --primary-color: #ffffff;
+    --secondary-color: #0066cc;
+    --text-color: #1a1a1a;
     --primary-font: "Onest", sans-serif;
+    --accent-blue: #0052a3;
+    --light-blue: #e6f2ff;
 }
 
 
@@ -32,7 +34,7 @@ body {
 
 /* Цвет наименования полей во crispy form */
 .form-label{
-    color: rgb(255, 0, 0);
+    color: var(--accent-blue);
 }
 
 button{
@@ -46,7 +48,7 @@ header{
 }
 
 .navbar {
-    background-color: #333 !important; /* Переопределяем фон */
+    background-color: var(--accent-blue) !important; /* Переопределяем фон */
     width: 100%;
     padding: 0.5rem 1rem;
 }
@@ -59,16 +61,16 @@ header{
 .navbar #logolink{
     position: relative;
     font-size: 2em;
-    color:#797878;
+    color: var(--primary-color);
 }
 
 .navbar-nav .nav-link {
-    color: var(--text-color) !important; /* Цвет текста */
+    color: var(--primary-color) !important; /* Цвет текста */
     padding: 0.5rem 1rem !important;
 }
 
 .navbar-nav .nav-link:hover {
-    color: rgb(227, 92, 121) !important; /* Цвет текста при наведении */
+    color: var(--light-blue) !important; /* Цвет текста при наведении */
 }
 
 .form-group{
@@ -238,7 +240,7 @@ section {
         content: "•";
         position: absolute;
         left: 0;
-        color: #4CAF50;
+        color: var(--secondary-color);
         font-size: 1.2rem;
     }
 
@@ -365,18 +367,18 @@ main > section > .text-block-2 {
 }
 
 .progress-bar {
-    background-color: #4CAF50;
+    background-color: var(--secondary-color);
     transition: width 0.5s ease-in-out;
 }
 
 .btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
 }
 
 .btn-success:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
 }
 
 
@@ -399,7 +401,8 @@ main > section > .text-block-2 {
     text-align: center;
     margin-bottom: 2vh;
     padding-bottom: 2vh;
-    border-bottom: 1px solid #706f6f;
+    border-bottom: 2px solid var(--secondary-color);
+    color: var(--accent-blue);
 }
 
 .lesson-navigation {
@@ -436,8 +439,8 @@ main > section > .text-block-2 {
 }
 
 .login-out-actions .btn:hover {
-    background-color: #0056b3; /* Цвет при наведении */
-    color: #fff; /* Цвет текста при наведении */
+    background-color: var(--accent-blue); /* Цвет при наведении */
+    color: var(--primary-color); /* Цвет текста при наведении */
 }
 
 /* Footer */
@@ -446,11 +449,11 @@ footer {
     align-items: center; /* Выравниваем элементы по вертикали */
     justify-content: flex-start; /* Элементы начинаются с левого края */
     /* padding: 1.5rem; */
-    background-color: var(--primary-color);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--accent-blue);
+    border-top: 2px solid var(--secondary-color);
     position: relative;
     width: 100%;
-    
+    color: var(--primary-color);
 }
 
 .footer-content {
@@ -480,19 +483,19 @@ footer {
     width: clamp(40px, 4vw, 100px);
 }
 
-.footer-text {
-    position: absolute;
-    bottom: 0;
-    left: 50%; /* Сдвигаем текст на 50% вправо */
-    transform: translateX(-50%); /* Центрируем текст */
-    transform: translateY(120%);
+    .footer-text {
+        position: absolute;
+        bottom: 0;
+        left: 50%; /* Сдвигаем текст на 50% вправо */
+        transform: translateX(-50%); /* Центрируем текст */
+        transform: translateY(120%);
 
 
-    font-size: clamp(4px, 0.8em, 8px);
-    font-style: italic;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.7);
-}
+        font-size: clamp(4px, 0.8em, 8px);
+        font-style: italic;
+        text-align: center;
+        color: var(--primary-color);
+    }
 
 .warning-info-about{
     position: relative;
@@ -512,9 +515,10 @@ footer {
 }
 
 #show_all_courses_btn{
-    background-color: #0056b3;
+    background-color: var(--secondary-color);
     width: fit-content;
     height: fit-content;
+    color: var(--primary-color);
 }
 
 .course-info-block {
@@ -524,7 +528,8 @@ footer {
     width: 80%;
     margin-top: 20px;
     padding: 20px;
-    background-color: #706f6f;
+    background-color: var(--light-blue);
+    border: 2px solid var(--secondary-color);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
@@ -561,7 +566,8 @@ footer {
 }
 
 #show_all_courses_btn:hover{
-    color:white;
+    background-color: var(--accent-blue);
+    color: var(--primary-color);
 }
 
 #course_detail_img{
@@ -721,13 +727,13 @@ footer {
 
 .completion-message h2 {
     font-size: 2rem;
-    color: #4CAF50;
+    color: var(--secondary-color);
     margin-bottom: 1rem;
 }
 
 .completion-message p {
     font-size: 1.5rem;
-    color: #333;
+    color: var(--text-color);
 }
 
 .confetti {
@@ -750,9 +756,160 @@ footer {
 }
 /* ---- */
 
+/* Стили для домашней страницы */
+.home-hero {
+    background: linear-gradient(135deg, var(--light-blue) 0%, var(--primary-color) 100%);
+    padding: 80px 20px;
+    text-align: center;
+    border-bottom: 3px solid var(--secondary-color);
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-title {
+    font-size: 3rem;
+    color: var(--accent-blue);
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin-bottom: 0;
+}
+
+.home-features {
+    padding: 60px 20px;
+    background-color: var(--primary-color);
+}
+
+.feature-card {
+    text-align: center;
+    padding: 30px 20px;
+    margin-bottom: 30px;
+    background-color: var(--light-blue);
+    border: 2px solid var(--secondary-color);
+    border-radius: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 102, 204, 0.2);
+}
+
+.feature-icon {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.feature-card h3 {
+    color: var(--accent-blue);
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.feature-card p {
+    color: var(--text-color);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.home-info {
+    padding: 60px 20px;
+    background-color: var(--light-blue);
+}
+
+.info-section {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.info-section h2 {
+    color: var(--accent-blue);
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+.info-section p {
+    color: var(--text-color);
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-bottom: 40px;
+}
+
+.info-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.info-actions .btn {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    border-radius: 25px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.info-actions .btn-primary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.info-actions .btn-primary:hover {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 102, 204, 0.3);
+}
+
+.info-actions .btn-outline-primary {
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+}
+
+.info-actions .btn-outline-primary:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 102, 204, 0.3);
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .info-section h2 {
+        font-size: 1.8rem;
+    }
+    
+    .info-section p {
+        font-size: 1rem;
+    }
+    
+    .feature-card {
+        margin-bottom: 20px;
+    }
+}
 
 #id_image_helptext{
-    color: whitesmoke;
+    color: var(--text-color);
 }
 
 
@@ -762,7 +919,7 @@ footer {
 
 /* во вкладке регистрации текст с информацией о требованиях к имени пользователя */
 #id_username_helptext{
-    color: #333;
+    color: var(--text-color);
 }
 /* во вкладке регистрации текст с информацией о требованиях к паролю */
 #id_password1_helptext{

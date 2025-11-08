@@ -29,8 +29,6 @@ from quizzes.models import Answer
 
 
 urlpatterns = [
-    re_path(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
-    re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
     path('admin/', admin.site.urls),
     path('register/', user_views.RegisterView.as_view(), name='register'),
     path('', views.IndexView.as_view(), name='home'),
@@ -43,7 +41,9 @@ urlpatterns = [
     path('quizzes/', include('quizzes.urls'), name='quizzes'),
     path('profile/quiz_report/<int:quiz_id>/', user_views.quiz_report, name='quiz_report'),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
-    path('error_found/', views.page_not_found_view, {'exception': Answer.MultipleObjectsReturned}, name='error')
+    path('error_found/', views.page_not_found_view, {'exception': Answer.MultipleObjectsReturned}, name='error'),
+    re_path(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
+    re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]
 
 handler404 = 'myapp.views.page_not_found_view'
