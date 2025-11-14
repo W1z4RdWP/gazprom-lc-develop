@@ -7,8 +7,8 @@
     <title>{% block title %}Home{% endblock %}</title>
     {% comment %} Шрифты {% endcomment %}
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
-    <link rel="icon" href="{% static 'global/imgs/favicon.ico' %}" type="image/x-icon">
-    <link rel="shortcut icon" href="{% static 'global/imgs/favicon.ico' %}" type="image/x-icon"> <!-- Иконка -->
+    <link rel="icon" href="{% static 'global/imgs/icons8-gaz-32.png' %}" type="image/x-icon">
+    <link rel="shortcut icon" href="{% static 'global/imgs/icons8-gaz-32.png' %}" type="image/x-icon"> <!-- Иконка -->
     {% comment %} <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script> {% endcomment %}
       <!-- Bootstrap CSS -->
@@ -33,7 +33,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
                 <a class="navbar-brand" href="{% url 'home' %}" id="logolink">
-                    <img src="{% static 'global/imgs/logo_lc.png' %}" alt="Logo" id='logopng'>
+                    <img src="{% static 'global/imgs/gazprom_logo.jpg' %}" alt="Logo" id='logopng'>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -98,13 +98,7 @@
 
     <footer>
         <div class="footer-content">
-            <a href="{% url 'home' %}"><img src="{% static 'global/imgs/logo.png' %}" alt="" class="footer-logo"></a>
-            <div class="footer__social-media">
-                <a href="https://vk.com/territorysmile" target="_blank"><img src="{% static 'global/imgs/vk.png' %}" alt="vk_logo" class="footer__social-media-elem"></a>
-                <a href="https://telegram.me/Stomatologiya_saratov" target="_blank"><img src="{% static 'global/imgs/tg.png' %}" alt="tg_logo" class="footer__social-media-elem"></a>
-                <a href="https://32cdi.ru/" target="_blank"><img src="{% static 'global/imgs/terr_smile.png' %}" alt="terr smile" class="footer__social-media-elem"></a>
-            </div>
-            <p class="footer-text">The site was created by w1z4rdWP</p>
+            <a href="{% url 'home' %}"><img src="{% static 'global/imgs/gazprom_logo.jpg' %}" alt="" class="footer-logo"></a>
         </div>
     </footer>
 </body>

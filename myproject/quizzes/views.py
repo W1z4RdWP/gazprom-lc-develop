@@ -133,20 +133,6 @@ def get_answer(request) -> HttpResponse:
                 'submitted_answers': Answer.objects.filter(id__in=submitted_ids),
                 'correct_answers': correct_answers,
             }
-        elif question.question_type == Question.TEXT:
-            user_text = request.POST.get('answer_text', '').strip()
-            quiz_answers[str(question.id)] = {
-                'answer_text': user_text,
-                'question_type': 'text'
-            }
-            context = {
-                'current_question_number': ...,
-                'total_questions': ...,
-                'progress_percent': ...,
-                'is_correct': False,  # для текстовых не бывает "правильно"
-                'question': question,
-                'user_text': user_text,
-            }
         else:
             submitted_answer_id = request.POST.get('answer_id')
             if submitted_answer_id:
@@ -198,22 +184,15 @@ def get_finish(request) -> HttpResponse:
     
     quiz = get_object_or_404(Quiz, id=quiz_id)
     questions_count = Question.objects.filter(quiz=quiz).count() # Количество вопросов в тесте всего
-    text_questions_count = Question.objects.filter(question_type='text').filter(quiz=quiz).count() # количество открытых вопросов в тесте
     score = request.session.get('score', 0)
-    is_all_question_text = False
-    if questions_count == text_questions_count:
-        is_all_question_text = True
-        percent_score = 100
-    else: 
-        percent_score = int((score / (questions_count - text_questions_count)) * 100) if questions_count > 0 else 0 # Процент правильных ответов на вопросы, исключая открытые
-
+    percent_score = int((score / questions_count) * 100) if questions_count > 0 else 0 # Процент правильных ответов
 
     passed = percent_score >= 80
     quiz_result = QuizResult.objects.create(
         user=request.user,
         quiz_title=quiz.name,
         score=score,
-        total_questions=questions_count - text_questions_count, # Всего вопросов без учёта открытых
+        total_questions=questions_count,
         percent=percent_score,
         passed=passed
     )
@@ -234,15 +213,6 @@ def get_finish(request) -> HttpResponse:
                     selected_answer=ans,
                     is_correct=ans.is_correct and ans_data['is_correct']
                 )
-        elif ans_data['question_type'] == 'text':
-            UserAnswer.objects.create(
-                user=request.user,
-                quiz_result=quiz_result,
-                question=q,
-                selected_answer=None,
-                is_correct=False,
-                answer_text=ans_data.get('answer_text', '')
-            )
         else:
             ans = Answer.objects.get(id=ans_data['selected_id'])
             UserAnswer.objects.create(
@@ -271,8 +241,7 @@ def get_finish(request) -> HttpResponse:
         'score': score,
         'questions_count': questions_count,
         'percent_score': percent_score,
-        'quiz_title': quiz.name,
-        'is_all_question_text': is_all_question_text
+        'quiz_title': quiz.name
     }
     
     _reset_quiz(request)

@@ -8,12 +8,8 @@
         <h2>Тестирование завершено!</h2>
     </div>
     <div class="result-summary">
-        {% if not is_all_question_text %}
-            <p style="color: black;">Количество правильных ответов: <span class="highlight">{{ score }}/{{ questions_count }}</span></p>
-            <p style="color: black;">Процент правильных ответов: <span class="highlight">{{ percent_score }}%</span></p>
-        {% else %}
-            <h4 style='color: #333;'>Результаты записаны</h4>
-        {% endif %}
+        <p style="color: black;">Количество правильных ответов: <span class="highlight">{{ score }}/{{ questions_count }}</span></p>
+        <p style="color: black;">Процент правильных ответов: <span class="highlight">{{ percent_score }}%</span></p>
         <div class="progress-bar-finish">
             <div class="progress-bar-finish__progress" style="width: {{ percent_score }}%"></div>
         </div>

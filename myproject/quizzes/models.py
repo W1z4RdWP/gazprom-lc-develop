@@ -17,11 +17,9 @@ class Quiz(models.Model):
 class Question(models.Model):
   SINGLE = 'single'
   MULTIPLE = 'multiple'
-  TEXT = 'text'
   QUESTION_TYPES = [
       (SINGLE, 'Один правильный ответ'),
       (MULTIPLE, 'Несколько правильных ответов'),
-      (TEXT, 'Открытый ответ'),
   ]
 
   quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)

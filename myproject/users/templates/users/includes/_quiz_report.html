@@ -15,7 +15,6 @@
             {% with question=group.grouper answer=group.list.0 %}
                 <div class="list-group-item mb-2 
                     {% if answer.is_correct %}list-group-item-success
-                    {% elif question.question_type == 'text' %}list-group-item-warning
                     {% else %}list-group-item-danger
                     {% endif %}">
                     
@@ -28,28 +27,22 @@
                             {{ ans.selected_answer.text }}{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     
-                    {# Для текстового ответа #}
-                    {% elif question.question_type == 'text' %}
-                        {{ answer.answer_text|default:"<em>Нет ответа</em>" }}
-                    
                     {# Для одиночного выбора #}
                     {% else %}
                         {{ answer.selected_answer.text|default:"<em>Нет ответа</em>" }}
                     {% endif %}
                     
                     <br>
-                    {% if question.question_type != 'text' %}
-                        <strong>Правильный ответ:</strong>
-                        {% for correct_ans in question.answer_set.all %}
-                            {% if correct_ans.is_correct %}
-                                {{ correct_ans.text }}{% if not forloop.last %}, {% endif %}
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
+                    <strong>Правильный ответ:</strong>
+                    {% for correct_ans in question.answer_set.all %}
+                        {% if correct_ans.is_correct %}
+                            {{ correct_ans.text }}{% if not forloop.last %}, {% endif %}
+                        {% endif %}
+                    {% endfor %}
                     
                     <br>
-                    <span class="badge {% if answer.is_correct %}bg-success{% elif question.question_type == 'text' %}bg-info{% else %}bg-danger{% endif %}">
-                        {% if answer.is_correct %}Верно{% elif question.question_type == 'text' %}Результат записан{% else %}Неверно{% endif %}
+                    <span class="badge {% if answer.is_correct %}bg-success{% else %}bg-danger{% endif %}">
+                        {% if answer.is_correct %}Верно{% else %}Неверно{% endif %}
                     </span>
                 </div>
             {% endwith %}

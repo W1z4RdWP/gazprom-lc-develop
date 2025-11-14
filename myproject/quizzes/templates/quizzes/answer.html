@@ -9,8 +9,8 @@
 <div class="quiz-container">
     <div class="progress mb-4" style="height: 25px;">
         <div class="progress-bar bg-success" 
-             style="width: {% if question.question_type == 'text' %}100%;{% else %}{{ progress_percent }}%{% endif %}">
-            Вопрос {% if question.question_type != 'text' %}{{ current_question_number }} из {{ total_questions }}{% else %} открытый{%endif%}
+             style="width: {{ progress_percent }}%">
+            Вопрос {{ current_question_number }} из {{ total_questions }}
         </div>
     </div>
     <form method="POST" action="{% url 'get-questions' %}">
@@ -49,14 +49,10 @@
 
                 </div>
             {% else %}
-            <div class="card mb-4 {% if is_correct %}border-success{% elif question.question_type == 'text' %}border-warning{% else %}border-danger{% endif %}">
+            <div class="card mb-4 {% if is_correct %}border-success{% else %}border-danger{% endif %}">
                 <div class="card-body">
-                    {% if question.question_type == 'text' %}
-                        <h5 class='p-3' align='center'>Ответ записан!</h5>
-                    {% else %}
-                        <h5>Ваш ответ:</h5>
-                        <p class="mb-0">{{ submitted_answer.text }}</p>
-                    {% endif %}
+                    <h5>Ваш ответ:</h5>
+                    <p class="mb-0">{{ submitted_answer.text }}</p>
                 </div>
             </div>
 
@@ -64,8 +60,6 @@
                 <div class="alert alert-success">
                     ✅ Правильный ответ!
                 </div>
-                {% elif question.question_type == 'text' %}
-                        <br/>
                 {% else %}
                 <div class="alert alert-danger">
                     ❌ Неверно! Правильный ответ:
