@@ -1,5 +1,40 @@
 /* База знаний - Папочная структура (как в Windows Explorer) */
 
+/* Кнопка "Создать" с выпадающим меню */
+.btn-group .dropdown-toggle {
+    padding: 8px 16px;
+}
+
+.dropdown-menu {
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #dee2e6;
+    padding: 8px 0;
+    margin-top: 8px;
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    transition: background-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #007bff;
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.dropdown-item:active {
+    background-color: #007bff;
+    color: white;
+}
+
 /* Хлебные крошки */
 .breadcrumb {
     background-color: #f8f9fa;

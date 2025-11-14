@@ -12,9 +12,33 @@
             <i class="bi bi-folder-fill"></i> База знаний
         </h1>
         {% if user.is_authenticated and user.is_staff %}
-        <a href="/admin/knowledge_base/directory/add/{% if current_directory %}?parent={{ current_directory.id }}{% endif %}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Создать категорию
-        </a>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-plus-circle"></i> Создать
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="/admin/knowledge_base/directory/add/{% if current_directory %}?parent={{ current_directory.id }}{% endif %}">
+                        <i class="bi bi-folder-plus me-2"></i> Создать категорию
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'courses:create-course' %}">
+                        <i class="bi bi-book-plus me-2"></i> Создать курс
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="/admin/courses/lesson/add/">
+                        <i class="bi bi-file-earmark-plus me-2"></i> Создать урок
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="/admin/quizzes/quiz/add/{% if current_directory %}?directory={{ current_directory.id }}{% endif %}">
+                        <i class="bi bi-clipboard-plus me-2"></i> Создать тест
+                    </a>
+                </li>
+            </ul>
+        </div>
         {% endif %}
     </div>
 
