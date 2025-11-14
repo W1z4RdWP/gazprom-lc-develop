@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'myapp',
     'users',
     'courses',
-    'quizzes'
+    'quizzes',
+    'knowledge_base'
 ]
 
 X_FRAME_OPTIONS = "SAMEORIGIN"              # allows you to use modals insated of popups
