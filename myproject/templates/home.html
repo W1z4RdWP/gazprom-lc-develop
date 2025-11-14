@@ -57,7 +57,7 @@
             <p>Мы предоставляем качественное образование и профессиональную подготовку специалистов в области энергетики. Наша платформа позволяет проходить обучение в удобном формате, отслеживать прогресс и получать сертификаты о прохождении курсов.</p>
             <div class="info-actions">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'course_detail_all' %}" class="btn btn-primary btn-lg">Перейти к курсам</a>
+                    <a href="{% url 'courses:course_detail_all' %}" class="btn btn-primary btn-lg">Перейти к курсам</a>
                 {% else %}
                     <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Зарегистрироваться</a>
                     <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Войти</a>

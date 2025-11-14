@@ -48,12 +48,15 @@
                             <a class="nav-link" href="{% url 'about' %}">О нас</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'quizzes' %}">Тесты</a>
+                            <a class="nav-link" href="{% url 'quizzes:quizzes' %}">Тесты</a>
                         </li>
                         {% if user.is_authenticated %}
                             {% if user.is_staff %}
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'create-course' %}">Создать курс</a>
+                                    <a class="nav-link" href="{% url 'courses:create-course' %}">Создать курс</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'knowledge_base:kb_home' %}">База знаний</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/admin">Админ панель</a>

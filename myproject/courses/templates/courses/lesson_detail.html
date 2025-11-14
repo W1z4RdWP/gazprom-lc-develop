@@ -24,7 +24,7 @@
         </div>
     </div>
     <div class="lesson-actions">
-        <form method="POST" action="{% url 'complete_lesson' course_slug=lesson.course.slug lesson_id=lesson.id %}">
+        <form method="POST" action="{% url 'courses:complete_lesson' course_slug=lesson.course.slug lesson_id=lesson.id %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-success">
                 ✔ Завершить урок
@@ -32,14 +32,14 @@
         </form>
         {% if user.is_authenticated and user.is_staff %}
             <!-- Кнопка удаления -->
-            <form method="POST" action="{% url 'delete_lesson' lesson.id %}">
+            <form method="POST" action="{% url 'courses:delete_lesson' lesson.id %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger lesson-btns" 
                         onclick="return confirm('Вы уверены, что хотите удалить этот урок?')">
                     Удалить урок
                 </button>
             </form>
-            <a href="{% url 'edit_lesson' lesson.id %}" class="btn btn-warning lesson-btns">
+            <a href="{% url 'courses:edit_lesson' lesson.id %}" class="btn btn-warning lesson-btns">
                 Редактировать
             </a>
         {% else %}

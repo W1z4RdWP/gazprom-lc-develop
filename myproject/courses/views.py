@@ -99,7 +99,7 @@ def course_detail(request, slug):
         if request.method == 'POST' and 'start_course' in request.POST:
             if not has_started:
                 UserCourse.objects.create(user=request.user, course=course)
-                return redirect('course_detail', slug=slug)
+                return redirect('courses:course_detail', slug=slug)
     else:
         return redirect('login')
 
@@ -204,14 +204,14 @@ def lesson_detail(request, course_slug, lesson_id):
     # Проверка доступа к курсу
     user_course = UserCourse.objects.filter(user=request.user, course=course).first()
     if not user_course:
-        return redirect('course_detail', slug=course.slug)
+        return redirect('courses:course_detail', slug=course.slug)
 
     # Проверка траектории
     trajectory = UserLessonTrajectory.objects.filter(user=request.user, course=course).first()
     if trajectory:
         lessons_in_trajectory = trajectory.lessons.all()
         if lesson not in lessons_in_trajectory:
-            return redirect('course_detail', slug=course.slug)  # Или вы можете отобразить страницу с ошибкой
+            return redirect('courses:course_detail', slug=course.slug)  # Или вы можете отобразить страницу с ошибкой
 
     # Помечаем урок как просмотренный (но не завершенный)
     UserProgress.objects.get_or_create(
@@ -245,7 +245,7 @@ def create_lesson(request, course_slug):
             lesson = form.save(commit=False)
             lesson.course = course
             lesson.save()
-            return redirect('course_detail', course_slug)
+            return redirect('courses:course_detail', course_slug)
     else:
         form = LessonForm()
     return render(request, 'courses/create_lesson.html', {'form': form, 'course': course})
@@ -258,7 +258,7 @@ def delete_course(request, slug):
     if request.method == 'POST':
         course.delete()
         return redirect('home')
-    return redirect('course_detail', slug=slug)
+    return redirect('courses:course_detail', slug=slug)
 
 
 @login_required
@@ -268,7 +268,7 @@ def delete_lesson(request, lesson_id):
     course_slug = lesson.course.slug
     if request.method == 'POST':
         lesson.delete()
-    return redirect('course_detail', course_slug)
+    return redirect('courses:course_detail', course_slug)
 
 
 @login_required
@@ -280,7 +280,7 @@ def edit_course(request, slug):
         form = CourseForm(request.POST, request.FILES, instance=course)
         if form.is_valid():
             form.save()
-            return redirect('course_detail', slug=course.slug)
+            return redirect('courses:course_detail', slug=course.slug)
     else:
         form = CourseForm(instance=course)
     
@@ -336,14 +336,14 @@ def complete_lesson(request, course_slug, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
     
     if not UserCourse.objects.filter(user=request.user, course=course).exists():
-        return redirect('course_detail', slug=course.slug)
+        return redirect('courses:course_detail', slug=course.slug)
     
     # Получаем траекторию пользователя
     trajectory = UserLessonTrajectory.objects.filter(user=request.user, course=course).first()
     
     # Проверяем, что урок входит в траекторию пользователя (если траектория задана)
     if trajectory and lesson not in trajectory.lessons.all():
-        return redirect('course_detail', slug=course.slug)
+        return redirect('courses:course_detail', slug=course.slug)
 
     # Создаем или обновляем прогресс
     UserProgress.objects.update_or_create(
@@ -374,12 +374,12 @@ def complete_lesson(request, course_slug, lesson_id):
     
     if all_completed:
         if course.final_quiz:
-            return redirect('redir_to_quiz', course_slug=course_slug)
+            return redirect('courses:redir_to_quiz', course_slug=course_slug)
         else:
             user_course.is_completed = True
             user_course.save()
     
-    return redirect('course_detail', slug=course.slug)
+    return redirect('courses:course_detail', slug=course.slug)
 
 
 def complete_course(request, course_id):
@@ -396,12 +396,12 @@ def complete_course(request, course_id):
         if quiz_result:
             user_course.is_completed = True
             user_course.save()
-            return redirect('course_detail', slug=course.slug)
+            return redirect('courses:course_detail', slug=course.slug)
         else:
             return redirect('quiz_start', quiz_id=course.final_quiz.id)
     else:
         user_course.is_completed = True
         user_course.save()
-        return redirect('course_detail', slug=course.slug)
+        return redirect('courses:course_detail', slug=course.slug)
     
 

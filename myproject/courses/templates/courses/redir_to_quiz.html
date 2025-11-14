@@ -6,7 +6,7 @@
     <h2>Вы завершили все уроки курса "{{ course.title }}"</h2>
     <p>Чтобы курс считался завершенным нужно закрепить усвоенный материал! 😉</p>
     <p>Хотите пройти итоговый тест сейчас?</p>
-    <form method="post" action="{% url 'redir_to_quiz' course.slug %}">
+    <form method="post" action="{% url 'courses:redir_to_quiz' course.slug %}">
         {% csrf_token %}
         <button type="submit" name="action" value="start_quiz">Пройти тест</button>
         <button type="submit" name="action" value="skip_quiz">Отложить</button>

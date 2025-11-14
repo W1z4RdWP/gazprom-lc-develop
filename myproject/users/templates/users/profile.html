@@ -76,14 +76,14 @@
                                 <span class="badge bg-success">Тест пройден</span>
                             {% else %}
                                 <span class="badge bg-warning">Требуется тест</span>
-                                <a href="{% url 'quiz_start' progress.course.final_quiz.id %}" 
+                                <a href="{% url 'quizzes:quiz_start' progress.course.final_quiz.id %}" 
                                 class="btn btn-sm btn-primary">
                                 Пройти тест</a>
                             {% endif %}
                             </div>
                         {% endif %}
                         <div class="btn-group">
-                            <a href="{% url 'course_detail' progress.course.slug %}" 
+                            <a href="{% url 'courses:course_detail' progress.course.slug %}" 
                             class="btn btn-primary">
                                 Перейти к курсу
                             </a>
@@ -121,7 +121,7 @@
                             Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
                         </p>
                         <div class="btn-group">
-                            <a href="{% url 'course_detail' progress.course.slug %}" 
+                            <a href="{% url 'courses:course_detail' progress.course.slug %}" 
                                class="btn btn-primary">
                                 Перейти к курсу
                             </a>

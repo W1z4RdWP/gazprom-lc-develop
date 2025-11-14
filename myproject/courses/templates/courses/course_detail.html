@@ -29,7 +29,7 @@
             <h3>Уроки курса</h3>
             <div class="list-group">
                 {% for lesson in lessons %}  {# Используем lessons, переданные из view #}
-                <a href="{% url 'lesson_detail' course.slug lesson.id %}" 
+                <a href="{% url 'courses:lesson_detail' course.slug lesson.id %}" 
                    class="list-group-item list-group-item-action">
                     {{ lesson.title }}
                     {% if has_started and lesson.id in completed_lessons_ids %}
@@ -56,7 +56,7 @@
                             <p class="text-success">Курс завершен: {{ user_course.end_date|date:"d.m.Y" }}</p>
                         {% endif %}
                     {% endif %}
-                    <a href="{% url 'lesson_detail' course.slug next_lesson.id %}" 
+                    <a href="{% url 'courses:lesson_detail' course.slug next_lesson.id %}" 
                        class="btn btn-primary w-100">
                         Продолжить обучение
                     </a>
@@ -73,11 +73,11 @@
                 </div>
                 {% if user.is_authenticated and user.is_staff %}
                 <div class="course-actions">
-                    <a href="{% url 'create_lesson' course.slug %}" class="btn btn-success">Добавить урок</a>
-                    <a href="{% url 'edit_course' course.slug %}" class="btn btn-warning">
+                    <a href="{% url 'courses:create_lesson' course.slug %}" class="btn btn-success">Добавить урок</a>
+                    <a href="{% url 'courses:edit_course' course.slug %}" class="btn btn-warning">
                         Редактировать
                     </a>
-                    <form method="POST" action="{% url 'delete_course' course.slug %}" style="display: inline;">
+                    <form method="POST" action="{% url 'courses:delete_course' course.slug %}" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger" 
                                 onclick="return confirm('Вы уверены, что хотите удалить этот курс? Все уроки будут удалены!')">

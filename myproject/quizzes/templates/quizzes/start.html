@@ -13,7 +13,7 @@
             <h2 class="mb-0">Выберите тест</h2>
         </div>
         <div class="card-body">
-            <form method="POST" action="{% url 'quiz_start_handler' %}">
+            <form method="POST" action="{% url 'quizzes:quiz_start_handler' %}">
                 {% csrf_token %}
                 <div class="list-group">
                     {% for topic in topics %}

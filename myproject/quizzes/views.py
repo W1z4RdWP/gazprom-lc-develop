@@ -37,14 +37,14 @@ def get_questions(request, quiz_id: int = None, is_start: bool = False) -> HttpR
     if request.method == 'POST' or is_start:
         # Если is_start=True, quiz_id берется из URL
         if is_start and not quiz_id:
-            return redirect('quizzes')
+            return redirect('quizzes:quizzes')
         
         # Если не стартовая страница, получаем quiz_id из сессии
         if not is_start:
             quiz_id = request.session.get('quiz_id')
             current_question_id = request.session.get('current_question_id')
             if not quiz_id or not current_question_id:
-                return redirect('quizzes')
+                return redirect('quizzes:quizzes')
 
             # Получаем следующий вопрос
             question = _get_subsequent_question(quiz_id, current_question_id)
@@ -58,7 +58,7 @@ def get_questions(request, quiz_id: int = None, is_start: bool = False) -> HttpR
             question = _get_first_question(quiz_id)
 
         if not question:
-            return redirect('get-finish')
+            return redirect('quizzes:get-finish')
         
         # Обновление сессии
         request.session['current_question_id'] = question.id
@@ -157,7 +157,7 @@ def get_answer(request) -> HttpResponse:
                     
                 }
             else:
-                return redirect('quizzes')
+                return redirect('quizzes:quizzes')
 
         # Сохраняем обновлённые ответы в сессии
         request.session['quiz_answers'] = quiz_answers
@@ -170,7 +170,7 @@ def get_answer(request) -> HttpResponse:
 
         return render(request, 'quizzes/answer.html', context)
     
-    return redirect('quizzes')
+    return redirect('quizzes:quizzes')
 
 
 
@@ -180,7 +180,7 @@ def get_finish(request) -> HttpResponse:
 
     quiz_id = request.session.get('quiz_id')
     if not quiz_id:
-        return redirect('quizzes')
+        return redirect('quizzes:quizzes')
     
     quiz = get_object_or_404(Quiz, id=quiz_id)
     questions_count = Question.objects.filter(quiz=quiz).count() # Количество вопросов в тесте всего
@@ -235,7 +235,7 @@ def get_finish(request) -> HttpResponse:
             return redirect('course_detail', slug=course.slug)
         else:
             messages.error(request, "Тест не пройден. Попробуйте снова!")
-            return redirect('quiz_start', quiz_id=quiz.id)
+            return redirect('quizzes:quiz_start', quiz_id=quiz.id)
 
     context = {
         'score': score,
@@ -258,12 +258,12 @@ def start_quiz_handler(request):
     if request.method == 'POST':
         quiz_id = request.POST.get('quiz_id')
         if not quiz_id:
-            return redirect('quizzes')
+            return redirect('quizzes:quizzes')
         
         # Сохраняем в сессии и перенаправляем на тест
         request.session['quiz_id'] = int(quiz_id)
         request.session['score'] = 0
         request.session['current_question_id'] = None
-        return redirect('quiz_start', quiz_id=quiz_id)
+        return redirect('quizzes:quiz_start', quiz_id=quiz_id)
     
-    return redirect('quizzes')
+    return redirect('quizzes:quizzes')

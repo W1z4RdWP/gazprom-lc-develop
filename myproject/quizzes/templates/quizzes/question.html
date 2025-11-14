@@ -25,7 +25,7 @@
             <h3 class="mb-0">{{ question.text }}</h3>
         </div>
         <div class="card-body">
-            <form method="POST" action="{% url 'get-answer' %}">
+            <form method="POST" action="{% url 'quizzes:get-answer' %}">
                 {% csrf_token %}
                 <input type="hidden" name="question_id" value="{{ question.id }}">
 

@@ -14,7 +14,7 @@
                     <p>Вам пока еще не назначили ни одного курса. Обратитесь к администрации сайта</p>
                 {% endif %}
                 {% for course in courses %}
-                <a href="{% url 'course_detail' course.slug %}"
+                <a href="{% url 'courses:course_detail' course.slug %}"
                    class="list-group-item list-group-item-action">
                     {{ course.title }}
                     {% if user.is_authenticated and course.id in completed_courses %}
