@@ -12,6 +12,7 @@ class Directory(models.Model):
         verbose_name='Родительская категория'
     )
     order = models.PositiveIntegerField(default=0, verbose_name='Порядок сортировки')
+    description = models.TextField(blank=True, null=True, verbose_name='Описание категории')
 
     
     class Meta:
@@ -29,3 +30,27 @@ class Directory(models.Model):
             full_path.append(k.name)
             k = k.parent
         return ' / '.join(full_path[::-1])
+    
+    def get_courses_count(self):
+        """Возвращает количество курсов в этой категории и подкатегориях"""
+        from courses.models import Course
+        count = Course.objects.filter(directory=self).count()
+        for subdir in self.subdirectories.all():
+            count += subdir.get_courses_count()
+        return count
+    
+    def get_lessons_count(self):
+        """Возвращает количество уроков в этой категории и подкатегориях"""
+        from courses.models import Lesson
+        count = Lesson.objects.filter(course__directory=self).count()
+        for subdir in self.subdirectories.all():
+            count += subdir.get_lessons_count()
+        return count
+    
+    def get_quizzes_count(self):
+        """Возвращает количество тестов в этой категории и подкатегориях"""
+        from quizzes.models import Quiz
+        count = Quiz.objects.filter(directory=self).count()
+        for subdir in self.subdirectories.all():
+            count += subdir.get_quizzes_count()
+        return count

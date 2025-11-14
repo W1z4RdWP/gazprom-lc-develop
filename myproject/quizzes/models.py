@@ -3,6 +3,14 @@ from django.db import models
 
 class Quiz(models.Model):
   name = models.CharField(max_length=300)
+  directory = models.ForeignKey(
+      'knowledge_base.Directory',
+      on_delete=models.SET_NULL,
+      null=True,
+      blank=True,
+      related_name='quizzes',
+      verbose_name="Категория"
+  )
 
   class Meta:
     verbose_name = "Тест" # Как будет отображаться в админ панели

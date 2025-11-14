@@ -16,10 +16,11 @@ class QuestionInline(NestedTabularInline):
 
 @admin.register(Quiz)
 class QuizAdmin(NestedModelAdmin):
-    list_display = ['name', 'question_count']
-    list_filter = ['name']
+    list_display = ['name', 'directory', 'question_count']
+    list_filter = ['directory', 'name']
     search_fields = ['name']
     inlines = [QuestionInline]
+    autocomplete_fields = ['directory']
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(question_count=Count('question'))

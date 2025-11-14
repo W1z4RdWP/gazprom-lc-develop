@@ -5,5 +5,231 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Knowledge base</h1>
+<div class="container mt-4 mb-5">
+    <!-- Заголовок и кнопка создания -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">
+            <i class="bi bi-folder-fill"></i> База знаний
+        </h1>
+        {% if user.is_authenticated and user.is_staff %}
+        <a href="/admin/knowledge_base/directory/add/{% if current_directory %}?parent={{ current_directory.id }}{% endif %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Создать категорию
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Хлебные крошки (навигация) -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            {% for crumb in breadcrumbs %}
+                {% if forloop.last %}
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <i class="bi bi-folder-fill me-1"></i>{{ crumb.name }}
+                    </li>
+                {% else %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ crumb.url }}">
+                            {% if crumb.is_root %}
+                                <i class="bi bi-house-door me-1"></i>
+                            {% endif %}
+                            {{ crumb.name }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+
+    <!-- Кнопка "Назад" если не в корневой папке -->
+    {% if current_directory %}
+        <div class="mb-3">
+            <a href="{% if current_directory.parent %}{% url 'knowledge_base:kb_directory' current_directory.parent.id %}{% else %}{% url 'knowledge_base:kb_home' %}{% endif %}" 
+               class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Назад
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Содержимое текущей папки -->
+    <div class="folder-content">
+        {% if not subdirectories and not courses and not quizzes %}
+            <div class="empty-folder">
+                <div class="empty-folder-icon">
+                    <i class="bi bi-folder-x"></i>
+                </div>
+                <p class="text-muted">Папка пуста</p>
+                {% if user.is_authenticated and user.is_staff %}
+                    <p class="text-muted small">Создайте категорию, курс или тест в этой папке</p>
+                {% endif %}
+            </div>
+        {% else %}
+            <!-- Подкатегории (папки) -->
+            {% if subdirectories %}
+                <div class="content-section">
+                    <h5 class="section-header">
+                        <i class="bi bi-folder-fill me-2"></i>Папки
+                    </h5>
+                    <div class="items-grid">
+                        {% for subdir in subdirectories %}
+                            <div class="folder-item" onclick="window.location.href='{% url 'knowledge_base:kb_directory' subdir.id %}'">
+                                <div class="item-icon">
+                                    <i class="bi bi-folder-fill"></i>
+                                </div>
+                                <div class="item-name">{{ subdir.name }}</div>
+                                {% if subdir.description %}
+                                    <div class="item-description">{{ subdir.description|truncatewords:10 }}</div>
+                                {% endif %}
+                                {% if user.is_authenticated and user.is_staff %}
+                                    <div class="item-actions" onclick="event.stopPropagation();">
+                                        <a href="/admin/knowledge_base/directory/{{ subdir.id }}/change/" 
+                                           class="btn btn-sm btn-outline-secondary" 
+                                           title="Редактировать">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Курсы -->
+            {% if courses %}
+                <div class="content-section">
+                    <h5 class="section-header">
+                        <i class="bi bi-book-fill me-2"></i>Курсы
+                    </h5>
+                    <div class="items-grid">
+                        {% for course_data in courses %}
+                            <div class="course-item">
+                                <div class="item-icon course-icon">
+                                    <i class="bi bi-book-half"></i>
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-name">
+                                        <a href="{% url 'courses:course_detail' course_data.course.slug %}" 
+                                           class="item-link">
+                                            {{ course_data.course.title }}
+                                        </a>
+                                    </div>
+                                    <div class="item-meta">
+                                        <small class="text-muted">
+                                            <i class="bi bi-person"></i> {{ course_data.course.author.get_full_name|default:course_data.course.author.username }}
+                                        </small>
+                                        {% if course_data.lessons_count > 0 %}
+                                            <small class="text-muted ms-2">
+                                                <i class="bi bi-file-text"></i> {{ course_data.lessons_count }} урок(ов)
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                    <!-- Уроки курса (раскрывающийся список) -->
+                                    {% if course_data.lessons %}
+                                        <div class="lessons-toggle mt-2">
+                                            <button class="btn btn-sm btn-outline-info lessons-btn" 
+                                                    type="button" 
+                                                    data-bs-toggle="collapse" 
+                                                    data-bs-target="#lessons-{{ course_data.course.id }}" 
+                                                    aria-expanded="false">
+                                                <i class="bi bi-chevron-down"></i> Показать уроки ({{ course_data.lessons_count }})
+                                            </button>
+                                            <div class="collapse mt-2" id="lessons-{{ course_data.course.id }}">
+                                                <div class="lessons-list">
+                                                    {% for lesson in course_data.lessons %}
+                                                        <div class="lesson-item">
+                                                            <a href="{% url 'courses:lesson_detail' course_data.course.slug lesson.id %}" 
+                                                               class="lesson-link">
+                                                                <i class="bi bi-file-text me-2"></i>
+                                                                {{ lesson.title }}
+                                                            </a>
+                                                            {% if user.is_authenticated and user.is_staff %}
+                                                                <a href="/admin/courses/lesson/{{ lesson.id }}/change/" 
+                                                                   class="btn btn-sm btn-outline-secondary btn-sm ms-2" 
+                                                                   title="Редактировать">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </a>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% if user.is_authenticated and user.is_staff %}
+                                    <div class="item-actions">
+                                        <a href="/admin/courses/course/{{ course_data.course.id }}/change/" 
+                                           class="btn btn-sm btn-outline-secondary" 
+                                           title="Редактировать">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'courses:create_lesson' course_data.course.slug %}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Добавить урок">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Тесты -->
+            {% if quizzes %}
+                <div class="content-section">
+                    <h5 class="section-header">
+                        <i class="bi bi-clipboard-check-fill me-2"></i>Тесты
+                    </h5>
+                    <div class="items-grid">
+                        {% for quiz in quizzes %}
+                            <div class="quiz-item">
+                                <div class="item-icon quiz-icon">
+                                    <i class="bi bi-clipboard-check"></i>
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-name">
+                                        <a href="{% url 'quizzes:quiz_start' quiz.id %}" 
+                                           class="item-link">
+                                            {{ quiz.name }}
+                                        </a>
+                                    </div>
+                                </div>
+                                {% if user.is_authenticated and user.is_staff %}
+                                    <div class="item-actions">
+                                        <a href="/admin/quizzes/quiz/{{ quiz.id }}/change/" 
+                                           class="btn btn-sm btn-outline-secondary" 
+                                           title="Редактировать">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработка раскрытия списка уроков
+    document.querySelectorAll('.lessons-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            if (isExpanded) {
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+            } else {
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

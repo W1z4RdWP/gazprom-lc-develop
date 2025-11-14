@@ -29,10 +29,11 @@ class LessonInline(admin.TabularInline):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ['title', 'description', 'image', 'slug', 'final_quiz']
+    list_display = ['title', 'directory', 'author', 'image', 'slug', 'final_quiz']
+    list_filter = ['directory', 'author']
     search_fields = ['title']
     prepopulated_fields = {'slug': ('title',)}
-    autocomplete_fields = ['final_quiz']  # Для удобного поиска тестов
+    autocomplete_fields = ['final_quiz', 'directory']  # Для удобного поиска тестов и категорий
 
 
 

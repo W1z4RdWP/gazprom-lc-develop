@@ -23,6 +23,14 @@ class Course(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     image = models.ImageField(upload_to='course_images/', blank=True, null=True, verbose_name="Изображение курса")
     slug = models.SlugField(max_length=200, unique=True, blank=True)
+    directory = models.ForeignKey(
+        'knowledge_base.Directory',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='courses',
+        verbose_name="Категория"
+    )
     final_quiz = models.ForeignKey(
         Quiz,
         on_delete=models.SET_NULL,
