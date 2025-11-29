@@ -246,32 +246,41 @@ class CourseListView(ListView):
 
 
 
-def lesson_detail(request, course_slug, lesson_id):
+def lesson_detail(request, course_slug=None, lesson_id=None):
     if not request.user.is_authenticated:
         return redirect('login')
 
-    course = get_object_or_404(Course, slug=course_slug)
-    lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
+    # Если передан lesson_id без course_slug, это урок без курса
+    if lesson_id and not course_slug:
+        lesson = get_object_or_404(Lesson, id=lesson_id, course__isnull=True)
+        return render(request, 'courses/lesson_detail.html', {'lesson': lesson, 'course': None})
+    
+    # Старый вариант - урок с курсом
+    if course_slug and lesson_id:
+        course = get_object_or_404(Course, slug=course_slug)
+        lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
 
-    # Проверка доступа к курсу
-    user_course = UserCourse.objects.filter(user=request.user, course=course).first()
-    if not user_course:
-        return redirect('courses:course_detail', slug=course.slug)
+        # Проверка доступа к курсу
+        user_course = UserCourse.objects.filter(user=request.user, course=course).first()
+        if not user_course:
+            return redirect('courses:course_detail', slug=course.slug)
 
-    # Проверка траектории
-    trajectory = UserLessonTrajectory.objects.filter(user=request.user, course=course).first()
-    if trajectory:
-        lessons_in_trajectory = trajectory.lessons.all()
-        if lesson not in lessons_in_trajectory:
-            return redirect('courses:course_detail', slug=course.slug)  # Или вы можете отобразить страницу с ошибкой
+        # Проверка траектории
+        trajectory = UserLessonTrajectory.objects.filter(user=request.user, course=course).first()
+        if trajectory:
+            lessons_in_trajectory = trajectory.lessons.all()
+            if lesson not in lessons_in_trajectory:
+                return redirect('courses:course_detail', slug=course.slug)
 
-    # Помечаем урок как просмотренный (но не завершенный)
-    UserProgress.objects.get_or_create(
-        user=request.user,
-        lesson=lesson,
-        defaults={'course': course}
-    )
-    return render(request, 'courses/lesson_detail.html', {'lesson': lesson})
+        # Помечаем урок как просмотренный (но не завершенный)
+        UserProgress.objects.get_or_create(
+            user=request.user,
+            lesson=lesson,
+            defaults={'course': course}
+        )
+        return render(request, 'courses/lesson_detail.html', {'lesson': lesson, 'course': course})
+    
+    return redirect('knowledge_base:kb_home')
 
 
 
@@ -322,6 +331,17 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 kwargs['course'] = course
             except Course.DoesNotExist:
                 pass
+        
+        # Получаем directory_id из GET-параметра
+        directory_id = self.request.GET.get('directory')
+        if directory_id:
+            try:
+                from knowledge_base.models import Directory
+                directory = Directory.objects.get(id=directory_id)
+                kwargs['directory'] = directory
+            except (Directory.DoesNotExist, ValueError):
+                pass
+        
         return kwargs
 
     def form_valid(self, form):
@@ -338,6 +358,16 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 context['course'] = Course.objects.get(slug=course_slug)
             except Course.DoesNotExist:
                 pass
+        
+        # Получаем директорию из GET-параметра
+        directory_id = self.request.GET.get('directory')
+        if directory_id:
+            try:
+                from knowledge_base.models import Directory
+                context['directory'] = Directory.objects.get(id=directory_id)
+            except (Directory.DoesNotExist, ValueError):
+                pass
+        
         return context
     
     def get_success_url(self):
@@ -345,8 +375,11 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         lesson = self.object
         if lesson.course:
             return reverse_lazy('courses:course_detail', kwargs={'slug': lesson.course.slug})
+        elif lesson.directory:
+            from django.urls import reverse
+            return reverse('knowledge_base:kb_directory', kwargs={'directory_id': lesson.directory.id})
         else:
-            return reverse_lazy('home')
+            return reverse_lazy('knowledge_base:kb_home')
     
 
 
@@ -369,16 +402,23 @@ def delete_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
     if request.method == 'POST':
         course = lesson.course  # Сохраняем курс до удаления
+        directory = lesson.directory  # Сохраняем директорию до удаления
         lesson.delete()
         if course:
             return redirect('courses:course_detail', slug=course.slug)
+        elif directory:
+            from django.urls import reverse
+            return redirect('knowledge_base:kb_directory', directory_id=directory.id)
         else:
-            return redirect('home')
+            return redirect('knowledge_base:kb_home')
     # Для GET запроса
     if lesson.course:
         return redirect('courses:course_detail', slug=lesson.course.slug)
+    elif lesson.directory:
+        from django.urls import reverse
+        return redirect('knowledge_base:kb_directory', directory_id=lesson.directory.id)
     else:
-        return redirect('home')
+        return redirect('knowledge_base:kb_home')
 
 
 @login_required
@@ -406,17 +446,20 @@ def edit_course(request, slug):
 def edit_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
     course = lesson.course
+    directory = lesson.directory
     
     if request.method == 'POST':
-        form = LessonForm(request.POST, instance=lesson, course=course)
+        form = LessonForm(request.POST, instance=lesson, course=course, directory=directory)
         if form.is_valid():
             form.save()
             if course:
-                return redirect('lesson_detail', course_slug=course.slug, lesson_id=lesson.id)
+                return redirect('courses:lesson_detail', course_slug=course.slug, lesson_id=lesson.id)
+            elif lesson.directory:
+                return redirect('knowledge_base:kb_directory', directory_id=lesson.directory.id)
             else:
-                return redirect('home')
+                return redirect('knowledge_base:kb_home')
     else:
-        form = LessonForm(instance=lesson, course=course)
+        form = LessonForm(instance=lesson, course=course, directory=directory)
     
     return render(request, 'courses/edit_lesson.html', {
         'form': form,

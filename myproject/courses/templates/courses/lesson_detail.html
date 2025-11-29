@@ -7,7 +7,11 @@
 
 
     <div class="content-section">
-        <h1>{{ lesson.course.title }}</h1>
+        {% if lesson.course %}
+            <h1>{{ lesson.course.title }}</h1>
+        {% elif lesson.directory %}
+            <h1>{{ lesson.directory.name }}</h1>
+        {% endif %}
         <h2>{{ lesson.title }}</h2>
         <div class="lesson-content ck-content">
             {{ lesson.content|safe }}
@@ -24,12 +28,14 @@
         </div>
     </div>
     <div class="lesson-actions">
-        <form method="POST" action="{% url 'courses:complete_lesson' course_slug=lesson.course.slug lesson_id=lesson.id %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success">
-                ✔ Завершить урок
-            </button>
-        </form>
+        {% if lesson.course %}
+            <form method="POST" action="{% url 'courses:complete_lesson' course_slug=lesson.course.slug lesson_id=lesson.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">
+                    ✔ Завершить урок
+                </button>
+            </form>
+        {% endif %}
         {% if user.is_authenticated and user.is_staff %}
             <!-- Кнопка удаления -->
             <form method="POST" action="{% url 'courses:delete_lesson' lesson.id %}">

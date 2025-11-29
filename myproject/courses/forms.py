@@ -47,43 +47,54 @@ class CourseForm(forms.ModelForm):
 class LessonForm(forms.ModelForm):
     class Meta:
         model = Lesson
-        fields = ['course', 'title', 'content', 'video_id', 'order']
+        fields = ['course', 'directory', 'title', 'content', 'video_id', 'order']
         widgets = {
             'content': CKEditor5Widget(
                 attrs={'class': 'django_ckeditor_5'}, 
                 config_name='extends'
             ),
-            'course': forms.Select(attrs={'class': 'form-control'})
+            'course': forms.Select(attrs={'class': 'form-control'}),
+            'directory': forms.Select(attrs={'class': 'form-control'})
         }
 
         labels = {
             'video_id': 'Ссылка на видео с Rutube',
-            'course': 'Курс (необязательно)'
+            'course': 'Курс (необязательно)',
+            'directory': 'Категория (необязательно)'
         }
 
         help_texts = {
             'video_id': 'Введите полную ссылку на видео. Пример: https://rutube.ru/video/abcdef12345/',
-            'course': 'Выберите курс, к которому относится урок, или оставьте пустым'
+            'course': 'Выберите курс, к которому относится урок, или оставьте пустым',
+            'directory': 'Выберите категорию базы знаний, к которой относится урок, или оставьте пустым'
         }
 
 
     def __init__(self, *args, **kwargs):
         self.course = kwargs.pop('course', None)
+        self.directory = kwargs.pop('directory', None)
         super().__init__(*args, **kwargs)
 
         # Делаем поле course необязательным
         self.fields['course'].required = False
         self.fields['course'].empty_label = '--- Без курса ---'
         
+        # Делаем поле directory необязательным
+        self.fields['directory'].required = False
+        self.fields['directory'].empty_label = '--- Без категории ---'
+        
         # Если курс передан явно, скрываем поле и устанавливаем его значение
         if self.course:
             self.fields['course'].widget = forms.HiddenInput()
             self.fields['course'].initial = self.course
 
-        # Если курс не передан, делаем поле order необязательным
-        if not self.course:
-            self.fields['order'].required = False
-            self.fields['order'].help_text = 'Порядок урока (необязательно, если урок не привязан к курсу)'
+        # Если директория передана явно, устанавливаем её значение
+        if self.directory:
+            self.fields['directory'].initial = self.directory
+
+        # Делаем поле order необязательным (будет автоматически вычисляться)
+        self.fields['order'].required = False
+        self.fields['order'].help_text = 'Порядок урока (необязательно, будет автоматически вычислен)'
 
 
     def clean_video_id(self):

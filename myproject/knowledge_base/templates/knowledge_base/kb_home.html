@@ -28,7 +28,7 @@
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item" href="#">
+                    <a class="dropdown-item" href="{% url 'courses:create_lesson' %}{% if current_directory %}?directory={{ current_directory.id }}{% endif %}">
                         <i class="bi bi-file-earmark-plus me-2"></i> Создать урок
                     </a>
                 </li>
@@ -76,14 +76,14 @@
 
     <!-- Содержимое текущей папки -->
     <div class="folder-content">
-        {% if not subdirectories and not courses and not quizzes %}
+        {% if not subdirectories and not courses and not quizzes and not standalone_lessons %}
             <div class="empty-folder">
                 <div class="empty-folder-icon">
                     <i class="bi bi-folder-x"></i>
                 </div>
                 <p class="text-muted">Папка пуста</p>
                 {% if user.is_authenticated and user.is_staff %}
-                    <p class="text-muted small">Создайте категорию, курс или тест в этой папке</p>
+                    <p class="text-muted small">Создайте категорию, курс, урок или тест в этой папке</p>
                 {% endif %}
             </div>
         {% else %}
@@ -191,6 +191,55 @@
                                            class="btn btn-sm btn-outline-primary" 
                                            title="Добавить урок">
                                             <i class="bi bi-plus-circle"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Уроки (не привязанные к курсам) -->
+            {% if standalone_lessons %}
+                <div class="content-section">
+                    <h5 class="section-header">
+                        <i class="bi bi-file-text-fill me-2"></i>Уроки
+                    </h5>
+                    <div class="items-grid">
+                        {% for lesson in standalone_lessons %}
+                            <div class="lesson-item">
+                                <div class="item-icon lesson-icon">
+                                    <i class="bi bi-file-text"></i>
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-name">
+                                        {% if lesson.course %}
+                                            <a href="{% url 'courses:lesson_detail' lesson.course.slug lesson.id %}" 
+                                               class="item-link">
+                                                {{ lesson.title }}
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'courses:lesson_detail_standalone' lesson.id %}" 
+                                               class="item-link">
+                                                {{ lesson.title }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    {% if lesson.course %}
+                                        <div class="item-meta">
+                                            <small class="text-muted">
+                                                <i class="bi bi-book"></i> Из курса: {{ lesson.course.title }}
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% if user.is_authenticated and user.is_staff %}
+                                    <div class="item-actions">
+                                        <a href="/admin/courses/lesson/{{ lesson.id }}/change/" 
+                                           class="btn btn-sm btn-outline-secondary" 
+                                           title="Редактировать">
+                                            <i class="bi bi-pencil"></i>
                                         </a>
                                     </div>
                                 {% endif %}

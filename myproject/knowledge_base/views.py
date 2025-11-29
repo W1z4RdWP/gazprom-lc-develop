@@ -34,6 +34,12 @@ class KbHome(TemplateView):
             
             # Тесты в текущей папке
             quizzes = Quiz.objects.filter(directory=current_directory).order_by('name')
+            
+            # Уроки в текущей папке (не привязанные к курсам)
+            standalone_lessons = Lesson.objects.filter(
+                directory=current_directory,
+                course__isnull=True
+            ).order_by('order', 'title')
         else:
             # Корневая папка - показываем корневые категории, курсы и тесты без категории
             subdirectories = Directory.objects.filter(parent__isnull=True).order_by('order', 'name')
@@ -43,6 +49,12 @@ class KbHome(TemplateView):
             
             # Тесты без категории (directory=None)
             quizzes = Quiz.objects.filter(directory__isnull=True).order_by('name')
+            
+            # Уроки без категории и без курса
+            standalone_lessons = Lesson.objects.filter(
+                directory__isnull=True,
+                course__isnull=True
+            ).order_by('order', 'title')
         
         # Уроки для каждого курса (общая логика для всех курсов)
         courses_with_lessons = []
@@ -59,6 +71,7 @@ class KbHome(TemplateView):
             'subdirectories': subdirectories,
             'courses': courses_with_lessons,
             'quizzes': quizzes,
+            'standalone_lessons': standalone_lessons,
             'breadcrumbs': breadcrumbs,
             'user': self.request.user,
         })

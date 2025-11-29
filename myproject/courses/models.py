@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django_ckeditor_5.fields import CKEditor5Field
@@ -75,6 +76,7 @@ class Lesson(models.Model):
         content - содержимое урока. Заполняется администратором сайта.
         video_id - идентификатор прикрепленного видео из рутуб. Максимальное количество символов для передачи в форму 
                     задается параметром max_length.
+        directory - Внешний ключ на директорию базы знаний, к которой относится урок.
     """
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons', verbose_name="Курс", null=True, blank=True)
     title = models.CharField(max_length=200, verbose_name="Название урока")
@@ -86,7 +88,15 @@ class Lesson(models.Model):
         null=True,
         help_text="Пример: https://rutube.ru/video/VIDEO_ID/ - вводите только VIDEO_ID"
     )
-    order = models.PositiveIntegerField(verbose_name="Порядок урока")
+    order = models.PositiveIntegerField(verbose_name="Порядок урока", default=0, blank=True)
+    directory = models.ForeignKey(
+        'knowledge_base.Directory',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='lessons',
+        verbose_name="Категория"
+    )
 
 
     class Meta:
@@ -94,13 +104,46 @@ class Lesson(models.Model):
         verbose_name_plural = 'Уроки'
         ordering = ['order']
 
+    def save(self, *args, **kwargs):
+        # Автоматически вычисляем order, если он не указан или равен 0
+        if not self.order or self.order == 0:
+            if self.course:
+                # Если урок привязан к курсу, берем максимальный order уроков этого курса
+                max_order = Lesson.objects.filter(course=self.course).exclude(pk=self.pk).aggregate(
+                    max_order=Max('order')
+                )['max_order'] or 0
+                self.order = max_order + 1
+            elif self.directory:
+                # Если урок привязан к директории, берем максимальный order уроков этой директории без курса
+                max_order = Lesson.objects.filter(
+                    directory=self.directory,
+                    course__isnull=True
+                ).exclude(pk=self.pk).aggregate(
+                    max_order=Max('order')
+                )['max_order'] or 0
+                self.order = max_order + 1
+            else:
+                # Если урок не привязан ни к курсу, ни к директории
+                max_order = Lesson.objects.filter(
+                    course__isnull=True,
+                    directory__isnull=True
+                ).exclude(pk=self.pk).aggregate(
+                    max_order=Max('order')
+                )['max_order'] or 0
+                self.order = max_order + 1
+        super().save(*args, **kwargs)
+
     def get_previous_lesson(self):
+        if not self.course:
+            return None
         return Lesson.objects.filter(
             course=self.course, 
             order__lt=self.order
         ).order_by('-order').first()
 
     def get_next_lesson(self):
+        if not self.course:
+            return None
         return Lesson.objects.filter(
             course=self.course, 
             order__gt=self.order

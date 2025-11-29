@@ -8,6 +8,7 @@ urlpatterns = [
     path('create_lesson/', course_views.CreateLessonView.as_view(), name='create_lesson'),
     path('course/<slug:slug>/', course_views.CourseDetailView.as_view(), name='course_detail'),
     path('courses_list/', course_views.CourseListView.as_view(), name='course_detail_all'),
+    path('lesson/<int:lesson_id>/', course_views.lesson_detail, name='lesson_detail_standalone'),
     path('course/<slug:course_slug>/lesson/<int:lesson_id>/', course_views.lesson_detail, name='lesson_detail'),
     path('course/<slug:course_slug>/create-lesson/', course_views.CreateLessonView.as_view(), name='create_lesson_for_course'),
     path('course/<slug:slug>/delete/', course_views.delete_course, name='delete_course'),
