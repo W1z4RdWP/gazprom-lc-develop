@@ -4,11 +4,12 @@ from . import views as course_views
 app_name = 'courses'
 
 urlpatterns = [
-    path('create_course/', course_views.create_course, name='create_course'),
+    path('create_course/', course_views.CreateCourseView.as_view(), name='create_course'),
+    path('create_lesson/', course_views.CreateLessonView.as_view(), name='create_lesson'),
     path('course/<slug:slug>/', course_views.CourseDetailView.as_view(), name='course_detail'),
     path('courses_list/', course_views.CourseListView.as_view(), name='course_detail_all'),
     path('course/<slug:course_slug>/lesson/<int:lesson_id>/', course_views.lesson_detail, name='lesson_detail'),
-    path('course/<slug:course_slug>/create-lesson/', course_views.create_lesson, name='create_lesson'),
+    path('course/<slug:course_slug>/create-lesson/', course_views.CreateLessonView.as_view(), name='create_lesson_for_course'),
     path('course/<slug:slug>/delete/', course_views.delete_course, name='delete_course'),
     path('lesson/<int:lesson_id>/delete/', course_views.delete_lesson, name='delete_lesson'),
     path('course/<slug:course_slug>/lesson/<int:lesson_id>/complete/', course_views.complete_lesson, name='complete_lesson'),

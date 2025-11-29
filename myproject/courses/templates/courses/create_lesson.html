@@ -6,7 +6,10 @@
 
 {% block content %}
     <div class="content-section">
-        <h2>Создать урок для курса {{ course.title }}</h2>
+        <h2>Создать урок{% if course %} для курса "{{ course.title }}"{% endif %}</h2>
+        {% if course %}
+            <p class="text-muted">Урок будет привязан к курсу "{{ course.title }}"</p>
+        {% endif %}
         <form method="POST">
             {% csrf_token %}
             {{ form.media }}
@@ -17,6 +20,8 @@
                 {{ field.label_tag }}
                 {{ field }}
             </div>
+        {% elif field.name == "course" and field.widget.input_type == "hidden" %}
+            {{ field }}
         {% else %}
             {{ field|as_crispy_field }}
         {% endif %}

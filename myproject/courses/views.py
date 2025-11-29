@@ -1,11 +1,12 @@
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Max
 from django.db import transaction
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST, require_http_methods
-from django.views.generic import DetailView, ListView
+from django.views.generic import CreateView, DetailView, ListView
 from .forms import CourseForm, LessonForm
 from .models import Course, Lesson, UserLessonTrajectory
 from myapp.models import UserProgress, UserCourse, QuizResult
@@ -209,6 +210,7 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
 
 
 
+
 class CourseListView(ListView):
     """CBV для отображения списка всех доступных курсов пользователя"""
     template_name = 'courses/all_courses_list.html'
@@ -272,33 +274,83 @@ def lesson_detail(request, course_slug, lesson_id):
     return render(request, 'courses/lesson_detail.html', {'lesson': lesson})
 
 
-@login_required
-@user_passes_test(is_admin, login_url='/')
-def create_course(request):
-    if request.method == 'POST':
-        form = CourseForm(request.POST, request.FILES)
-        if form.is_valid():
-            course = form.save(commit=False)
-            course.author = request.user
-            course.save()
-            return redirect('home')
-    else:
-        form = CourseForm()
-    return render(request, 'courses/create_course.html', {'form': form})
 
-@login_required
-def create_lesson(request, course_slug):
-    course = get_object_or_404(Course, slug=course_slug)
-    if request.method == 'POST':
-        form = LessonForm(request.POST)
-        if form.is_valid():
-            lesson = form.save(commit=False)
-            lesson.course = course
-            lesson.save()
-            return redirect('courses:course_detail', course_slug)
-    else:
-        form = LessonForm()
-    return render(request, 'courses/create_lesson.html', {'form': form, 'course': course})
+
+class CreateCourseView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """CBV формы создания курса"""
+    model = Course
+    form_class = CourseForm
+    # success_url = reverse_lazy('home')
+    template_name = 'courses/create_course.html'
+
+    def test_func(self):
+        return self.request.user.is_staff
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('home')
+
+
+
+
+class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """CBV формы создания урока"""
+    model = Lesson
+    form_class = LessonForm
+    template_name = 'courses/create_lesson.html'
+
+    def test_func(self):
+        """Проверка прав доступа - только для администраторов"""
+        return self.request.user.is_staff
+    
+    def get_form_kwargs(self):
+        """Передача дополнительных параметров в форму"""
+        kwargs = super().get_form_kwargs()
+        # Получаем course_slug из URL, если он есть (для обратной совместимости)
+        course_slug = self.kwargs.get('course_slug')
+        if course_slug:
+            try:
+                course = Course.objects.get(slug=course_slug)
+                kwargs['course'] = course
+            except Course.DoesNotExist:
+                pass
+        return kwargs
+
+    def form_valid(self, form):
+        """Обработка валидной формы"""
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        """Добавление контекста для шаблона"""
+        context = super().get_context_data(**kwargs)
+        # Получаем курс из URL, если он есть
+        course_slug = self.kwargs.get('course_slug')
+        if course_slug:
+            try:
+                context['course'] = Course.objects.get(slug=course_slug)
+            except Course.DoesNotExist:
+                pass
+        return context
+    
+    def get_success_url(self):
+        """Перенаправление после успешного создания"""
+        lesson = self.object
+        if lesson.course:
+            return reverse_lazy('courses:course_detail', kwargs={'slug': lesson.course.slug})
+        else:
+            return reverse_lazy('home')
+    
+
+
+
 
 
 @login_required
@@ -315,10 +367,18 @@ def delete_course(request, slug):
 @user_passes_test(is_admin, login_url='/')
 def delete_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
-    course_slug = lesson.course.slug
     if request.method == 'POST':
+        course = lesson.course  # Сохраняем курс до удаления
         lesson.delete()
-    return redirect('courses:course_detail', course_slug)
+        if course:
+            return redirect('courses:course_detail', slug=course.slug)
+        else:
+            return redirect('home')
+    # Для GET запроса
+    if lesson.course:
+        return redirect('courses:course_detail', slug=lesson.course.slug)
+    else:
+        return redirect('home')
 
 
 @login_required
@@ -348,12 +408,15 @@ def edit_lesson(request, lesson_id):
     course = lesson.course
     
     if request.method == 'POST':
-        form = LessonForm(request.POST, instance=lesson)
+        form = LessonForm(request.POST, instance=lesson, course=course)
         if form.is_valid():
             form.save()
-            return redirect('lesson_detail', course_slug=course.slug, lesson_id=lesson.id)
+            if course:
+                return redirect('lesson_detail', course_slug=course.slug, lesson_id=lesson.id)
+            else:
+                return redirect('home')
     else:
-        form = LessonForm(instance=lesson)
+        form = LessonForm(instance=lesson, course=course)
     
     return render(request, 'courses/edit_lesson.html', {
         'form': form,

@@ -73,7 +73,7 @@
                 </div>
                 {% if user.is_authenticated and user.is_staff %}
                 <div class="course-actions">
-                    <a href="{% url 'courses:create_lesson' course.slug %}" class="btn btn-success">Добавить урок</a>
+                    <a href="{% url 'courses:create_lesson_for_course' course.slug %}" class="btn btn-success">Добавить урок</a>
                     <a href="{% url 'courses:edit_course' course.slug %}" class="btn btn-warning">
                         Редактировать
                     </a>

@@ -23,37 +23,67 @@ class CourseForm(forms.ModelForm):
         if slug and not re.match(r'^[-a-zA-Z0-9_]+$', slug):
             raise forms.ValidationError("ЧПУ может содержать только латинские буквы, цифры, дефисы и подчеркивания")
         return slug
-    
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        if title and self.user:
+            # Проверяем существует ли уже курс с таким названием у этого автора
+            qs = Course.objects.filter(title=title, author=self.user)
+            # Если форма редактирует существующий курс, исключаем его из проверки
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError(
+                    f"Курс с названием '{title}' уже существует у вас. Пожалуйста, выберите другое название."
+                )
+        return title
+
+
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         self.fields['image'].help_text = "Рекомендуемый размер: 1200x600 пикселей"
 
 class LessonForm(forms.ModelForm):
     class Meta:
         model = Lesson
-        fields = ['title', 'content', 'video_id', 'order']
+        fields = ['course', 'title', 'content', 'video_id', 'order']
         widgets = {
             'content': CKEditor5Widget(
                 attrs={'class': 'django_ckeditor_5'}, 
                 config_name='extends'
-            )
+            ),
+            'course': forms.Select(attrs={'class': 'form-control'})
         }
 
         labels = {
-            'video_id': 'Ссылка на видео с Rutube'
+            'video_id': 'Ссылка на видео с Rutube',
+            'course': 'Курс (необязательно)'
         }
 
         help_texts = {
-            'video_id': 'Введите полную ссылку на видео. Пример: https://rutube.ru/video/abcdef12345/'
+            'video_id': 'Введите полную ссылку на видео. Пример: https://rutube.ru/video/abcdef12345/',
+            'course': 'Выберите курс, к которому относится урок, или оставьте пустым'
         }
 
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            if not self.instance.pk:  # Только для новых уроков
-                self.fields['order'].queryset = Lesson.objects.filter(
-                    course=self.initial['course']
-                ).order_by('order')
+    def __init__(self, *args, **kwargs):
+        self.course = kwargs.pop('course', None)
+        super().__init__(*args, **kwargs)
+
+        # Делаем поле course необязательным
+        self.fields['course'].required = False
+        self.fields['course'].empty_label = '--- Без курса ---'
+        
+        # Если курс передан явно, скрываем поле и устанавливаем его значение
+        if self.course:
+            self.fields['course'].widget = forms.HiddenInput()
+            self.fields['course'].initial = self.course
+
+        # Если курс не передан, делаем поле order необязательным
+        if not self.course:
+            self.fields['order'].required = False
+            self.fields['order'].help_text = 'Порядок урока (необязательно, если урок не привязан к курсу)'
 
 
     def clean_video_id(self):
@@ -71,6 +101,17 @@ class LessonForm(forms.ModelForm):
             raise forms.ValidationError("Некорректная ссылка на Rutube. Пример правильной ссылки: https://rutube.ru/video/abcdef12345/")
             
         return match.group(1)
+
+    
+    def save(self, commit=True):
+        lesson = super().save(commit=False)
+        # Если курс передан через kwargs, привязываем урок к курсу
+        # (это для обратной совместимости со старым кодом)
+        if self.course and not lesson.course:
+            lesson.course = self.course
+        if commit:
+            lesson.save()
+        return lesson
     
 
 class UserLessonTrajectoryForm(forms.ModelForm):
