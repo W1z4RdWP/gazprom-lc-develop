@@ -1,5 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required, user_passes_test
+import json
 from .models import Directory
 from courses.models import Course, Lesson
 from quizzes.models import Quiz
@@ -105,3 +109,30 @@ class KbHome(TemplateView):
                 })
         
         return breadcrumbs
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+@require_POST
+def edit_directory_name(request, directory_id):
+    """AJAX представление для inline редактирования названия категории"""
+    directory = get_object_or_404(Directory, id=directory_id)
+    
+    try:
+        data = json.loads(request.body)
+        new_name = data.get('name', '').strip()
+        
+        if not new_name:
+            return JsonResponse({'success': False, 'error': 'Название не может быть пустым'}, status=400)
+        
+        if len(new_name) > 255:
+            return JsonResponse({'success': False, 'error': 'Название слишком длинное (максимум 255 символов)'}, status=400)
+        
+        directory.name = new_name
+        directory.save()
+        
+        return JsonResponse({'success': True, 'name': directory.name})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Неверный формат данных'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

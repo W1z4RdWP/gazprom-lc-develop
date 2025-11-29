@@ -5,7 +5,7 @@
 
 {% block content %}
     <div class="content-section">
-        <h2>Редактирование урока в курсе {{ course.title }}</h2>
+        <h2>Редактирование урока{% if course %} в курсе "{{ course.title }}"{% elif lesson.directory %} в категории "{{ lesson.directory.name }}"{% endif %}</h2>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.media }}
@@ -17,6 +17,8 @@
                             {{ field }}
                         </div>
                     </div>
+                {% elif field.name == "course" and field.widget.input_type == "hidden" %}
+                    {{ field }}
                 {% else %}
                     {{ field|as_crispy_field }}
                 {% endif %}
@@ -24,7 +26,13 @@
             
             <div class="button-group mt-4">
                 <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-                <a href="{% url 'lesson_detail' course.slug lesson.id %}" class="btn btn-secondary">Отмена</a>
+                {% if course %}
+                    <a href="{% url 'courses:lesson_detail' course.slug lesson.id %}" class="btn btn-secondary">Отмена</a>
+                {% elif lesson.directory %}
+                    <a href="{% url 'knowledge_base:kb_directory' lesson.directory.id %}" class="btn btn-secondary">Отмена</a>
+                {% else %}
+                    <a href="{% url 'knowledge_base:kb_home' %}" class="btn btn-secondary">Отмена</a>
+                {% endif %}
             </div>
         </form>
     </div>

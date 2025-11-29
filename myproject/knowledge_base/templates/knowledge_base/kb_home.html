@@ -95,17 +95,82 @@
                     </h5>
                     <div class="items-grid">
                         {% for subdir in subdirectories %}
-                            <div class="folder-item" onclick="window.location.href='{% url 'knowledge_base:kb_directory' subdir.id %}'">
+                            <div class="folder-item" onclick="if (!event.target.closest('.item-actions') && !event.target.closest('.edit-name-form')) { window.location.href='{% url 'knowledge_base:kb_directory' subdir.id %}'; }">
                                 <div class="item-icon">
                                     <i class="bi bi-folder-fill"></i>
                                 </div>
-                                <div class="item-name">{{ subdir.name }}</div>
+                                <div class="item-name-container" data-directory-id="{{ subdir.id }}">
+                                    <span class="item-name-display">{{ subdir.name }}</span>
+                                    <form class="edit-name-form" style="display: none;" onsubmit="return false;">
+                                        <input type="text" 
+                                               class="form-control form-control-sm d-inline-block directory-name-input" 
+                                               value="{{ subdir.name }}" 
+                                               style="width: auto; min-width: 150px;"
+                                               data-directory-id="{{ subdir.id }}">
+                                        <button type="button" 
+                                                class="btn btn-sm btn-success ms-1" 
+                                                onclick="saveDirectoryName({{ subdir.id }})"
+                                                title="Сохранить">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                    </form>
+                                </div>
                                 {% if subdir.description %}
                                     <div class="item-description">{{ subdir.description|truncatewords:10 }}</div>
                                 {% endif %}
                                 {% if user.is_authenticated and user.is_staff %}
                                     <div class="item-actions" onclick="event.stopPropagation();">
-                                        <a href="/admin/knowledge_base/directory/{{ subdir.id }}/change/" 
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary edit-directory-btn" 
+                                                title="Редактировать название"
+                                                onclick="editDirectoryName({{ subdir.id }})">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Уроки (не привязанные к курсам) -->
+            {% if standalone_lessons %}
+                <div class="content-section">
+                    <h5 class="section-header">
+                        <i class="bi bi-file-text-fill me-2"></i>Уроки
+                    </h5>
+                    <div class="items-grid">
+                        {% for lesson in standalone_lessons %}
+                            <div class="lesson-item">
+                                <div class="item-icon lesson-icon">
+                                    <i class="bi bi-file-text"></i>
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-name">
+                                        {% if lesson.course %}
+                                            <a href="{% url 'courses:lesson_detail' lesson.course.slug lesson.id %}" 
+                                               class="item-link">
+                                                {{ lesson.title }}
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'courses:lesson_detail_standalone' lesson.id %}" 
+                                               class="item-link">
+                                                {{ lesson.title }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    {% if lesson.course %}
+                                        <div class="item-meta">
+                                            <small class="text-muted">
+                                                <i class="bi bi-book"></i> Из курса: {{ lesson.course.title }}
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% if user.is_authenticated and user.is_staff %}
+                                    <div class="item-actions">
+                                        <a href="{% url 'courses:edit_lesson' lesson.id %}" 
                                            class="btn btn-sm btn-outline-secondary" 
                                            title="Редактировать">
                                             <i class="bi bi-pencil"></i>
@@ -167,7 +232,7 @@
                                                                 {{ lesson.title }}
                                                             </a>
                                                             {% if user.is_authenticated and user.is_staff %}
-                                                                <a href="/admin/courses/lesson/{{ lesson.id }}/change/" 
+                                                                <a href="{% url 'courses:edit_lesson' lesson.id %}" 
                                                                    class="btn btn-sm btn-outline-secondary btn-sm ms-2" 
                                                                    title="Редактировать">
                                                                     <i class="bi bi-pencil"></i>
@@ -191,55 +256,6 @@
                                            class="btn btn-sm btn-outline-primary" 
                                            title="Добавить урок">
                                             <i class="bi bi-plus-circle"></i>
-                                        </a>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-
-            <!-- Уроки (не привязанные к курсам) -->
-            {% if standalone_lessons %}
-                <div class="content-section">
-                    <h5 class="section-header">
-                        <i class="bi bi-file-text-fill me-2"></i>Уроки
-                    </h5>
-                    <div class="items-grid">
-                        {% for lesson in standalone_lessons %}
-                            <div class="lesson-item">
-                                <div class="item-icon lesson-icon">
-                                    <i class="bi bi-file-text"></i>
-                                </div>
-                                <div class="item-content">
-                                    <div class="item-name">
-                                        {% if lesson.course %}
-                                            <a href="{% url 'courses:lesson_detail' lesson.course.slug lesson.id %}" 
-                                               class="item-link">
-                                                {{ lesson.title }}
-                                            </a>
-                                        {% else %}
-                                            <a href="{% url 'courses:lesson_detail_standalone' lesson.id %}" 
-                                               class="item-link">
-                                                {{ lesson.title }}
-                                            </a>
-                                        {% endif %}
-                                    </div>
-                                    {% if lesson.course %}
-                                        <div class="item-meta">
-                                            <small class="text-muted">
-                                                <i class="bi bi-book"></i> Из курса: {{ lesson.course.title }}
-                                            </small>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                {% if user.is_authenticated and user.is_staff %}
-                                    <div class="item-actions">
-                                        <a href="/admin/courses/lesson/{{ lesson.id }}/change/" 
-                                           class="btn btn-sm btn-outline-secondary" 
-                                           title="Редактировать">
-                                            <i class="bi bi-pencil"></i>
                                         </a>
                                     </div>
                                 {% endif %}
@@ -287,22 +303,5 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Обработка раскрытия списка уроков
-    document.querySelectorAll('.lessons-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const icon = this.querySelector('i');
-            const isExpanded = this.getAttribute('aria-expanded') === 'true';
-            if (isExpanded) {
-                icon.classList.remove('bi-chevron-up');
-                icon.classList.add('bi-chevron-down');
-            } else {
-                icon.classList.remove('bi-chevron-down');
-                icon.classList.add('bi-chevron-up');
-            }
-        });
-    });
-});
-</script>
+<script src='knowledge_base/js/kb_main.js' defer></script>
 {% endblock %}

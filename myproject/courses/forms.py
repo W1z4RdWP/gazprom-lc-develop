@@ -47,7 +47,7 @@ class CourseForm(forms.ModelForm):
 class LessonForm(forms.ModelForm):
     class Meta:
         model = Lesson
-        fields = ['course', 'directory', 'title', 'content', 'video_id', 'order']
+        fields = ['title', 'content', 'video_id', 'course', 'directory', 'order']
         widgets = {
             'content': CKEditor5Widget(
                 attrs={'class': 'django_ckeditor_5'}, 
