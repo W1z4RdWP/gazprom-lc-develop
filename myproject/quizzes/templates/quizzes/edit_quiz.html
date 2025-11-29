@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Редактировать тест{% endblock %}
+{% block content %}
+<div class="content-section">
+    <h2>Редактировать тест{% if quiz.directory %} в категории "{{ quiz.directory.name }}"{% endif %}</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Редактировать тест "{{ quiz.name }}"</legend>
+            {{ form|crispy }}
+        </fieldset>
+        <div class="form-group mt-4">
+            <button class="btn btn-primary" type="submit">Сохранить изменения</button>
+            {% if quiz.directory %}
+                <a href="{% url 'knowledge_base:kb_directory' quiz.directory.id %}" class="btn btn-secondary">Отмена</a>
+            {% else %}
+                <a href="{% url 'quizzes:quizzes' %}" class="btn btn-secondary">Отмена</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+{% endblock content %}
+

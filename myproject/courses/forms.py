@@ -8,14 +8,21 @@ class CourseForm(forms.ModelForm):
     captcha = CaptchaField()
     class Meta:
         model = Course
-        fields = ['title', 'description', 'image', 'slug', 'final_quiz']
-        labels = {'slug': 'ЧПУ (оставьте пустым для автогенерации)'}
+        fields = ['title', 'description', 'image', 'slug', 'directory', 'final_quiz']
+        labels = {
+            'slug': 'ЧПУ (оставьте пустым для автогенерации)',
+            'directory': 'Категория (необязательно)'
+        }
         required = {'slug': False}  # Поле slug не обязательно
         widgets = {
             'description': CKEditor5Widget(
                 attrs={'class': 'django_ckeditor_5'},
                 config_name='extends'
-            )
+            ),
+            'directory': forms.Select(attrs={'class': 'form-control'})
+        }
+        help_texts = {
+            'directory': 'Выберите категорию базы знаний, к которой относится курс, или оставьте пустым'
         }
 
     def clean_slug(self):
@@ -41,8 +48,17 @@ class CourseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
+        self.directory = kwargs.pop('directory', None)
         super().__init__(*args, **kwargs)
         self.fields['image'].help_text = "Рекомендуемый размер: 1200x600 пикселей"
+        
+        # Делаем поле directory необязательным
+        self.fields['directory'].required = False
+        self.fields['directory'].empty_label = '--- Без категории ---'
+        
+        # Если директория передана явно, устанавливаем её значение
+        if self.directory:
+            self.fields['directory'].initial = self.directory
 
 class LessonForm(forms.ModelForm):
     class Meta:

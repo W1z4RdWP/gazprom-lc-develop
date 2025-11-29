@@ -23,7 +23,7 @@
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item" href="{% url 'courses:create_course' %}">
+                    <a class="dropdown-item" href="{% url 'courses:create_course' %}{% if current_directory %}?directory={{ current_directory.id }}{% endif %}">
                         <i class="bi bi-book-plus me-2"></i> Создать курс
                     </a>
                 </li>
@@ -33,7 +33,7 @@
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item" href="/admin/quizzes/quiz/add/{% if current_directory %}?directory={{ current_directory.id }}{% endif %}">
+                    <a class="dropdown-item" href="{% url 'quizzes:create_quiz' %}{% if current_directory %}?directory={{ current_directory.id }}{% endif %}">
                         <i class="bi bi-clipboard-plus me-2"></i> Создать тест
                     </a>
                 </li>
@@ -287,7 +287,7 @@
                                 </div>
                                 {% if user.is_authenticated and user.is_staff %}
                                     <div class="item-actions">
-                                        <a href="/admin/quizzes/quiz/{{ quiz.id }}/change/" 
+                                        <a href="{% url 'quizzes:edit_quiz' quiz.id %}" 
                                            class="btn btn-sm btn-outline-secondary" 
                                            title="Редактировать">
                                             <i class="bi bi-pencil"></i>

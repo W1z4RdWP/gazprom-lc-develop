@@ -3,11 +3,15 @@ from django.http import HttpRequest, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Count, Exists, OuterRef
 from django.contrib import messages  # Добавлен импорт
-from django.views.generic import DetailView, TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.generic import DetailView, TemplateView, CreateView
+from django.urls import reverse_lazy
 
 from myapp.models import QuizResult, UserCourse, UserAnswer
 from courses.models import Course  # Добавлен импорт модели Course
 from .models import Quiz, Question, Answer
+from .forms import QuizForm
 from .utils import DataMixin
 
 from typing import Optional
@@ -28,6 +32,86 @@ class StartQuizView(DataMixin, TemplateView):
         return self.get_mixin_context(context, topics=Quiz.objects.annotate(questions_count=Count('question')))
         # context['topics'] = Quiz.objects.annotate(questions_count=Count('question'))
         # return context
+
+
+class CreateQuizView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """CBV формы создания теста"""
+    model = Quiz
+    form_class = QuizForm
+    template_name = 'quizzes/create_quiz.html'
+
+    def test_func(self):
+        """Проверка прав доступа - только для администраторов"""
+        return self.request.user.is_staff
+    
+    def get_form_kwargs(self):
+        """Передача дополнительных параметров в форму"""
+        kwargs = super().get_form_kwargs()
+        
+        # Получаем directory_id из GET-параметра
+        directory_id = self.request.GET.get('directory')
+        if directory_id:
+            try:
+                from knowledge_base.models import Directory
+                directory = Directory.objects.get(id=directory_id)
+                kwargs['directory'] = directory
+            except (Directory.DoesNotExist, ValueError):
+                pass
+        
+        return kwargs
+
+    def form_valid(self, form):
+        """Обработка валидной формы"""
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        """Добавление контекста для шаблона"""
+        context = super().get_context_data(**kwargs)
+        
+        # Получаем директорию из GET-параметра
+        directory_id = self.request.GET.get('directory')
+        if directory_id:
+            try:
+                from knowledge_base.models import Directory
+                context['directory'] = Directory.objects.get(id=directory_id)
+            except (Directory.DoesNotExist, ValueError):
+                pass
+        
+        return context
+    
+    def get_success_url(self):
+        """Перенаправление после успешного создания"""
+        quiz = self.object
+        if quiz.directory:
+            from django.urls import reverse
+            return reverse('knowledge_base:kb_directory', kwargs={'directory_id': quiz.directory.id})
+        else:
+            return reverse_lazy('knowledge_base:kb_home')
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def edit_quiz(request, quiz_id):
+    """Функция для редактирования теста"""
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    directory = quiz.directory
+    
+    if request.method == 'POST':
+        form = QuizForm(request.POST, instance=quiz, directory=directory)
+        if form.is_valid():
+            form.save()
+            # Перенаправляем в зависимости от того, где находится тест
+            if quiz.directory:
+                return redirect('knowledge_base:kb_directory', directory_id=quiz.directory.id)
+            else:
+                return redirect('quizzes:quizzes')
+    else:
+        form = QuizForm(instance=quiz, directory=directory)
+    
+    return render(request, 'quizzes/edit_quiz.html', {
+        'form': form,
+        'quiz': quiz
+    })
 
 # def start_quiz_view(request) -> HttpResponse:
 #     topics = Quiz.objects.annotate(questions_count=Count('question'))

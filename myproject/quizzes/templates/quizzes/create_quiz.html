@@ -1,22 +1,20 @@
 {% extends "layout.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}Создать курс{% endblock %}
+{% block title %}Создать тест{% endblock %}
 {% block content %}
 <div class="content-section">
-    <h2>Создать курс{% if directory %} в категории "{{ directory.name }}"{% endif %}</h2>
+    <h2>Создать тест{% if directory %} в категории "{{ directory.name }}"{% endif %}</h2>
     {% if directory %}
-        <p class="text-muted">Курс будет привязан к категории "{{ directory.name }}"</p>
+        <p class="text-muted">Тест будет привязан к категории "{{ directory.name }}"</p>
     {% endif %}
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST">
         {% csrf_token %}
-        {{ form.media }}
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Создать курс</legend>
             {{ form|crispy }}
         </fieldset>
         <div class="form-group mt-4">
-            <button class="btn btn-primary" type="submit">Создать</button>
+            <button class="btn btn-primary" type="submit">Создать тест</button>
             {% if directory %}
                 <a href="{% url 'knowledge_base:kb_directory' directory.id %}" class="btn btn-secondary">Отмена</a>
             {% else %}
@@ -26,3 +24,4 @@
     </form>
 </div>
 {% endblock content %}
+

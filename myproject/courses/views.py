@@ -298,14 +298,46 @@ class CreateCourseView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
+        
+        # Получаем directory_id из GET-параметра
+        directory_id = self.request.GET.get('directory')
+        if directory_id:
+            try:
+                from knowledge_base.models import Directory
+                directory = Directory.objects.get(id=directory_id)
+                kwargs['directory'] = directory
+            except (Directory.DoesNotExist, ValueError):
+                pass
+        
         return kwargs
 
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
     
+    def get_context_data(self, **kwargs):
+        """Добавление контекста для шаблона"""
+        context = super().get_context_data(**kwargs)
+        
+        # Получаем директорию из GET-параметра
+        directory_id = self.request.GET.get('directory')
+        if directory_id:
+            try:
+                from knowledge_base.models import Directory
+                context['directory'] = Directory.objects.get(id=directory_id)
+            except (Directory.DoesNotExist, ValueError):
+                pass
+        
+        return context
+    
     def get_success_url(self):
-        return reverse_lazy('home')
+        """Перенаправление после успешного создания"""
+        course = self.object
+        if course.directory:
+            from django.urls import reverse
+            return reverse('knowledge_base:kb_directory', kwargs={'directory_id': course.directory.id})
+        else:
+            return reverse_lazy('knowledge_base:kb_home')
 
 
 
@@ -425,14 +457,19 @@ def delete_lesson(request, lesson_id):
 @user_passes_test(lambda u: is_author_or_admin(u, Course), login_url='/')
 def edit_course(request, slug):
     course = get_object_or_404(Course, slug=slug)
+    directory = course.directory
     
     if request.method == 'POST':
-        form = CourseForm(request.POST, request.FILES, instance=course)
+        form = CourseForm(request.POST, request.FILES, instance=course, user=request.user, directory=directory)
         if form.is_valid():
             form.save()
-            return redirect('courses:course_detail', slug=course.slug)
+            # Перенаправляем в зависимости от того, где находится курс
+            if course.directory:
+                return redirect('knowledge_base:kb_directory', directory_id=course.directory.id)
+            else:
+                return redirect('courses:course_detail', slug=course.slug)
     else:
-        form = CourseForm(instance=course)
+        form = CourseForm(instance=course, user=request.user, directory=directory)
     
     return render(request, 'courses/edit_course.html', {
         'form': form,

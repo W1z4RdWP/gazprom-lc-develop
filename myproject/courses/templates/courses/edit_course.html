@@ -19,7 +19,11 @@
         
         <div class="form-group mt-3">
             <button class="btn btn-primary" type="submit">Сохранить</button>
-            <a href="{% url 'course_detail' course.slug %}" class="btn btn-secondary">Отмена</a>
+            {% if course.directory %}
+                <a href="{% url 'knowledge_base:kb_directory' course.directory.id %}" class="btn btn-secondary">Отмена</a>
+            {% else %}
+                <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-secondary">Отмена</a>
+            {% endif %}
         </div>
     </form>
 </div>
