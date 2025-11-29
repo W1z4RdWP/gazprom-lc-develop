@@ -5,7 +5,7 @@ from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST, require_http_methods
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 from .forms import CourseForm, LessonForm
 from .models import Course, Lesson, UserLessonTrajectory
 from myapp.models import UserProgress, UserCourse, QuizResult
@@ -209,26 +209,39 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
 
 
 
+class CourseListView(ListView):
+    """CBV для отображения списка всех доступных курсов пользователя"""
+    template_name = 'courses/all_courses_list.html'
+    paginate_by = 10
+    model = UserCourse
 
-def course_detail_all(request):
-    courses = []
-    completed_courses = []
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        return super().dispatch(request, *args, **kwargs)
 
-    if request.user.is_authenticated:
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(object_list=object_list, **kwargs)
+        courses = []
+        completed_courses = []
+
         # Получаем курсы, назначенные пользователю
-        user_courses = UserCourse.objects.filter(user=request.user).values_list('course', flat=True)
+        user_courses = UserCourse.objects.filter(user=self.request.user).values_list('course', flat=True)
         courses = Course.objects.filter(id__in=user_courses)
         # Получаем список завершенных курсов
         completed_courses = UserCourse.objects.filter(
-            user=request.user, 
+            user=self.request.user, 
             is_completed=True
         ).values_list('course_id', flat=True)
 
-    context = {
-        'courses': courses,
-        'completed_courses': completed_courses,
-    }
-    return render(request, 'courses/all_courses_list.html', context)
+        context.update({
+            'courses': courses,
+            'completed_courses': completed_courses,
+        })
+
+        return context
+
+
 
 
 def lesson_detail(request, course_slug, lesson_id):
