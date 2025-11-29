@@ -4,9 +4,8 @@ from . import views as course_views
 app_name = 'courses'
 
 urlpatterns = [
-    path('', course_views.course_detail, name='course-detail'),
-    path('create-course/', course_views.create_course, name='create-course'),
-    path('course/<slug:slug>/', course_views.course_detail, name='course_detail'),
+    path('create_course/', course_views.create_course, name='create_course'),
+    path('course/<slug:slug>/', course_views.CourseDetailView.as_view(), name='course_detail'),
     path('courses_list/', course_views.course_detail_all, name='course_detail_all'),
     path('course/<slug:course_slug>/lesson/<int:lesson_id>/', course_views.lesson_detail, name='lesson_detail'),
     path('course/<slug:course_slug>/create-lesson/', course_views.create_lesson, name='create_lesson'),
