@@ -30,8 +30,8 @@ class StartQuizView(DataMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return self.get_mixin_context(context, topics=Quiz.objects.annotate(questions_count=Count('question')))
-        # context['topics'] = Quiz.objects.annotate(questions_count=Count('question'))
-        # return context
+
+
 
 
 class CreateQuizView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -40,10 +40,12 @@ class CreateQuizView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = QuizForm
     template_name = 'quizzes/create_quiz.html'
 
+
     def test_func(self):
         """Проверка прав доступа - только для администраторов"""
         return self.request.user.is_staff
     
+
     def get_form_kwargs(self):
         """Передача дополнительных параметров в форму"""
         kwargs = super().get_form_kwargs()
@@ -60,10 +62,12 @@ class CreateQuizView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         
         return kwargs
 
+
     def form_valid(self, form):
         """Обработка валидной формы"""
         return super().form_valid(form)
     
+
     def get_context_data(self, **kwargs):
         """Добавление контекста для шаблона"""
         context = super().get_context_data(**kwargs)
@@ -79,6 +83,7 @@ class CreateQuizView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         
         return context
     
+
     def get_success_url(self):
         """Перенаправление после успешного создания"""
         quiz = self.object
@@ -87,6 +92,8 @@ class CreateQuizView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return reverse('knowledge_base:kb_directory', kwargs={'directory_id': quiz.directory.id})
         else:
             return reverse_lazy('knowledge_base:kb_home')
+
+
 
 
 @login_required
@@ -113,9 +120,8 @@ def edit_quiz(request, quiz_id):
         'quiz': quiz
     })
 
-# def start_quiz_view(request) -> HttpResponse:
-#     topics = Quiz.objects.annotate(questions_count=Count('question'))
-#     return render(request, 'quizzes/start.html', {'topics': topics})
+
+
 
 def get_questions(request, quiz_id: int = None, is_start: bool = False) -> HttpResponse:
     if request.method == 'POST' or is_start:

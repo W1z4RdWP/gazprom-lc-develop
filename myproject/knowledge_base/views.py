@@ -9,8 +9,11 @@ from courses.models import Course, Lesson
 from quizzes.models import Quiz
 
 
+
+
 class KbHome(TemplateView):
     template_name = 'knowledge_base/kb_home.html'
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -82,6 +85,7 @@ class KbHome(TemplateView):
         
         return context
     
+
     def _get_breadcrumbs(self, directory):
         """Строит путь навигации (хлебные крошки) от корня до текущей папки"""
         breadcrumbs = []
@@ -109,6 +113,8 @@ class KbHome(TemplateView):
                 })
         
         return breadcrumbs
+
+
 
 
 @login_required

@@ -65,7 +65,7 @@ SILENCED_SYSTEM_CHECKS = ["security.W019"]  # ignores redundant warning messages
 
 MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware', # django-debug toolbar = панель отладки djt
-    'django.middleware.cache.UpdateCacheMiddleware', # кэш
+    # 'django.middleware.cache.UpdateCacheMiddleware', # кэш
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -76,7 +76,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware', # кэш
+    # 'django.middleware.cache.FetchFromCacheMiddleware', # кэш
     
     
 ]
@@ -117,27 +117,27 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "sqlite3.sql",
-    }
-}
-
 # DATABASES = {
-#     'default': {
-#             'ENGINE': 'django.db.backends.postgresql',
-#             'NAME': os.getenv('DJANGO_DB_NAME'), # DJANGO_DB_NAME /
-#             'USER': os.getenv('DJANGO_DB_USER'), # DJANGO_DB_USER /
-#             'PASSWORD': os.getenv('DJANGO_DB_PASSWD'), # DJANGO_DB_PASSWD /
-#             'HOST': os.getenv('DJANGO_DB_HOST'), # DJANGO_DB_HOST / 
-#             'PORT': os.getenv('DJANGO_DB_PORT'), # DJANGO_DB_PORT /
-#             'CONN_MAX_AGE': 60 * 10, # Не разрывать соединения пользователей с БД в течение 10 минут
-#             'OPTIONS' :{
-#                 'client_encoding': 'UTF8',
-#             }
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": "sqlite3.sql",
 #     }
 # }
+
+DATABASES = {
+    'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('GAZPROM_DB_NAME'), 
+            'USER': os.getenv('GAZPROM_DB_USER'),
+            'PASSWORD': os.getenv('GAZPROM_DB_PASSWORD'), 
+            'HOST': os.getenv('GAZPROM_DB_HOST'), 
+            'PORT': os.getenv('GAZPROM_DB_PORT'), 
+            'CONN_MAX_AGE': 60 * 10, # Не разрывать соединения пользователей с БД в течение 10 минут
+            'OPTIONS' :{
+                'client_encoding': 'UTF8',
+            }
+    }
+}
 
 
 # Password validation

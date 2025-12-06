@@ -21,6 +21,7 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'course'
     slug_url_kwarg = 'slug'
 
+
     def post(self, request, *args, **kwargs):
         """Обработка POST запроса для начала курса"""
         self.object = self.get_object()
@@ -131,6 +132,7 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
             return int((completed_lessons / total_lessons) * 100)
         return 0
     
+
     def should_show_final_quiz(self, has_started, completed_lessons, total_lessons):
         """Определение, нужно ли показывать финальный тест"""
         if not (self.request.user.is_authenticated and has_started):
@@ -157,7 +159,6 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
                     user_course.is_completed = True
                     user_course.course_complete_animation_shown = True
                     user_course.save()
-    
 
 
     def get_context_data(self, **kwargs):
@@ -217,10 +218,12 @@ class CourseListView(ListView):
     paginate_by = 10
     model = UserCourse
 
+
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('login')
         return super().dispatch(request, *args, **kwargs)
+
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
@@ -292,9 +295,11 @@ class CreateCourseView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     # success_url = reverse_lazy('home')
     template_name = 'courses/create_course.html'
 
+
     def test_func(self):
         return self.request.user.is_staff
     
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
@@ -311,10 +316,12 @@ class CreateCourseView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         
         return kwargs
 
+
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
     
+
     def get_context_data(self, **kwargs):
         """Добавление контекста для шаблона"""
         context = super().get_context_data(**kwargs)
@@ -330,6 +337,7 @@ class CreateCourseView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         
         return context
     
+
     def get_success_url(self):
         """Перенаправление после успешного создания"""
         course = self.object
@@ -348,10 +356,12 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = LessonForm
     template_name = 'courses/create_lesson.html'
 
+
     def test_func(self):
         """Проверка прав доступа - только для администраторов"""
         return self.request.user.is_staff
     
+
     def get_form_kwargs(self):
         """Передача дополнительных параметров в форму"""
         kwargs = super().get_form_kwargs()
@@ -376,9 +386,11 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         
         return kwargs
 
+
     def form_valid(self, form):
         """Обработка валидной формы"""
         return super().form_valid(form)
+    
     
     def get_context_data(self, **kwargs):
         """Добавление контекста для шаблона"""
@@ -402,6 +414,7 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         
         return context
     
+
     def get_success_url(self):
         """Перенаправление после успешного создания"""
         lesson = self.object
@@ -416,8 +429,6 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 
 
-
-
 @login_required
 @user_passes_test(is_admin, login_url='/')
 def delete_course(request, slug):
@@ -426,6 +437,8 @@ def delete_course(request, slug):
         course.delete()
         return redirect('home')
     return redirect('courses:course_detail', slug=slug)
+
+
 
 
 @login_required
@@ -453,6 +466,8 @@ def delete_lesson(request, lesson_id):
         return redirect('knowledge_base:kb_home')
 
 
+
+
 @login_required
 @user_passes_test(lambda u: is_author_or_admin(u, Course), login_url='/')
 def edit_course(request, slug):
@@ -475,6 +490,7 @@ def edit_course(request, slug):
         'form': form,
         'course': course
     })
+
 
 
 
@@ -504,6 +520,9 @@ def edit_lesson(request, lesson_id):
         'lesson': lesson
     })
 
+
+
+
 @require_http_methods(["GET", "POST"])
 def redir_to_quiz(request, course_slug):
     course = get_object_or_404(Course, slug=course_slug)
@@ -518,6 +537,9 @@ def redir_to_quiz(request, course_slug):
 
     # GET-запрос - показываем страницу с подтверждением
     return render(request, 'courses/redir_to_quiz.html', {'course': course})
+
+
+
 
 @require_POST
 def complete_lesson(request, course_slug, lesson_id):
@@ -575,6 +597,8 @@ def complete_lesson(request, course_slug, lesson_id):
     return redirect('courses:course_detail', slug=course.slug)
 
 
+
+
 def complete_course(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     user_course = UserCourse.objects.get(user=request.user, course=course)
@@ -597,4 +621,3 @@ def complete_course(request, course_id):
         user_course.save()
         return redirect('courses:course_detail', slug=course.slug)
     
-
