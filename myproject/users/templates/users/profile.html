@@ -6,151 +6,244 @@
 {% load static %}
     <link rel="stylesheet" href="{% static 'users/css/profile.css' %}">
     <script src="{% static 'users/js/scripts.js' %}" defer></script>
-    <div class="content-section">
-        <div class="media">
-        {% if user.profile.image %}
-            <img class="rounded-circle account-img" src="{{ user.profile.image.url }}" alt="Profile Image">
-        {% else %}
-            <img class="rounded-circle account-img" src="https://via.placeholder.com/150" alt="Profile Image">
-        {% endif %}
-            <div class="media-body">
-                <h2 class="account-heading">{{ user.username }}</h2>
-                <p class="text-secondary">{{ user.email }}</p>
-                <p class="text-secondary">{{ user.profile.bio|default:'О себе: нет информации' }}</p>
+    
+    <!-- Профиль пользователя -->
+    <div class="profile-wrapper">
+        <div class="profile-header">
+            <div class="profile-avatar-section">
+                {% if user.profile.image %}
+                    <img class="profile-avatar" src="{{ user.profile.image.url }}" alt="Profile Image">
+                {% else %}
+                    <img class="profile-avatar" src="https://via.placeholder.com/150" alt="Profile Image">
+                {% endif %}
+                <div class="level-badge">Уровень {{ level }}</div>
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-username">{{ user.username }}</h1>
+                <p class="profile-email">
+                    <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    {{ user.email }}
+                </p>
+                <p class="profile-bio">{{ user.profile.bio|default:'О себе: нет информации' }}</p>
             </div>
         </div>
+
+        <!-- Прогресс-бар опыта -->
+        <div class="experience-section">
+            <div class="experience-header">
+                <span class="experience-label">Опыт</span>
+                <span class="experience-value">{{ exp }} XP</span>
+            </div>
+            <div class="experience-bar">
+                <div class="experience-fill" style="width: {{ progress }}%;" nonce="{{ request.csp_nonce }}"></div>
+                <div class="experience-text">{{ progress }}% до следующего уровня</div>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
         <div class="profile-actions">
-            <button class="btn btn-outline-info" id="edit-profile-btn">Редактировать</button>
-            <button class="btn btn-outline-info" id="toggle-quizzes-btn">Показать тесты</button>
-            <button class="btn btn-outline-info" id="toggle-courses-btn">Показать завершенные курсы</button>
+            <button class="action-btn primary" id="edit-profile-btn">
+                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Редактировать
+            </button>
+            <button class="action-btn secondary" id="toggle-quizzes-btn">
+                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Показать тесты
+            </button>
+            <button class="action-btn secondary" id="toggle-courses-btn">
+                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Показать завершенные курсы
+            </button>
         </div>
-        <div class="progress-bar-user">
-            <h3>
-                Уровень: {{ level }} | Опыт: {{ exp }}
-            </h3>
-            <div class="inner" style="width: {{ progress }}%;" nonce="{{ request.csp_nonce }}" ></div>
-        </div>
-        
-        
+
         <!-- Форма для обновления профиля -->
-        <div id="edit-profile-form" style="display: none;">
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <fieldset class="form-group">
-                    <legend class="border-bottom mb-4">Информация профиля</legend>
-                    {{ user_form|crispy }}
-                    {{ profile_form|crispy }}
-                </fieldset>
-                <div class="form-group">
-                    <button class="btn btn-outline-info" type="submit">Обновить</button>
-                    <button class="btn btn-outline-secondary" id="cancel-edit-btn">Отмена</button>
-                </div>
-            </form>
+        <div id="edit-profile-form" class="edit-form-container" style="display: none;">
+            <div class="form-card">
+                <h2 class="form-title">Редактирование профиля</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        {{ user_form|crispy }}
+                        {{ profile_form|crispy }}
+                    </fieldset>
+                    <div class="form-actions">
+                        <button class="action-btn primary" type="submit">Сохранить изменения</button>
+                        <button class="action-btn cancel" id="cancel-edit-btn" type="button">Отмена</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-    <div class="container mt-4">
-        <h2>Ваш прогресс</h2>
+
+    <!-- Блок прогресса по курсам -->
+    <div class="courses-section">
+        <h2 class="section-title">
+            <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+            Ваш прогресс
+        </h2>
         
         <!-- Блок для незавершенных курсов -->
-        <div id="unfinished-courses">
+        <div id="unfinished-courses" class="courses-grid">
             {% if unfinished_courses %}
                 {% for progress in unfinished_courses %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ progress.course.title }}</h5>
-                        <div class="progress">
-                            <div class="progress-bar" 
-                                style="width: {{ progress.percent }}%" 
-                                aria-valuenow="{{ progress.percent }}" 
-                                aria-valuemin="0" 
-                                aria-valuemax="100">
-                                {{ progress.percent }}%
-                            </div>
+                <div class="course-card">
+                    <div class="course-card-header">
+                        <h3 class="course-title">{{ progress.course.title }}</h3>
+                        <span class="course-progress-badge">{{ progress.percent }}%</span>
+                    </div>
+                    <div class="course-progress-bar">
+                        <div class="course-progress-fill" 
+                             style="width: {{ progress.percent }}%"
+                             aria-valuenow="{{ progress.percent }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
                         </div>
-                        <p class="mt-2">
-                            Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
-                        </p>
-                        {% if progress.course.final_quiz %}
-                            <div class="quiz-status">
+                    </div>
+                    <p class="course-stats">
+                        <svg class="stats-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
+                    </p>
+                    {% if progress.course.final_quiz %}
+                        <div class="quiz-status">
                             {% if progress.quiz_passed %}
-                                <span class="badge bg-success">Тест пройден</span>
+                                <span class="status-badge success">
+                                    <svg class="badge-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    Тест пройден
+                                </span>
                             {% else %}
-                                <span class="badge bg-warning">Требуется тест</span>
-                                <a href="{% url 'quizzes:quiz_start' progress.course.final_quiz.id %}" 
-                                class="btn btn-sm btn-primary">
-                                Пройти тест</a>
-                            {% endif %}
-                            </div>
-                        {% endif %}
-                        <div class="btn-group">
-                            <a href="{% url 'courses:course_detail' progress.course.slug %}" 
-                            class="btn btn-primary">
-                                Перейти к курсу
-                            </a>
-                            {% if progress.percent == 100 and finished_courses %}
-                            <span class="btn btn-success disabled">
-                                Курс завершен
-                            </span>
+                                <span class="status-badge warning">
+                                    <svg class="badge-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    Требуется тест
+                                </span>
+                                <a href="{% url 'quizzes:quiz_start' progress.course.final_quiz.id %}" class="btn-quiz">
+                                    Пройти тест
+                                </a>
                             {% endif %}
                         </div>
+                    {% endif %}
+                    <div class="course-actions">
+                        <a href="{% url 'courses:course_detail' progress.course.slug %}" class="btn-course-primary">
+                            Перейти к курсу
+                        </a>
+                        {% if progress.percent == 100 and finished_courses %}
+                        <span class="btn-course-success">
+                            <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Курс завершен
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="alert alert-info">Вы еще не начали ни одного курса</div>
+                <div class="empty-state">
+                    <svg class="empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                    <p>Вы еще не начали ни одного курса</p>
+                </div>
             {% endif %}
         </div>
 
         <!-- Блок для завершенных курсов (изначально скрыт) -->
-        <div id="finished-courses" style="display: none;">
+        <div id="finished-courses" class="courses-grid" style="display: none;">
             {% if finished_courses %}
                 {% for progress in finished_courses %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ progress.course.title }}</h5>
-                        <div class="progress">
-                            <div class="progress-bar" 
-                                 style="width: {{ progress.percent }}%" 
-                                 aria-valuenow="{{ progress.percent }}" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                                {{ progress.percent }}%
-                            </div>
+                <div class="course-card completed">
+                    <div class="course-card-header">
+                        <h3 class="course-title">{{ progress.course.title }}</h3>
+                        <span class="course-progress-badge completed">{{ progress.percent }}%</span>
+                    </div>
+                    <div class="course-progress-bar">
+                        <div class="course-progress-fill completed" 
+                             style="width: {{ progress.percent }}%"
+                             aria-valuenow="{{ progress.percent }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
                         </div>
-                        <p class="mt-2">
-                            Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
-                        </p>
-                        <div class="btn-group">
-                            <a href="{% url 'courses:course_detail' progress.course.slug %}" 
-                               class="btn btn-primary">
-                                Перейти к курсу
-                            </a>
-                            <span class="btn btn-success disabled">
-                                Курс завершен
-                            </span>
-                        </div>
+                    </div>
+                    <p class="course-stats">
+                        <svg class="stats-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
+                    </p>
+                    <div class="course-actions">
+                        <a href="{% url 'courses:course_detail' progress.course.slug %}" class="btn-course-primary">
+                            Перейти к курсу
+                        </a>
+                        <span class="btn-course-success">
+                            <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Курс завершен
+                        </span>
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="alert alert-info">Вы еще не завершили ни одного курса</div>
+                <div class="empty-state">
+                    <svg class="empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                    <p>Вы еще не завершили ни одного курса</p>
+                </div>
             {% endif %}
         </div>
- 
-
     </div>
 
-    <div class="container mt-4 quiz-history-container" style="display: none;">
-        <h2>История тестов</h2>
+    <!-- История тестов -->
+    <div class="quiz-history-container" style="display: none;">
+        <h2 class="section-title">
+            <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            История тестов
+        </h2>
         <div id="quiz-history-content">
             {% if page_obj %}
                 {% include 'users/includes/_quiz_history.html' %}
             {% else %}
-                <div class="alert alert-info">Вы еще не проходили тесты</div>
+                <div class="empty-state">
+                    <svg class="empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <p>Вы еще не проходили тесты</p>
+                </div>
             {% endif %}
         </div>
     </div>
-</div>
-
 
 {% endblock content %}

@@ -1,57 +1,87 @@
 {% if page_obj %}
 <div class="quiz-history-section">
-    <div class="row">
+    <div class="quiz-grid">
         {% for result in page_obj %}
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-primary text-white">
-                    {{ result.quiz_title }}
-                </div>
-                <div class="card-body">
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" 
+        <div class="quiz-card">
+            <div class="quiz-card-header">
+                <h3 class="quiz-title">{{ result.quiz_title }}</h3>
+                {% if result.passed %}
+                <span class="quiz-status-badge passed">
+                    <svg class="badge-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Пройден
+                </span>
+                {% else %}
+                <span class="quiz-status-badge failed">
+                    <svg class="badge-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Не пройден
+                </span>
+                {% endif %}
+            </div>
+            <div class="quiz-card-body">
+                <div class="quiz-progress-wrapper">
+                    <div class="quiz-progress-bar">
+                        <div class="quiz-progress-fill" 
                             style="width: {{ result.percent|stringformat:"d" }}%">
-                            {{ result.percent|floatformat:0 }}%
                         </div>
                     </div>
-                    <p class="mb-1">Правильных ответов: {{ result.score }}/{{ result.total_questions }}</p>
-                    <div class="quiz_history-bottom_info">
-                        <small class="text-muted">
-                            Дата: {{ result.completed_at|date:"d.m.Y H:i" }}
-                        </small>
-                        <form action="{% url 'quiz_report' result.id %}" method="get">
-                            {% comment %} {% csrf_token %} {% endcomment %}
-                            <button class="btn-outline-info p-2" type="submit">Отчёт</button>
-                        </form>
-                    </div>
+                    <span class="quiz-progress-text">{{ result.percent|floatformat:0 }}%</span>
+                </div>
+                <p class="quiz-score">
+                    <svg class="stats-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    Правильных ответов: <strong>{{ result.score }}/{{ result.total_questions }}</strong>
+                </p>
+                <div class="quiz_history-bottom_info">
+                    <span class="quiz-date">
+                        <svg class="stats-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        {{ result.completed_at|date:"d.m.Y H:i" }}
+                    </span>
+                    <form action="{% url 'quiz_report' result.id %}" method="get" style="margin: 0;">
+                        <button class="btn-quiz-report" type="submit">
+                            <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            Отчёт
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+    <nav aria-label="Page navigation" class="quiz-pagination">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.has_other_pages %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
                     </li>
                 {% endif %}
-                
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.has_other_pages %}
-                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-                
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперед</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </nav>
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперед</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
 </div>
 {% else %}
 <div class="alert alert-info">Вы еще не проходили тесты</div>

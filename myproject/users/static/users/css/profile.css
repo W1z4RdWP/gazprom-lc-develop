@@ -1,237 +1,941 @@
-/* static/css/profile.css */
+/* Современный дизайн профиля */
 
-.content-section {
-    background: #dad7d7;
-    padding: 20px;
-    border: 1px solid #dddddd;
-    border-radius: 8px;
-    margin-top: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+/* Используем префикс --profile- чтобы не конфликтовать с глобальными переменными */
+.profile-wrapper,
+.courses-section,
+.quiz-history-container,
+.edit-form-container {
+    --profile-primary-color: #6366f1;
+    --profile-primary-dark: #4f46e5;
+    --profile-primary-light: #818cf8;
+    --profile-secondary-color: #8b5cf6;
+    --profile-success-color: #10b981;
+    --profile-warning-color: #f59e0b;
+    --profile-danger-color: #ef4444;
+    --profile-bg-primary: #ffffff;
+    --profile-bg-secondary: #f8fafc;
+    --profile-bg-card: #ffffff;
+    --profile-text-primary: #1e293b;
+    --profile-text-secondary: #64748b;
+    --profile-border-color: #e2e8f0;
+    --profile-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --profile-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --profile-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --profile-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --profile-radius-sm: 8px;
+    --profile-radius-md: 12px;
+    --profile-radius-lg: 16px;
+    --profile-radius-xl: 24px;
 }
 
-.media {
+.profile-wrapper {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* Заголовок профиля */
+.profile-header {
+    background: linear-gradient(135deg, var(--profile-primary-color) 0%, var(--profile-secondary-color) 100%);
+    border-radius: var(--profile-radius-xl);
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--profile-shadow-xl);
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    gap: 2rem;
+    position: relative;
+    overflow: hidden;
 }
 
-.rounded-circle.account-img {
-    width: 100px;
-    height: 100px;
-    border: 3px solid #007bff;
-    margin-right: 20px;
+.profile-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    z-index: 0;
 }
 
-.account-heading {
-    font-size: 2rem;
-    color: #333;
+.profile-header > * {
+    position: relative;
+    z-index: 1;
 }
 
-.text-secondary {
-    color: #6c757d;
+.profile-avatar-section {
+    position: relative;
+    flex-shrink: 0;
 }
 
-.form-group {
-    margin-bottom: 15px;
+.profile-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+    box-shadow: var(--profile-shadow-xl);
+    background: var(--profile-bg-card);
+    padding: 4px;
 }
 
-legend{
-    color: #333;
+.level-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--profile-success-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--profile-radius-lg);
+    font-weight: 700;
+    font-size: 0.875rem;
+    box-shadow: var(--profile-shadow-lg);
+    border: 3px solid white;
 }
 
-.btn-outline-info {
-    color: #007bff;
-    border-color: #007bff;
+.profile-info {
+    flex: 1;
+    color: white;
 }
 
-.btn-outline-info:hover {
-    background-color: #007bff;
-    color: #fff;
+.profile-username {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.profile-actions{
+.profile-email {
     display: flex;
-    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    margin: 0.5rem 0;
+    opacity: 0.95;
+}
+
+.profile-bio {
+    font-size: 1rem;
+    margin: 0.75rem 0 0 0;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+.icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Секция опыта */
+.experience-section {
+    background: var(--profile-bg-card);
+    border-radius: var(--profile-radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--profile-shadow-md);
+    border: 1px solid var(--profile-border-color);
+}
+
+.experience-header {
+    display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
-#check-finished-courses-btn{
-    margin-bottom: 20px;
+.experience-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--profile-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-#edit-profile-btn {
-    margin-bottom: 20px;
+.experience-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--profile-primary-color);
 }
 
-#cancel-edit-btn {
-    margin-left: 10px;
+.experience-bar {
+    position: relative;
+    height: 48px;
+    background: var(--profile-bg-secondary);
+    border-radius: var(--profile-radius-lg);
+    overflow: hidden;
+    border: 2px solid var(--profile-border-color);
 }
 
-.progress-bar {
-    transition: width 0.5s ease-in-out;
-    background-color: #4CAF50;
-}
-
-.progress {
-    height: 25px;
-    border-radius: 12px;
-    overflow: visible;
-}
-
-.progress-bar-user {
-    place-self: center;
-    height: 5vh;
-    width: 90%;
-    border: 2px solid #333;
-    margin-top: 1vh; 
-    
-    position: relative; /* Делаем контейнер относительным для позиционирования текста */
-}
-
-.progress-bar-user h3 {
-    position: absolute; /* Абсолютное позиционирование текста */
-    top: 50%; /* Размещаем текст по центру по вертикали */
-    left: 10px; /* Отступ слева */
-    transform: translateY(-50%); /* Смещаем текст вверх на половину его высоты */
-    margin: 0; /* Убираем отступы */
-    z-index: 2; /* Убедимся, что текст поверх .inner */
-    color: #333; /* Цвет текста */
-}
-
-.progress-bar-user .inner {
+.experience-fill {
     height: 100%;
-    background-color: #4CAF50;
-    position: relative; /* Относительное позиционирование */
-    z-index: 1; /* Убедимся, что .inner ниже текста */
+    background: linear-gradient(90deg, var(--profile-primary-color) 0%, var(--profile-secondary-color) 100%);
+    border-radius: var(--profile-radius-lg);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
-/* Блок с кнопками "Перейти к курсу" и "Курс завершен" */
-.btn-group {
+.experience-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.experience-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 600;
+    color: var(--profile-text-primary);
+    font-size: 0.875rem;
+    z-index: 2;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Кнопки действий */
+.profile-actions {
     display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--profile-radius-md);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--profile-shadow-sm);
+    text-decoration: none;
+}
+
+.action-btn.primary {
+    background: var(--profile-primary-color);
+    color: white;
+}
+
+.action-btn.primary:hover {
+    background: var(--profile-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--profile-shadow-md);
+}
+
+.action-btn.secondary {
+    background: var(--profile-bg-card);
+    color: var(--profile-text-primary);
+    border: 2px solid var(--profile-border-color);
+}
+
+.action-btn.secondary:hover {
+    background: var(--profile-bg-secondary);
+    border-color: var(--profile-primary-color);
+    color: var(--profile-primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--profile-shadow-md);
+}
+
+.action-btn.cancel {
+    background: var(--profile-bg-secondary);
+    color: var(--profile-text-secondary);
+    border: 2px solid var(--profile-border-color);
+}
+
+.action-btn.cancel:hover {
+    background: #e2e8f0;
+    border-color: var(--profile-text-secondary);
+}
+
+.btn-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* Форма редактирования */
+.edit-form-container {
+    margin-bottom: 2rem;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-card {
+    background: var(--profile-bg-card);
+    border-radius: var(--profile-radius-lg);
+    padding: 2rem;
+    box-shadow: var(--profile-shadow-lg);
+    border: 1px solid var(--profile-border-color);
+}
+
+.form-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--profile-text-primary);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--profile-border-color);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* Стили для Crispy Forms */
+.form-card .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-card label {
+    font-weight: 600;
+    color: var(--profile-text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-card input[type="text"],
+.form-card input[type="email"],
+.form-card input[type="file"],
+.form-card textarea {
     width: 100%;
-    /* background-color: red; */
-    justify-content: space-between;
-    gap: 25%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--profile-border-color);
+    border-radius: var(--profile-radius-md);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: var(--profile-bg-card);
+    color: var(--profile-text-primary);
 }
 
-.quiz-status{
+.form-card input[type="text"]:focus,
+.form-card input[type="email"]:focus,
+.form-card textarea:focus {
+    outline: none;
+    border-color: var(--profile-primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-card textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-card .help-block,
+.form-card .help-text {
+    font-size: 0.875rem;
+    color: var(--profile-text-secondary);
+    margin-top: 0.5rem;
+}
+
+.form-card .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+}
+
+.form-card .errorlist li {
+    color: var(--profile-danger-color);
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: var(--profile-radius-sm);
+    margin-top: 0.25rem;
+}
+
+/* Секция курсов */
+.courses-section {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.section-title {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    /* border: 1px solid gray; */
-    margin-bottom: 0.5%;
-
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--profile-text-primary);
+    margin-bottom: 2rem;
 }
 
+.section-icon {
+    width: 28px;
+    height: 28px;
+    color: var(--profile-primary-color);
+}
 
-.quiz-status span{ /* Выравнивание текста "Требуется тест" по центру внутри своего контейнера */
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Карточка курса */
+.course-card {
+    background: var(--profile-bg-card);
+    border-radius: var(--profile-radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--profile-shadow-md);
+    border: 1px solid var(--profile-border-color);
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
+    gap: 1rem;
+}
+
+.course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--profile-shadow-xl);
+    border-color: var(--profile-primary-light);
+}
+
+.course-card.completed {
+    border-left: 4px solid var(--profile-success-color);
+}
+
+.course-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.course-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--profile-text-primary);
+    margin: 0;
+    flex: 1;
+    line-height: 1.4;
+}
+
+.course-progress-badge {
+    background: var(--profile-primary-color);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--profile-radius-md);
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.course-progress-badge.completed {
+    background: var(--profile-success-color);
+}
+
+.course-progress-bar {
+    height: 12px;
+    background: var(--profile-bg-secondary);
+    border-radius: var(--profile-radius-md);
+    overflow: hidden;
+    position: relative;
+}
+
+.course-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--profile-primary-color) 0%, var(--profile-primary-light) 100%);
+    border-radius: var(--profile-radius-md);
+    transition: width 0.6s ease;
+}
+
+.course-progress-fill.completed {
+    background: linear-gradient(90deg, var(--profile-success-color) 0%, #34d399 100%);
+}
+
+.course-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--profile-text-secondary);
+    font-size: 0.9375rem;
+    margin: 0;
+}
+
+.stats-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--profile-primary-color);
+}
+
+.quiz-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: var(--profile-bg-secondary);
+    border-radius: var(--profile-radius-md);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--profile-radius-md);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.status-badge.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--profile-success-color);
+}
+
+.status-badge.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--profile-warning-color);
+}
+
+.badge-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.btn-quiz {
+    padding: 0.5rem 1rem;
+    background: var(--profile-primary-color);
+    color: white;
+    border-radius: var(--profile-radius-md);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-quiz:hover {
+    background: var(--profile-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--profile-shadow-sm);
+}
+
+.course-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: auto;
+    flex-wrap: wrap;
+}
+
+.btn-course-primary {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: var(--profile-primary-color);
+    color: white;
+    border-radius: var(--profile-radius-md);
+    text-decoration: none;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 140px;
+}
+
+.btn-course-primary:hover {
+    background: var(--profile-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--profile-shadow-md);
+}
+
+.btn-course-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--profile-success-color);
+    color: white;
+    border-radius: var(--profile-radius-md);
+    font-weight: 600;
+    cursor: default;
+    min-width: 140px;
     justify-content: center;
 }
 
-.quiz_history-bottom_info{
+/* Пустое состояние */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--profile-text-secondary);
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.5rem;
+    color: var(--profile-text-secondary);
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+/* Alert сообщения */
+.alert {
+    border-radius: var(--profile-radius-md);
+    padding: 1rem 1.5rem;
+    border: 1px solid;
+    box-shadow: var(--profile-shadow-sm);
+}
+
+.alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #1e40af;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #065f46;
+}
+
+.alert-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #92400e;
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #991b1b;
+}
+
+/* История тестов */
+.quiz-history-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.quiz-history-section {
+    margin-top: 1.5rem;
+}
+
+.quiz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.quiz-card {
+    background: var(--profile-bg-card);
+    border-radius: var(--profile-radius-lg);
+    box-shadow: var(--profile-shadow-md);
+    border: 1px solid var(--profile-border-color);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.quiz-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--profile-shadow-xl);
+    border-color: var(--profile-primary-light);
+}
+
+.quiz-card-header {
+    background: linear-gradient(135deg, var(--profile-primary-color) 0%, var(--profile-secondary-color) 100%);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.quiz-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    flex: 1;
+    line-height: 1.4;
+}
+
+.quiz-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--profile-radius-md);
+    font-weight: 600;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.quiz-status-badge.passed {
+    background: rgba(16, 185, 129, 0.3);
+}
+
+.quiz-status-badge.failed {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.quiz-card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.quiz-progress-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.quiz-progress-bar {
+    flex: 1;
+    height: 12px;
+    background: var(--profile-bg-secondary);
+    border-radius: var(--profile-radius-md);
+    overflow: hidden;
+}
+
+.quiz-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--profile-success-color) 0%, #34d399 100%);
+    border-radius: var(--profile-radius-md);
+    transition: width 0.6s ease;
+}
+
+.quiz-progress-text {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--profile-text-primary);
+    min-width: 45px;
+    text-align: right;
+}
+
+.quiz-score {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--profile-text-secondary);
+    font-size: 0.9375rem;
+    margin: 0;
+}
+
+.quiz-score strong {
+    color: var(--profile-text-primary);
+    font-weight: 700;
+}
+
+.quiz-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--profile-text-secondary);
+    font-size: 0.875rem;
+}
+
+.quiz_history-bottom_info {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--profile-border-color);
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
-@media (max-width: 768px){
-    .content-section {
-        background: #dad7d7;
-        padding: 10px;
-        border: 1px solid #dddddd;
-        border-radius: 8px;
-        margin-top: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.btn-quiz-report {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--profile-primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--profile-radius-md);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-quiz-report:hover {
+    background: var(--profile-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--profile-shadow-sm);
+}
+
+.quiz-pagination {
+    margin-top: 2rem;
+}
+
+/* Пагинация */
+.pagination {
+    margin-top: 2rem;
+    justify-content: center;
+}
+
+.pagination .page-link {
+    color: var(--profile-primary-color);
+    border-color: var(--profile-border-color);
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+    background: var(--profile-bg-secondary);
+    border-color: var(--profile-primary-color);
+    color: var(--profile-primary-dark);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--profile-primary-color);
+    border-color: var(--profile-primary-color);
+    color: white;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .profile-wrapper {
+        margin: 1rem auto;
+        padding: 0 0.75rem;
     }
-    
-    .media {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem 1.5rem;
+        gap: 1.5rem;
     }
-    
-    .rounded-circle.account-img {
-        width: 70px;
-        height: 70px;
-        border: 2px solid #007bff;
-        margin-right: 10px;
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
     }
-    
-    .account-heading {
+
+    .profile-username {
+        font-size: 2rem;
+    }
+
+    .profile-email {
+        font-size: 1rem;
+        justify-content: center;
+    }
+
+    .profile-actions {
+        flex-direction: column;
+    }
+
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .courses-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .section-title {
         font-size: 1.5rem;
-        color: #333;
     }
-    
-    
-    .form-group {
-        margin-bottom: 8px;
-    }
-    
-    
-    
-    .profile-actions{
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        gap: 10%;
-        
-        
-    }
-    
 
+    .course-actions {
+        flex-direction: column;
+    }
 
-    #toggle-courses-btn{
-        overflow: hidden;
-        font-size: 0.8em;
-        margin-bottom: 10px;
-        height: 50px;
+    .btn-course-primary,
+    .btn-course-success {
+        width: 100%;
     }
-    
-    #edit-profile-btn {
-        font-size: 0.8em;
-        margin-bottom: 10px;
-        height: 50px;
+
+    .form-actions {
+        flex-direction: column;
     }
-    
-    #cancel-edit-btn {
-        margin-left: 5px;
+
+    .form-actions .action-btn {
+        width: 100%;
     }
-    
-    
-    .progress {
-        height: 20px;
-        border-radius: 10px;
-        overflow: visible;
+
+    .experience-bar {
+        height: 40px;
     }
-    
-    .progress-bar-user {
-        place-self: center;
-        height: 5vh;
-        width: 90%;
-        border: 2px solid #333;
-        margin-top: 1vh;
-        
-        position: relative; /* Делаем контейнер относительным для позиционирования текста */
+
+    .experience-text {
+        font-size: 0.75rem;
     }
-    
-    .progress-bar-user h3 {
-        position: absolute; /* Абсолютное позиционирование текста */
-        font-size: 1em; 
-        top: 50%; /* Размещаем текст по центру по вертикали */
-        left: 10px; /* Отступ слева */
-        transform: translateY(-50%); /* Смещаем текст вверх на половину его высоты */
-        margin: 0; /* Убираем отступы */
-        z-index: 2; /* Убедимся, что текст поверх .inner */
-        color: #333; /* Цвет текста */
+}
+
+@media (max-width: 480px) {
+    .profile-header {
+        padding: 1.5rem 1rem;
     }
-    
-    .progress-bar-user .inner {
-        height: 100%;
-        background-color: #4CAF50;
-        position: relative; /* Относительное позиционирование */
-        z-index: 1; /* Убедимся, что .inner ниже текста */
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
     }
-    
+
+    .profile-username {
+        font-size: 1.75rem;
+    }
+
+    .level-badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .courses-section,
+    .quiz-history-container {
+        padding: 0 0.5rem;
+    }
 }

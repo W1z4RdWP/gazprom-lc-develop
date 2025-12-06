@@ -107,7 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const editProfileBtn = document.getElementById('edit-profile-btn');
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const editProfileForm = document.getElementById('edit-profile-form');
-    const progressBar = document.querySelector('.progress-bar-user');
+    const experienceSection = document.querySelector('.experience-section');
+    const profileActions = document.querySelector('.profile-actions');
+    const profileHeader = document.querySelector('.profile-header');
 
     if (editProfileBtn && cancelEditBtn) {
         editProfileBtn.addEventListener('click', function() {
@@ -115,7 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
             editProfileBtn.style.display = 'none';
             if (toggleCoursesBtn) toggleCoursesBtn.style.display = 'none';
             if (toggleQuizzesBtn) toggleQuizzesBtn.style.display = 'none';
-            if (progressBar) progressBar.style.display = 'none';
+            if (experienceSection) experienceSection.style.display = 'none';
+            if (profileHeader) profileHeader.style.display = 'none';
+            if (profileActions) {
+                const otherButtons = profileActions.querySelectorAll('.action-btn:not(#edit-profile-btn)');
+                otherButtons.forEach(btn => btn.style.display = 'none');
+            }
         });
 
         cancelEditBtn.addEventListener('click', function(event) {
@@ -124,7 +131,12 @@ document.addEventListener('DOMContentLoaded', () => {
             editProfileBtn.style.display = 'block';
             if (toggleCoursesBtn) toggleCoursesBtn.style.display = 'block';
             if (toggleQuizzesBtn) toggleQuizzesBtn.style.display = 'block';
-            if (progressBar) progressBar.style.display = 'block';
+            if (experienceSection) experienceSection.style.display = 'block';
+            if (profileHeader) profileHeader.style.display = 'flex';
+            if (profileActions) {
+                const otherButtons = profileActions.querySelectorAll('.action-btn:not(#edit-profile-btn)');
+                otherButtons.forEach(btn => btn.style.display = 'block');
+            }
         });
     }
 });
