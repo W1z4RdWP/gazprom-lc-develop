@@ -162,3 +162,335 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelEditDirectoryName(directoryId);
     });
 });
+
+
+// Модальное окно добавления материалов в курс
+document.addEventListener('DOMContentLoaded', function() {
+    const addLessonModal = document.getElementById('addLessonModal');
+    let currentCourseSlug = null;
+    let currentCourseTitle = null;
+    
+    // Обработчик открытия модального окна
+    addLessonModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        currentCourseSlug = button.getAttribute('data-course-slug');
+        currentCourseTitle = button.getAttribute('data-course-title');
+        
+        // Обновляем заголовок модального окна
+        document.getElementById('addLessonModalLabel').textContent = 
+            `Добавить в курс: ${currentCourseTitle}`;
+        
+        // Сбрасываем табы на первую вкладку
+        const lessonsTab = document.getElementById('lessons-tab');
+        const quizzesTab = document.getElementById('quizzes-tab');
+        const lessonsPane = document.getElementById('lessons-pane');
+        const quizzesPane = document.getElementById('quizzes-pane');
+        
+        lessonsTab.classList.add('active');
+        quizzesTab.classList.remove('active');
+        lessonsPane.classList.add('show', 'active');
+        quizzesPane.classList.remove('show', 'active');
+        
+        // Сбрасываем состояние уроков
+        resetLessonsState();
+        // Сбрасываем состояние тестов
+        resetQuizzesState();
+        // Загружаем список доступных уроков
+        loadAvailableLessons(currentCourseSlug);
+    });
+    
+    // Обработчик переключения табов
+    const quizzesTab = document.getElementById('quizzes-tab');
+    if (quizzesTab) {
+        // Функция для загрузки тестов
+        function handleQuizzesTabLoad() {
+            // Проверяем, что вкладка действительно активна
+            const quizzesPane = document.getElementById('quizzes-pane');
+            if (!quizzesPane || !quizzesPane.classList.contains('active')) {
+                return;
+            }
+            
+            // Проверяем, что currentCourseSlug установлен
+            if (!currentCourseSlug) {
+                console.error('currentCourseSlug не установлен');
+                const quizzesLoading = document.getElementById('quizzes-loading');
+                const quizzesError = document.getElementById('quizzes-error');
+                if (quizzesLoading) quizzesLoading.style.display = 'none';
+                if (quizzesError) {
+                    quizzesError.textContent = 'Ошибка: не удалось определить курс';
+                    quizzesError.style.display = 'block';
+                }
+                return;
+            }
+            
+            // Загружаем тесты только если контейнер пуст
+            const quizzesContainer = document.getElementById('quizzes-container');
+            const isEmpty = !quizzesContainer || quizzesContainer.innerHTML.trim() === '';
+            
+            if (isEmpty) {
+                resetQuizzesState();
+                loadAvailableQuizzes(currentCourseSlug);
+            }
+        }
+        
+        // Обработчик события shown.bs.tab (срабатывает после переключения)
+        quizzesTab.addEventListener('shown.bs.tab', handleQuizzesTabLoad);
+    }
+    
+    // Функции для сброса состояния
+    function resetLessonsState() {
+        document.getElementById('lessons-loading').style.display = 'block';
+        document.getElementById('lessons-list').style.display = 'none';
+        document.getElementById('lessons-error').style.display = 'none';
+        document.getElementById('lessons-empty').style.display = 'none';
+        document.getElementById('lessons-container').innerHTML = '';
+    }
+    
+    function resetQuizzesState() {
+        document.getElementById('quizzes-loading').style.display = 'block';
+        document.getElementById('quizzes-list').style.display = 'none';
+        document.getElementById('quizzes-error').style.display = 'none';
+        document.getElementById('quizzes-empty').style.display = 'none';
+        document.getElementById('quizzes-container').innerHTML = '';
+    }
+    
+    // Функция загрузки списка доступных уроков
+    function loadAvailableLessons(courseSlug) {
+        fetch(`/courses/course/${courseSlug}/available-lessons/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки уроков');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('lessons-loading').style.display = 'none';
+                
+                if (data.lessons && data.lessons.length > 0) {
+                    const container = document.getElementById('lessons-container');
+                    container.innerHTML = '';
+                    
+                    data.lessons.forEach(lesson => {
+                        const lessonItem = document.createElement('div');
+                        lessonItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                        lessonItem.innerHTML = `
+                            <div>
+                                <h6 class="mb-1">${escapeHtml(lesson.title)}</h6>
+                                <small class="text-muted">
+                                    <i class="bi bi-book"></i> ${escapeHtml(lesson.current_course)} | 
+                                    <i class="bi bi-folder"></i> ${escapeHtml(lesson.directory)}
+                                </small>
+                            </div>
+                            <button class="btn btn-sm btn-primary add-lesson-btn" 
+                                    data-lesson-id="${lesson.id}"
+                                    data-lesson-title="${escapeHtml(lesson.title)}">
+                                <i class="bi bi-plus-circle"></i> Добавить
+                            </button>
+                        `;
+                        container.appendChild(lessonItem);
+                    });
+                    
+                    document.getElementById('lessons-list').style.display = 'block';
+                    
+                    // Добавляем обработчики для кнопок добавления
+                    document.querySelectorAll('.add-lesson-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const lessonId = this.getAttribute('data-lesson-id');
+                            const lessonTitle = this.getAttribute('data-lesson-title');
+                            addLessonToCourse(courseSlug, lessonId, lessonTitle, this);
+                        });
+                    });
+                } else {
+                    document.getElementById('lessons-empty').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                document.getElementById('lessons-loading').style.display = 'none';
+                document.getElementById('lessons-error').textContent = 
+                    'Ошибка при загрузке списка уроков: ' + error.message;
+                document.getElementById('lessons-error').style.display = 'block';
+            });
+    }
+    
+    // Функция загрузки списка доступных тестов
+    function loadAvailableQuizzes(courseSlug) {
+        if (!courseSlug) {
+            console.error('courseSlug не передан в loadAvailableQuizzes');
+            document.getElementById('quizzes-loading').style.display = 'none';
+            document.getElementById('quizzes-error').textContent = 
+                'Ошибка: не указан курс';
+            document.getElementById('quizzes-error').style.display = 'block';
+            return;
+        }
+        
+        fetch(`/courses/course/${courseSlug}/available-quizzes/`)
+            .then(response => {
+                if (!response.ok) {
+                    // Пытаемся получить текст ошибки
+                    return response.text().then(text => {
+                        throw new Error(`Ошибка ${response.status}: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('quizzes-loading').style.display = 'none';
+                
+                if (data.quizzes && data.quizzes.length > 0) {
+                    const container = document.getElementById('quizzes-container');
+                    container.innerHTML = '';
+                    
+                    data.quizzes.forEach(quiz => {
+                        const quizItem = document.createElement('div');
+                        quizItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                        quizItem.innerHTML = `
+                            <div>
+                                <h6 class="mb-1">${escapeHtml(quiz.name)}</h6>
+                                <small class="text-muted">
+                                    <i class="bi bi-folder"></i> ${escapeHtml(quiz.directory)}
+                                </small>
+                            </div>
+                            <button class="btn btn-sm btn-primary add-quiz-btn" 
+                                    data-quiz-id="${quiz.id}"
+                                    data-quiz-name="${escapeHtml(quiz.name)}">
+                                <i class="bi bi-plus-circle"></i> Добавить
+                            </button>
+                        `;
+                        container.appendChild(quizItem);
+                    });
+                    
+                    document.getElementById('quizzes-list').style.display = 'block';
+                    
+                    // Добавляем обработчики для кнопок добавления
+                    document.querySelectorAll('.add-quiz-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const quizId = this.getAttribute('data-quiz-id');
+                            const quizName = this.getAttribute('data-quiz-name');
+                            addQuizToCourse(courseSlug, quizId, quizName, this);
+                        });
+                    });
+                } else {
+                    document.getElementById('quizzes-empty').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки тестов:', error);
+                document.getElementById('quizzes-loading').style.display = 'none';
+                document.getElementById('quizzes-error').textContent = 
+                    'Ошибка при загрузке списка тестов: ' + error.message;
+                document.getElementById('quizzes-error').style.display = 'block';
+            });
+    }
+    
+    // Функция добавления урока в курс
+    function addLessonToCourse(courseSlug, lessonId, lessonTitle, button) {
+        button.disabled = true;
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Добавление...';
+        
+        const formData = new FormData();
+        formData.append('lesson_id', lessonId);
+        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+        
+        fetch(`/courses/course/${courseSlug}/add-lesson/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                button.innerHTML = '<i class="bi bi-check-circle"></i> Добавлено';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(addLessonModal);
+                    modal.hide();
+                    window.location.reload();
+                }, 1000);
+            } else {
+                button.innerHTML = originalHtml;
+                button.disabled = false;
+                alert('Ошибка: ' + (data.error || 'Не удалось добавить урок'));
+            }
+        })
+        .catch(error => {
+            button.innerHTML = originalHtml;
+            button.disabled = false;
+            alert('Ошибка при добавлении урока: ' + error.message);
+        });
+    }
+    
+    // Функция добавления теста в курс
+    function addQuizToCourse(courseSlug, quizId, quizName, button) {
+        button.disabled = true;
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Добавление...';
+        
+        const formData = new FormData();
+        formData.append('quiz_id', quizId);
+        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+        
+        fetch(`/courses/course/${courseSlug}/add-quiz/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                button.innerHTML = '<i class="bi bi-check-circle"></i> Добавлено';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(addLessonModal);
+                    modal.hide();
+                    window.location.reload();
+                }, 1000);
+            } else {
+                button.innerHTML = originalHtml;
+                button.disabled = false;
+                alert('Ошибка: ' + (data.error || 'Не удалось добавить тест'));
+            }
+        })
+        .catch(error => {
+            button.innerHTML = originalHtml;
+            button.disabled = false;
+            alert('Ошибка при добавлении теста: ' + error.message);
+        });
+    }
+    
+    // Вспомогательная функция для получения CSRF токена
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Вспомогательная функция для экранирования HTML
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+});

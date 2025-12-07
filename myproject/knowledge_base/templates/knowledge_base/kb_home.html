@@ -307,30 +307,69 @@
     </div>
 </div>
 
-<!-- Модальное окно для добавления урока в курс -->
+<!-- Модальное окно для добавления урока/теста в курс -->
 <div class="modal fade" id="addLessonModal" tabindex="-1" aria-labelledby="addLessonModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addLessonModalLabel">Добавить урок в курс</h5>
+                <h5 class="modal-title" id="addLessonModalLabel">Добавить в курс</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <div class="modal-body">
-                <div id="lessons-loading" class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Загрузка...</span>
+                <!-- Табы для переключения между уроками и тестами -->
+                <ul class="nav nav-tabs mb-3" id="contentTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="lessons-tab" data-bs-toggle="tab" data-bs-target="#lessons-pane" type="button" role="tab" aria-controls="lessons-pane" aria-selected="true">
+                            <i class="bi bi-file-text"></i> Уроки
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="quizzes-tab" data-bs-toggle="tab" data-bs-target="#quizzes-pane" type="button" role="tab" aria-controls="quizzes-pane" aria-selected="false">
+                            <i class="bi bi-clipboard-check"></i> Тесты
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="contentTabsContent">
+                    <!-- Вкладка с уроками -->
+                    <div class="tab-pane fade show active" id="lessons-pane" role="tabpanel" aria-labelledby="lessons-tab">
+                        <div id="lessons-loading" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
+                            <p class="mt-2">Загрузка списка уроков...</p>
+                        </div>
+                        <div id="lessons-error" class="alert alert-danger" style="display: none;"></div>
+                        <div id="lessons-list" style="display: none;">
+                            <p class="text-muted mb-3">Выберите урок для добавления в курс:</p>
+                            <div class="list-group" id="lessons-container">
+                                <!-- Список уроков будет загружен через JavaScript -->
+                            </div>
+                        </div>
+                        <div id="lessons-empty" class="alert alert-info" style="display: none;">
+                            Нет доступных уроков для добавления в этот курс.
+                        </div>
                     </div>
-                    <p class="mt-2">Загрузка списка уроков...</p>
-                </div>
-                <div id="lessons-error" class="alert alert-danger" style="display: none;"></div>
-                <div id="lessons-list" style="display: none;">
-                    <p class="text-muted mb-3">Выберите урок для добавления в курс:</p>
-                    <div class="list-group" id="lessons-container">
-                        <!-- Список уроков будет загружен через JavaScript -->
+                    
+                    <!-- Вкладка с тестами -->
+                    <div class="tab-pane fade" id="quizzes-pane" role="tabpanel" aria-labelledby="quizzes-tab">
+                        <div id="quizzes-loading" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
+                            <p class="mt-2">Загрузка списка тестов...</p>
+                        </div>
+                        <div id="quizzes-error" class="alert alert-danger" style="display: none;"></div>
+                        <div id="quizzes-list" style="display: none;">
+                            <p class="text-muted mb-3">Выберите тест для добавления в курс:</p>
+                            <div class="list-group" id="quizzes-container">
+                                <!-- Список тестов будет загружен через JavaScript -->
+                            </div>
+                        </div>
+                        <div id="quizzes-empty" class="alert alert-info" style="display: none;">
+                            Нет доступных тестов для добавления в этот курс.
+                        </div>
                     </div>
-                </div>
-                <div id="lessons-empty" class="alert alert-info" style="display: none;">
-                    Нет доступных уроков для добавления в этот курс.
                 </div>
             </div>
             <div class="modal-footer">
@@ -341,164 +380,5 @@
 </div>
 
 <script src="{% static 'knowledge_base/js/kb_main.js' %}" defer></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const addLessonModal = document.getElementById('addLessonModal');
-    let currentCourseSlug = null;
-    
-    // Обработчик открытия модального окна
-    addLessonModal.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        currentCourseSlug = button.getAttribute('data-course-slug');
-        const courseTitle = button.getAttribute('data-course-title');
-        
-        // Обновляем заголовок модального окна
-        document.getElementById('addLessonModalLabel').textContent = 
-            `Добавить урок в курс: ${courseTitle}`;
-        
-        // Показываем индикатор загрузки
-        document.getElementById('lessons-loading').style.display = 'block';
-        document.getElementById('lessons-list').style.display = 'none';
-        document.getElementById('lessons-error').style.display = 'none';
-        document.getElementById('lessons-empty').style.display = 'none';
-        
-        // Загружаем список доступных уроков
-        loadAvailableLessons(currentCourseSlug);
-    });
-    
-    // Функция загрузки списка доступных уроков
-    function loadAvailableLessons(courseSlug) {
-        fetch(`/courses/course/${courseSlug}/available-lessons/`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Ошибка загрузки уроков');
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('lessons-loading').style.display = 'none';
-                
-                if (data.lessons && data.lessons.length > 0) {
-                    const container = document.getElementById('lessons-container');
-                    container.innerHTML = '';
-                    
-                    data.lessons.forEach(lesson => {
-                        const lessonItem = document.createElement('div');
-                        lessonItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
-                        lessonItem.innerHTML = `
-                            <div>
-                                <h6 class="mb-1">${escapeHtml(lesson.title)}</h6>
-                                <small class="text-muted">
-                                    <i class="bi bi-book"></i> ${escapeHtml(lesson.current_course)} | 
-                                    <i class="bi bi-folder"></i> ${escapeHtml(lesson.directory)}
-                                </small>
-                            </div>
-                            <button class="btn btn-sm btn-primary add-lesson-btn" 
-                                    data-lesson-id="${lesson.id}"
-                                    data-lesson-title="${escapeHtml(lesson.title)}">
-                                <i class="bi bi-plus-circle"></i> Добавить
-                            </button>
-                        `;
-                        container.appendChild(lessonItem);
-                    });
-                    
-                    document.getElementById('lessons-list').style.display = 'block';
-                    
-                    // Добавляем обработчики для кнопок добавления
-                    document.querySelectorAll('.add-lesson-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const lessonId = this.getAttribute('data-lesson-id');
-                            const lessonTitle = this.getAttribute('data-lesson-title');
-                            addLessonToCourse(courseSlug, lessonId, lessonTitle, this);
-                        });
-                    });
-                } else {
-                    document.getElementById('lessons-empty').style.display = 'block';
-                }
-            })
-            .catch(error => {
-                document.getElementById('lessons-loading').style.display = 'none';
-                document.getElementById('lessons-error').textContent = 
-                    'Ошибка при загрузке списка уроков: ' + error.message;
-                document.getElementById('lessons-error').style.display = 'block';
-            });
-    }
-    
-    // Функция добавления урока в курс
-    function addLessonToCourse(courseSlug, lessonId, lessonTitle, button) {
-        // Отключаем кнопку и показываем индикатор загрузки
-        button.disabled = true;
-        const originalHtml = button.innerHTML;
-        button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Добавление...';
-        
-        // Отправляем POST запрос
-        const formData = new FormData();
-        formData.append('lesson_id', lessonId);
-        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
-        
-        fetch(`/courses/course/${courseSlug}/add-lesson/`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Показываем сообщение об успехе
-                button.innerHTML = '<i class="bi bi-check-circle"></i> Добавлено';
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-success');
-                
-                // Закрываем модальное окно через 1 секунду
-                setTimeout(() => {
-                    const modal = bootstrap.Modal.getInstance(addLessonModal);
-                    modal.hide();
-                    // Перезагружаем страницу для обновления списка уроков
-                    window.location.reload();
-                }, 1000);
-            } else {
-                // Показываем ошибку
-                button.innerHTML = originalHtml;
-                button.disabled = false;
-                alert('Ошибка: ' + (data.error || 'Не удалось добавить урок'));
-            }
-        })
-        .catch(error => {
-            button.innerHTML = originalHtml;
-            button.disabled = false;
-            alert('Ошибка при добавлении урока: ' + error.message);
-        });
-    }
-    
-    // Вспомогательная функция для получения CSRF токена
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    
-    // Вспомогательная функция для экранирования HTML
-    function escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, m => map[m]);
-    }
-});
-</script>
+
 {% endblock %}

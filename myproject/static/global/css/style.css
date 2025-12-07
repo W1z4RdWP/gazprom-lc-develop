@@ -577,6 +577,59 @@ footer {
     margin-top: 10px;
 }
 
+/* Улучшенные стили для страницы курса */
+.course-description {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #495057;
+}
+
+.course-description p {
+    margin-bottom: 1rem;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 991.98px) {
+    .sticky-top {
+        position: relative !important;
+        top: 0 !important;
+    }
+    
+    .course-description {
+        font-size: 1rem;
+    }
+    
+    .display-5 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .list-group-item {
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .display-5 {
+        font-size: 1.75rem;
+    }
+}
+
+/* Стили для кнопок управления курсом */
+.admin-course-btn {
+    min-height: 48px !important;
+    height: 48px !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+
 .course-detail-content{
     place-self: center;
 }

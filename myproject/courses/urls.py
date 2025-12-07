@@ -18,5 +18,7 @@ urlpatterns = [
     path('lesson/<int:lesson_id>/edit/', course_views.edit_lesson, name='edit_lesson'),
     path('course/<slug:course_slug>/redir_to_quiz/', course_views.redir_to_quiz, name='redir_to_quiz'),
     path('course/<slug:course_slug>/available-lessons/', course_views.get_available_lessons, name='get_available_lessons'),
-    path('course/<slug:course_slug>/add-lesson/', course_views.add_lesson_to_course, name='add_lesson_to_course')
+    path('course/<slug:course_slug>/add-lesson/', course_views.add_lesson_to_course, name='add_lesson_to_course'),
+    path('course/<slug:course_slug>/available-quizzes/', course_views.get_available_quizzes, name='get_available_quizzes'),
+    path('course/<slug:course_slug>/add-quiz/', course_views.add_quiz_to_course, name='add_quiz_to_course')
 ]

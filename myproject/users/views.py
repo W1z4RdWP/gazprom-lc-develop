@@ -72,32 +72,74 @@ def profile(request: HttpRequest) -> HttpResponse:
 
     for user_course in started_courses:
         course = user_course.course
-        completed = UserProgress.objects.filter(
-            user=user,
-            course=course,
-            completed=True
-        ).count()
-
+        
+        # Получаем траекторию для подсчета уроков
         trajectory = UserLessonTrajectory.objects.filter(user=request.user, course=course).first()
-        total = trajectory.lessons.count() if trajectory else course.lessons.count()
-        percent = int((completed / total) * 100) if total > 0 else 0
+        
+        # Подсчет завершенных уроков
+        if trajectory:
+            lesson_ids = trajectory.lessons.values_list('id', flat=True)
+            completed_lessons = UserProgress.objects.filter(
+                user=user,
+                course=course,
+                completed=True,
+                lesson_id__in=lesson_ids
+            ).count()
+            total_lessons = trajectory.lessons.count()
+        else:
+            lesson_ids = course.lessons.values_list('id', flat=True)
+            completed_lessons = UserProgress.objects.filter(
+                user=user,
+                course=course,
+                completed=True,
+                lesson_id__in=lesson_ids
+            ).count()
+            total_lessons = course.lessons.count()
+
+        # Подсчет пройденных тестов курса
+        course_quizzes = course.quizzes.all()
+        total_quizzes = course_quizzes.count()
+        completed_quizzes = 0
+        
+        for quiz in course_quizzes:
+            quiz_passed = QuizResult.objects.filter(
+                user=request.user,
+                quiz_title=quiz.name,
+                passed=True
+            ).exists()
+            if quiz_passed:
+                completed_quizzes += 1
+
+        # Расчет прогресса с учетом уроков и тестов
+        total_items = total_lessons + total_quizzes
+        completed_items = completed_lessons + completed_quizzes
+        percent = int((completed_items / total_items) * 100) if total_items > 0 else 0
 
         course_data = {
             'course': course,
-            'completed': completed,
-            'total': total,
+            'completed': completed_lessons,
+            'total': total_lessons,
+            'completed_quizzes': completed_quizzes,
+            'total_quizzes': total_quizzes,
             'percent': percent
         }
 
+        # Проверка финального теста
         if course.final_quiz:
             quiz_passed = QuizResult.objects.filter(
                 user=request.user,
-                quiz_title=course.final_quiz,
+                quiz_title=course.final_quiz.name,
                 passed=True
             ).exists()
             course_data['quiz_passed'] = quiz_passed
 
-        if percent == 100:
+        # Курс считается завершенным только если все уроки, все тесты и финальный тест (если есть) пройдены
+        all_items_completed = (completed_lessons >= total_lessons and 
+                              completed_quizzes >= total_quizzes)
+        final_quiz_passed = course_data.get('quiz_passed', True) if course.final_quiz else True
+        is_course_completed = all_items_completed and final_quiz_passed
+
+        if is_course_completed:
             user_course_obj = UserCourse.objects.get(user=user, course=course)
             if user_course_obj.can_receive_exp():
                 finished_courses.append(course_data)

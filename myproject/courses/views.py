@@ -8,6 +8,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import CreateView, DetailView, ListView
+
+from quizzes.models import Quiz
 from .forms import CourseForm, LessonForm
 from .models import Course, Lesson, UserLessonTrajectory
 from myapp.models import UserProgress, UserCourse, QuizResult
@@ -89,6 +91,26 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
 
         return completed_count, completed_ids
 
+    def get_completed_quizzes_data(self, course_quizzes):
+        """Получение данных о пройденных тестах курса"""
+        if not self.request.user.is_authenticated:
+            return 0, []
+        
+        completed_quizzes = []
+        completed_count = 0
+        
+        for quiz in course_quizzes:
+            quiz_passed = QuizResult.objects.filter(
+                user=self.request.user,
+                quiz_title=quiz.name,
+                passed=True
+            ).exists()
+            if quiz_passed:
+                completed_quizzes.append(quiz.id)
+                completed_count += 1
+        
+        return completed_count, completed_quizzes
+
     
     def get_next_lesson(self, trajectory, lesson_ids):
         """Определение следующего урока для изучения"""
@@ -127,17 +149,23 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
         return next_lesson
         
 
-    def calculate_progress(self, completed_lessons, total_lessons):
-        """Вычисление процента прогресса"""
-        if total_lessons > 0:
-            return int((completed_lessons / total_lessons) * 100)
+    def calculate_progress(self, completed_lessons, total_lessons, completed_quizzes, total_quizzes):
+        """Вычисление процента прогресса с учетом уроков и тестов"""
+        total_items = total_lessons + total_quizzes
+        if total_items > 0:
+            completed_items = completed_lessons + completed_quizzes
+            return int((completed_items / total_items) * 100)
         return 0
     
 
-    def should_show_final_quiz(self, has_started, completed_lessons, total_lessons):
+    def should_show_final_quiz(self, has_started, completed_lessons, total_lessons, completed_quizzes, total_quizzes):
         """Определение, нужно ли показывать финальный тест"""
         if not (self.request.user.is_authenticated and has_started):
             return False
+        
+        # Все уроки и тесты курса должны быть завершены
+        all_lessons_and_quizzes_completed = (completed_lessons >= total_lessons and 
+                                             completed_quizzes >= total_quizzes)
         
         if self.object.final_quiz:
             quiz_passed = QuizResult.objects.filter(
@@ -145,9 +173,9 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
                 quiz_title=self.object.final_quiz.name,
                 passed=True
             ).exists()
-            return quiz_passed
+            return quiz_passed and all_lessons_and_quizzes_completed
         else:
-            return completed_lessons == total_lessons
+            return all_lessons_and_quizzes_completed
 
 
     def update_course_completion_animation(self, user_course, all_completed):
@@ -173,27 +201,47 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
         # Получаем уроки
         lessons, lesson_ids, total_lessons = self.get_lessons_and_ids(trajectory)
 
-        # Получаем тесты курса
+        # Получаем тесты курса (не включая final_quiz)
         course_quizzes = self.object.quizzes.all().order_by('name')
+        total_quizzes = course_quizzes.count()
 
-        # Данные о прогрессе
+        # Данные о прогрессе уроков
         completed_lessons, completed_lessons_ids = self.get_completed_lessons_data(lesson_ids)
 
-        # Вычисляем прогресс
-        progress = int((completed_lessons / total_lessons) * 100) if total_lessons > 0 else 0
+        # Данные о прогрессе тестов
+        completed_quizzes, completed_quizzes_ids = self.get_completed_quizzes_data(course_quizzes)
+
+        # Вычисляем прогресс с учетом уроков и тестов
+        progress = self.calculate_progress(completed_lessons, total_lessons, completed_quizzes, total_quizzes)
 
         # Следующий урок
         next_lesson = self.get_next_lesson(trajectory, lesson_ids) if has_started else None
 
-        # Проверка завершения
-        all_completed = completed_lessons >= total_lessons
+        # Проверка завершения всех уроков и тестов курса
+        all_lessons_and_quizzes_completed = (completed_lessons >= total_lessons and 
+                                             completed_quizzes >= total_quizzes)
+        
+        # Проверка завершения финального теста (если есть)
+        final_quiz_passed = False
+        if self.object.final_quiz:
+            final_quiz_passed = QuizResult.objects.filter(
+                user=self.request.user,
+                quiz_title=self.object.final_quiz.name,
+                passed=True
+            ).exists() if self.request.user.is_authenticated else False
+
+        # Курс считается завершенным только если все уроки, все тесты курса и финальный тест (если есть) пройдены
+        all_completed = all_lessons_and_quizzes_completed and (
+            not self.object.final_quiz or final_quiz_passed
+        )
 
         # Обновление анимации завершения 
         self.update_course_completion_animation(user_course, all_completed)
 
         # Доп. данные
         exp_earned = user_course.exp_reward() if user_course else 0
-        show_final_quiz = self.should_show_final_quiz(has_started, completed_lessons, total_lessons)
+        show_final_quiz = self.should_show_final_quiz(has_started, completed_lessons, total_lessons, 
+                                                      completed_quizzes, total_quizzes)
 
         # Добавляем все в контекст
         context.update({
@@ -202,13 +250,19 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
             'lessons': lessons,
             'course_quizzes': course_quizzes,
             'total_lessons': total_lessons,
+            'total_quizzes': total_quizzes,
+            'total_items': total_lessons + total_quizzes,
             'completed_lessons': completed_lessons,
+            'completed_quizzes': completed_quizzes,
+            'completed_items': completed_lessons + completed_quizzes,
             'completed_lessons_ids': completed_lessons_ids,
+            'completed_quizzes_ids': completed_quizzes_ids,
             'progress': progress,
             'next_lesson': next_lesson,
             'all_completed': all_completed,
             'exp_earned': exp_earned,
             'show_final_quiz': show_final_quiz,
+            'final_quiz_passed': final_quiz_passed,
             'shown_animation': user_course.course_complete_animation_shown if user_course else False
         })
 
@@ -588,13 +642,39 @@ def complete_lesson(request, course_slug, lesson_id):
         lesson_id__in=lesson_ids
     ).count()
 
-    all_completed = completed_lessons >= total_lessons
+    # Проверяем завершение всех тестов курса
+    course_quizzes = course.quizzes.all()
+    total_quizzes = course_quizzes.count()
+    completed_quizzes = 0
+    
+    for quiz in course_quizzes:
+        quiz_passed = QuizResult.objects.filter(
+            user=request.user,
+            quiz_title=quiz.name,
+            passed=True
+        ).exists()
+        if quiz_passed:
+            completed_quizzes += 1
+
+    # Все уроки и тесты курса должны быть завершены
+    all_lessons_and_quizzes_completed = (completed_lessons >= total_lessons and 
+                                         completed_quizzes >= total_quizzes)
 
     user_course = UserCourse.objects.get(user=request.user, course=course)
     
-    if all_completed:
+    if all_lessons_and_quizzes_completed:
+        # Проверяем финальный тест
         if course.final_quiz:
-            return redirect('courses:redir_to_quiz', course_slug=course_slug)
+            final_quiz_passed = QuizResult.objects.filter(
+                user=request.user,
+                quiz_title=course.final_quiz.name,
+                passed=True
+            ).exists()
+            if final_quiz_passed:
+                user_course.is_completed = True
+                user_course.save()
+            else:
+                return redirect('courses:redir_to_quiz', course_slug=course_slug)
         else:
             user_course.is_completed = True
             user_course.save()
@@ -680,3 +760,49 @@ def add_lesson_to_course(request, course_slug):
     except Lesson.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Урок не найден'}, status=404)
     
+
+@login_required
+@user_passes_test(is_admin, login_url='/')
+def get_available_quizzes(request, course_slug):
+    """Получение списка доступных тестов для добавления в курс (JSON API)"""
+    course = get_object_or_404(Course, slug=course_slug)
+
+    # Получаем ID тестов, которые уже привязаны к курсу
+    course_quiz_ids = course.quizzes.values_list('id', flat=True)
+    
+    # Получаем тесты, которые еще не привязаны к этому курсу
+    available_quizzes = Quiz.objects.exclude(id__in=course_quiz_ids).order_by('name')
+    
+    # Исключаем также финальный тест курса, если он есть
+    if course.final_quiz:
+        available_quizzes = available_quizzes.exclude(id=course.final_quiz.id)
+
+    quizzes_data = []
+    for quiz in available_quizzes:
+        quizzes_data.append({
+            'id': quiz.id,
+            'name': quiz.name,
+            'directory': quiz.directory.name if quiz.directory else 'Без категории',
+        })
+
+    return JsonResponse({'quizzes': quizzes_data})
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/')
+@require_POST
+def add_quiz_to_course(request, course_slug):
+    """Добавление существующего теста в курс"""
+    course = get_object_or_404(Course, slug=course_slug)
+    quiz_id = request.POST.get('quiz_id')
+
+    if not quiz_id:
+        return JsonResponse({'success': False, 'error': 'Не указан ID теста'}, status=400)
+
+    try:
+        quiz = Quiz.objects.get(id=quiz_id)
+        # Добавлеяем тест в курс через ManyToMany
+        course.quizzes.add(quiz)
+        return JsonResponse({'success': True, 'message': f'Тест "{quiz.name}" успешно добавлен в курс'})
+    except Quiz.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Тест не найден'}, status=404)

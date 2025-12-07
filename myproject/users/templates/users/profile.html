@@ -121,6 +121,15 @@
                             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                         </svg>
                         Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
+                        {% if progress.total_quizzes > 0 %}
+                            <br>
+                            <svg class="stats-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            Пройдено тестов: {{ progress.completed_quizzes }} из {{ progress.total_quizzes }}
+                        {% endif %}
                     </p>
                     {% if progress.course.final_quiz %}
                         <div class="quiz-status">
@@ -150,14 +159,6 @@
                         <a href="{% url 'courses:course_detail' progress.course.slug %}" class="btn-course-primary">
                             Перейти к курсу
                         </a>
-                        {% if progress.percent == 100 and finished_courses %}
-                        <span class="btn-course-success">
-                            <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            Курс завершен
-                        </span>
-                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -194,6 +195,15 @@
                             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                         </svg>
                         Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
+                        {% if progress.total_quizzes > 0 %}
+                            <br>
+                            <svg class="stats-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            Пройдено тестов: {{ progress.completed_quizzes }} из {{ progress.total_quizzes }}
+                        {% endif %}
                     </p>
                     <div class="course-actions">
                         <a href="{% url 'courses:course_detail' progress.course.slug %}" class="btn-course-primary">
