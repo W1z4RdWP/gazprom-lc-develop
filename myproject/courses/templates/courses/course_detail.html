@@ -23,23 +23,40 @@
     </div>
     {% endif %}
     
-    
     <div class="row">
         <div class="col-md-8">
-            <h3>Уроки курса</h3>
-            <div class="list-group">
-                {% for lesson in lessons %}  {# Используем lessons, переданные из view #}
+            <h3>Материалы курса</h3>
+
+            <!-- Уроки -->
+            {% if lessons %}
+            <h5 class='mt-3'>Уроки</h5>
+            <div class="list-group mb-3">
+                {% for lesson in lessons %} 
                 <a href="{% url 'courses:lesson_detail' course.slug lesson.id %}" 
                    class="list-group-item list-group-item-action">
-                    {{ lesson.title }}
+                    <i class="bi bi-file-text me-2"></i> {{ lesson.title }}
                     {% if has_started and lesson.id in completed_lessons_ids %}
                         <span class="badge bg-success float-end">✓</span>
                     {% endif %}
                 </a>
                 {% endfor %}
             </div>
+            {% endif %}
         </div>
         
+
+        <!-- Тесты -->
+        {% if course_quizzes %}
+            <h5 class="mt-3">Тесты</h5>
+            <div class="list-group">
+                {% for quiz in course_quizzes %}
+                    <a href="{% url 'quizzes:quiz_start' quiz_id=quiz.id %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-question-circle me-2"></i> {{ quiz.name }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
@@ -49,7 +66,7 @@
                         {% if not show_final_quiz %}
                                 <div class="alert alert-info">
                                     Для завершения курса необходимо пройти финальный тест
-                                    <a href="{% url 'quiz_start' quiz_id=course.final_quiz.id %}" class="btn btn-primary">
+                                    <a href="{% url 'quizzes:quiz_start' quiz_id=course.final_quiz.id %}" class="btn btn-primary">
                                     Пройти тест</a>
                                 </div>
                         {% else %}

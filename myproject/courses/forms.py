@@ -1,5 +1,5 @@
 from django import forms
-from .models import Course, Lesson, UserLessonTrajectory
+from .models import Course, Lesson, UserLessonTrajectory, Quiz
 from django_ckeditor_5.fields import CKEditor5Widget
 from captcha.fields import CaptchaField
 import re
@@ -9,6 +9,12 @@ class CourseForm(forms.ModelForm):
     class Meta:
         model = Course
         fields = ['title', 'description', 'image', 'slug', 'directory', 'final_quiz']
+        quizzes = forms.ModelMultipleChoiceField(
+            queryset=Quiz.objects.all(),
+            required=False,
+            widget=forms.CheckboxSelectMultiple,
+            label="Тесты курса"
+        )
         labels = {
             'slug': 'ЧПУ (оставьте пустым для автогенерации)',
             'directory': 'Категория (необязательно)'

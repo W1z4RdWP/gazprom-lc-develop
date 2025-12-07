@@ -39,6 +39,12 @@ class Course(models.Model):
         blank=True,
         verbose_name="Финальный тест"
     )
+    quizzes = models.ManyToManyField(
+        Quiz,
+        related_name='courses',
+        blank=True,
+        verbose_name="Тесты курса"
+    )
 
     class Meta:
         verbose_name = 'Курс'

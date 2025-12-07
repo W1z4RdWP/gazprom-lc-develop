@@ -173,6 +173,9 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
         # Получаем уроки
         lessons, lesson_ids, total_lessons = self.get_lessons_and_ids(trajectory)
 
+        # Получаем тесты курса
+        course_quizzes = self.object.quizzes.all().order_by('name')
+
         # Данные о прогрессе
         completed_lessons, completed_lessons_ids = self.get_completed_lessons_data(lesson_ids)
 
@@ -197,6 +200,7 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
             'user_course': user_course,
             'has_started': has_started,
             'lessons': lessons,
+            'course_quizzes': course_quizzes,
             'total_lessons': total_lessons,
             'completed_lessons': completed_lessons,
             'completed_lessons_ids': completed_lessons_ids,
@@ -532,7 +536,7 @@ def redir_to_quiz(request, course_slug):
         # Проверяем, какую кнопку нажал пользователь
         action = request.POST.get('action')
         if action == 'start_quiz':
-            return redirect('quiz_start', quiz_id=course.final_quiz.id)
+            return redirect('quizzes:quiz_start', quiz_id=course.final_quiz.id)
         else:
             return redirect('profile')
 
@@ -616,11 +620,13 @@ def complete_course(request, course_id):
             user_course.save()
             return redirect('courses:course_detail', slug=course.slug)
         else:
-            return redirect('quiz_start', quiz_id=course.final_quiz.id)
+            return redirect('quizzes:quiz_start', quiz_id=course.final_quiz.id)
     else:
         user_course.is_completed = True
         user_course.save()
         return redirect('courses:course_detail', slug=course.slug)
+
+
 
 
 @login_required
@@ -643,6 +649,8 @@ def get_available_lessons(request, course_slug):
         })
     
     return JsonResponse({'lessons': lessons_data})
+
+
 
 
 @login_required
