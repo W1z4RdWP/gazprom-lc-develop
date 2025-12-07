@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Max
 from django.db import transaction
+from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST, require_http_methods
@@ -620,4 +621,54 @@ def complete_course(request, course_id):
         user_course.is_completed = True
         user_course.save()
         return redirect('courses:course_detail', slug=course.slug)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/')
+def get_available_lessons(request, course_slug):
+    """Получение списка доступных уроков для добавления в курс (JSON API)"""
+    course = get_object_or_404(Course, slug=course_slug)
+    
+    # Получаем уроки, которые еще не привязаны к этому курсу
+    # Это могут быть уроки без курса или уроки из других курсов
+    available_lessons = Lesson.objects.exclude(course=course).order_by('title')
+    
+    lessons_data = []
+    for lesson in available_lessons:
+        lessons_data.append({
+            'id': lesson.id,
+            'title': lesson.title,
+            'current_course': lesson.course.title if lesson.course else 'Без курса',
+            'directory': lesson.directory.name if lesson.directory else 'Без категории',
+        })
+    
+    return JsonResponse({'lessons': lessons_data})
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/')
+@require_POST
+def add_lesson_to_course(request, course_slug):
+    """Добавление существующего урока в курс"""
+    course = get_object_or_404(Course, slug=course_slug)
+    lesson_id = request.POST.get('lesson_id')
+    
+    if not lesson_id:
+        return JsonResponse({'success': False, 'error': 'Не указан ID урока'}, status=400)
+    
+    try:
+        lesson = Lesson.objects.get(id=lesson_id)
+        # Привязываем урок к курсу
+        lesson.course = course
+        # Автоматически устанавливаем order, если он не указан
+        if not lesson.order or lesson.order == 0:
+            max_order = Lesson.objects.filter(course=course).exclude(pk=lesson.pk).aggregate(
+                max_order=Max('order')
+            )['max_order'] or 0
+            lesson.order = max_order + 1
+        lesson.save()
+        
+        return JsonResponse({'success': True, 'message': f'Урок "{lesson.title}" успешно добавлен в курс'})
+    except Lesson.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Урок не найден'}, status=404)
     
