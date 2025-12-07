@@ -151,7 +151,7 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
 
     def update_course_completion_animation(self, user_course, all_completed):
         """Обновление флага анимации завершения курса"""
-        if all_completed and user_course and not user_course.course_completed_animation_shown:
+        if all_completed and user_course and not user_course.course_complete_animation_shown:
             with transaction.atomic():
                 user_course.refresh_from_db()
                 if not user_course.course_complete_animation_shown:

@@ -146,6 +146,8 @@ def profile(request: HttpRequest) -> HttpResponse:
     })
 
 
+
+
 @login_required
 def quiz_report(request, quiz_id):
     quiz_result = get_object_or_404(QuizResult, id=quiz_id, user=request.user)
