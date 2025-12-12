@@ -215,8 +215,5 @@ class CustomLoginView(LoginView):
 
     def form_valid(self, form):
         user = form.get_user()
-        if not user.profile.is_approved:
-            messages.error(self.request, "Ваш аккаунт ожидает подтверждения администратором.")
-            return redirect('login')
         auth_login(self.request, user)
         return redirect(self.get_success_url())

@@ -14,14 +14,12 @@ class Profile(models.Model):
         user (User): Связь один-к-одному с моделью User.
         image (ImageField): Изображение профиля. По умолчанию используется 'profile_pics/default.jpg'.
         bio (TextField): Текстовое поле с информацией о пользователе.
-        is_approved (BooleanField): Провряет, подтвердил ли администратор регистрацию пользователя.
 
     """
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(default='profile_pics/default.jpg', upload_to=get_profile_image_path)
     bio = models.TextField(max_length=500, blank=True, null=True, verbose_name="О себе")
-    is_approved = models.BooleanField(default=False, verbose_name="Подвтерждение администратором")
 
     class Meta:
         verbose_name = 'Пользователь'

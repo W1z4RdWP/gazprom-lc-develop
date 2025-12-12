@@ -3,20 +3,19 @@
 {% block title %}Учебный центр Газпром Энерго{% endblock %}
 
 {% block content %}
-
-<div class="home-info">
-    <div class="container">
-        <div class="info-section">
-            <h2>Добро пожаловать в Учебный центр Газпром Энерго</h2>
-            <p>Мы предоставляем качественное образование и профессиональную подготовку специалистов в области энергетики. Наша платформа позволяет проходить обучение в удобном формате, отслеживать прогресс и получать сертификаты о прохождении курсов.</p>
-            <div class="info-actions">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'courses:course_detail_all' %}" class="btn btn-primary btn-lg">Перейти к курсам</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Войти</a>
-                {% endif %}
+    <div class="home-info">
+        <div class="container">
+            <div class="info-section">
+                <h2>Добро пожаловать в Учебный центр Газпром Энерго</h2>
+                <p>Мы предоставляем качественное образование и профессиональную подготовку специалистов в области энергетики. Наша платформа позволяет проходить обучение в удобном формате, отслеживать прогресс и получать сертификаты о прохождении курсов.</p>
+                <div class="info-actions">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'courses:course_detail_all' %}" class="btn btn-primary btn-lg">Перейти к курсам</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Войти</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
