@@ -1,3 +1,4 @@
+from gc import disable
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
@@ -27,6 +28,12 @@ class UserRegisterForm(UserCreationForm):
 
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'password1': forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
+            'password2': forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
+        }
 
     
 
@@ -50,7 +57,13 @@ class UserUpdateForm(forms.ModelForm):
         """
                 
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'first_name', 'last_name', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control', 'disabled': True, 'autocomplete': 'off'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email', 'autocomplete': 'off'}),
+        }
 
 
 
@@ -74,3 +87,7 @@ class ProfileUpdateForm(forms.ModelForm):
         
         model = Profile
         fields = ['image', 'bio']
+        widgets = {
+            'image': forms.FileInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+        }

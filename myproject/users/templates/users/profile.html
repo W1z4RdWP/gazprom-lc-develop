@@ -74,7 +74,7 @@
         <div id="edit-profile-form" class="edit-form-container" style="display: none;">
             <div class="form-card">
                 <h2 class="form-title">Редактирование профиля</h2>
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data" autocomplete="off">
                     {% csrf_token %}
                     <fieldset class="form-group">
                         {{ user_form|crispy }}

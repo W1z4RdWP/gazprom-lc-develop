@@ -31,7 +31,7 @@ class RegisterView(FormView):
 
 
 
-@cache_page(60*15)
+# @cache_page(60*15)
 @login_required
 def profile(request: HttpRequest) -> HttpResponse:
     """
