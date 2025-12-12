@@ -30,10 +30,8 @@ from quizzes.models import Answer
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register/', user_views.RegisterView.as_view(), name='register'),
     path('', views.IndexView.as_view(), name='home'),
     path('captcha/', include('captcha.urls')),
-    path('about/', views.AboutView.as_view(), name='about'),
     path('profile/', user_views.profile, name='profile'),
     path('login/', user_views.CustomLoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),

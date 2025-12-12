@@ -6,37 +6,6 @@ from .models import Profile
 from captcha.fields import CaptchaField
 
 
-class UserRegisterForm(UserCreationForm):
-    """
-    Форма для регистрации пользователя.
-
-    Attributes:
-        captcha (CaptchaField): Поле требующее ввести текст с картинки перед тем как подтвердить регистрацию.
-        email (EmailField): Поле для ввода email.
-    """
-    captcha = CaptchaField() 
-    email = forms.EmailField()
-
-    class Meta:
-        """
-        Метаданные формы.
-
-        Attributes:
-            model (User): Модель, с которой связана форма.
-            fields (list): Поля, которые будут отображаться в форме.
-        """
-
-        model = User
-        fields = ['username', 'email', 'password1', 'password2']
-        widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'password1': forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
-            'password2': forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
-        }
-
-    
-
 
 
 class UserUpdateForm(forms.ModelForm):

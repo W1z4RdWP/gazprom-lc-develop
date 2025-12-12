@@ -26,9 +26,6 @@ class IndexView(TemplateView):
             
         return context
 
-class AboutView(TemplateView):
-    """Класс представление страницы 'О нас' """
-    template_name = 'about.html'
 
 def is_admin(user) -> bool:
     return user.is_staff

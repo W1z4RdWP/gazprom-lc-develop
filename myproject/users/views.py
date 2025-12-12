@@ -16,18 +16,8 @@ from django.urls import reverse_lazy
 from myapp.models import UserCourse, UserProgress, QuizResult, UserAnswer
 from quizzes.models import Answer
 from courses.models import UserLessonTrajectory
-from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
+from .forms import UserUpdateForm, ProfileUpdateForm
  
-
-
-class RegisterView(FormView):
-    form_class = UserRegisterForm
-    template_name = 'users/register.html'
-    success_url = reverse_lazy('home')
-
-    def form_valid(self, form):
-        form.save()
-        return super().form_valid(form)
 
 
 
