@@ -125,7 +125,7 @@ class UserAnswer(models.Model):
     question = models.ForeignKey('quizzes.Question', on_delete=models.CASCADE)
     selected_answer = models.ForeignKey('quizzes.Answer', on_delete=models.SET_NULL, null=True, blank=True)
     is_correct = models.BooleanField()
-    answer_text = models.CharField(max_length=500, blank=True, null=True)
+    # answer_text = models.CharField(max_length=500, blank=True, null=True)
     #text_answer = models.CharField(max_length=500, blank=True, null=True)
 
     def __str__(self):

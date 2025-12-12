@@ -9,5 +9,14 @@ class UserCourseAdmin(admin.ModelAdmin):
     list_filter = ('course',)
     search_fields = ('user__username', 'course__title')
 
-admin.site.register(QuizResult)
-admin.site.register(UserAnswer)
+@admin.register(UserAnswer)
+class UserAnswerAdmin(admin.ModelAdmin):
+    fields = ['user', 'quiz_result', 'question', 'selected_answer', 'is_correct']
+    readonly_fields = ['user', 'quiz_result', 'question', 'selected_answer', 'is_correct']
+
+
+@admin.register(QuizResult)
+class QuizResultAdmin(admin.ModelAdmin):
+    fields = ['user', 'quiz_title', 'score', 'total_questions', 'percent', 'completed_at', 'passed']
+    readonly_fields = ['user', 'quiz_title', 'score', 'total_questions', 'percent', 'completed_at', 'passed']
+
