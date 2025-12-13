@@ -9,7 +9,7 @@ services:
      - "5434:5432" # проброс порта 5432 из контейнера на порт 5434 снаружи
    volumes:
      - postgres_data:/var/lib/postgresql/data
-   env_file:
+   env_file: 
      - .env
  
  redis:
@@ -38,12 +38,11 @@ services:
      DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL}
      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
      DATABASE_ENGINE: ${DATABASE_ENGINE}
-     DATABASE_NAME: ${DJANGO_DB_NAME}
-     DATABASE_USERNAME: ${DJANGO_DB_USER}
- 
-     DATABASE_PASSWORD: ${DJANGO_DB_PASSWD}
-     DATABASE_HOST: ${DJANGO_DB_HOST}
-     DATABASE_PORT: ${DJANGO_DB_PORT}
+     GAZPROM_DB_NAME: ${DJANGO_DB_NAME}
+     GAZPROM_DB_USER: ${DJANGO_DB_USER}
+     GAZPROM_DB_PASSWORD: ${DJANGO_DB_PASSWD}
+     GAZPROM_DB_HOST: db
+     GAZPROM_DB_PORT: ${DJANGO_DB_PORT}
    env_file: # имя файла откуда берутся переменные (путь до файла, должен быть на одном уровне в компоуз)
      - .env
 volumes:

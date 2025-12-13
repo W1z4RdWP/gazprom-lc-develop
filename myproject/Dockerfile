@@ -10,8 +10,6 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-
-
 # Copy the requirements.txt file into the container
 COPY ./requirements.txt .
 
@@ -28,7 +26,7 @@ RUN mkdir -p /var/log/django && chown -R www-data:www-data /var/log/django
 RUN python manage.py collectstatic --noinput
 
 # Открыть порт 8000 на входящий к приложению трафик
-EXPOSE 8000
+EXPOSE 8005
 
 # Define the command to run the application
-CMD ["gunicorn", "myproject.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "myproject.wsgi:application", "--bind", "0.0.0.0:8005"]

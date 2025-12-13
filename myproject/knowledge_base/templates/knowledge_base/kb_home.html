@@ -212,38 +212,7 @@
                                             </small>
                                         {% endif %}
                                     </div>
-                                    <!-- Уроки курса (раскрывающийся список) -->
-                                    {% if course_data.lessons %}
-                                        <div class="lessons-toggle mt-2">
-                                            <button class="btn btn-sm btn-outline-info lessons-btn" 
-                                                    type="button" 
-                                                    data-bs-toggle="collapse" 
-                                                    data-bs-target="#lessons-{{ course_data.course.id }}" 
-                                                    aria-expanded="false">
-                                                <i class="bi bi-chevron-down"></i> Показать уроки ({{ course_data.lessons_count }})
-                                            </button>
-                                            <div class="collapse mt-2" id="lessons-{{ course_data.course.id }}">
-                                                <div class="lessons-list">
-                                                    {% for lesson in course_data.lessons %}
-                                                        <div class="lesson-item">
-                                                            <a href="{% url 'courses:lesson_detail' course_data.course.slug lesson.id %}" 
-                                                               class="lesson-link">
-                                                                <i class="bi bi-file-text me-2"></i>
-                                                                {{ lesson.title }}
-                                                            </a>
-                                                            {% if user.is_authenticated and user.is_staff %}
-                                                                <a href="{% url 'courses:edit_lesson' lesson.id %}" 
-                                                                   class="btn btn-sm btn-outline-secondary btn-sm ms-2" 
-                                                                   title="Редактировать">
-                                                                    <i class="bi bi-pencil"></i>
-                                                                </a>
-                                                            {% endif %}
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endif %}
+                                    
                                 </div>
                                 {% if user.is_authenticated and user.is_staff %}
                                     <div class="item-actions">
