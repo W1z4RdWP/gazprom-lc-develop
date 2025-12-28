@@ -148,30 +148,12 @@
                                 </div>
                                 <div class="item-content">
                                     <div class="item-name">
-                                        {% if lesson.courses.exists %}
-                                            <a href="{% url 'courses:lesson_detail' lesson.courses.first.slug lesson.id %}" 
-                                               class="item-link">
-                                                {{ lesson.title }}
-                                            </a>
-                                        {% else %}
-                                            <a href="{% url 'courses:lesson_detail_standalone' lesson.id %}" 
-                                               class="item-link">
-                                                {{ lesson.title }}
-                                            </a>
-                                        {% endif %}
+                                        <a href="{% url 'courses:lesson_detail_standalone' lesson.id %}" 
+                                           class="item-link">
+                                            {{ lesson.title }}
+                                        </a>
                                     </div>
-                                    {% if lesson.courses.exists %}
-                                        <div class="item-meta">
-                                            <small class="text-muted">
-                                                <i class="bi bi-book"></i> 
-                                                {% if lesson.courses.count == 1 %}
-                                                    Из курса: {{ lesson.courses.first.title }}
-                                                {% else %}
-                                                    В курсах: {% for course in lesson.courses.all %}{{ course.title }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                                                {% endif %}
-                                            </small>
-                                        </div>
-                                    {% endif %}
+
                                 </div>
                                 {% if user.is_authenticated and user.is_staff %}
                                     <div class="item-actions">
