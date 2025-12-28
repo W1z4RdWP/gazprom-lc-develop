@@ -139,6 +139,11 @@ def get_questions(request, quiz_id: int = None, is_start: bool = False) -> HttpR
             # Получаем следующий вопрос
             question = _get_subsequent_question(quiz_id, current_question_id)
         else:
+            # Проверяем количество вопросов перед стартом теста
+            questions_count = Question.objects.filter(quiz_id=quiz_id).count()
+            if questions_count == 0:
+                return redirect('quizzes:quiz_empty_warning', quiz_id=quiz_id)
+            
             # Сброс сессии при старте нового теста
             request.session['quiz_id'] = quiz_id
             request.session['score'] = 0
@@ -357,3 +362,14 @@ def start_quiz_handler(request):
         return redirect('quizzes:quiz_start', quiz_id=quiz_id)
     
     return redirect('quizzes:quizzes')
+
+
+def quiz_empty_warning(request, quiz_id: int) -> HttpResponse:
+    """Страница предупреждения о том, что в тесте нет вопросов"""
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    is_staff_or_superuser = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    
+    return render(request, 'quizzes/quiz_empty_warning.html', {
+        'quiz': quiz,
+        'is_staff_or_superuser': is_staff_or_superuser
+    })

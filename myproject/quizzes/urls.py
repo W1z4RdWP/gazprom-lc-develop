@@ -13,4 +13,5 @@ urlpatterns = [
     path('get-questions', views.get_questions, {'is_start': False}, name='get-questions'),
     path('get-answer', views.get_answer, name='get-answer'),
     path('get-finish', views.get_finish, name='get-finish'),
+    path('<int:quiz_id>/empty-warning/', views.quiz_empty_warning, name='quiz_empty_warning'),
 ]

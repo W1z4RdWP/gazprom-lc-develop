@@ -1,0 +1,134 @@
+{% extends "layout.html" %}
+{% block title %}Тест недоступен{% endblock %}
+{% load static %}
+{% block specific_styles %}
+<link rel="stylesheet" href="{% static 'quizzes/css/quiz_styles.css' %}">
+<style>
+    .quiz-warning-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .quiz-warning-buttons .btn {
+        flex: 1 1 auto;
+        min-width: fit-content;
+        white-space: normal;
+        word-wrap: break-word;
+        padding: 0.5rem 1rem;
+    }
+    
+    /* На мобильных устройствах кнопки на всю ширину */
+    @media (max-width: 576px) {
+        .quiz-warning-buttons {
+            flex-direction: column;
+        }
+        
+        .quiz-warning-buttons .btn {
+            width: 100%;
+        }
+        
+        .card-header h2 {
+            font-size: 1.25rem;
+        }
+        
+        .alert-heading {
+            font-size: 1rem;
+        }
+        
+        .container {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+    }
+    
+    /* На планшетах и больше - кнопки рядом */
+    @media (min-width: 577px) {
+        .quiz-warning-buttons .btn {
+            flex: 0 1 auto;
+            min-width: 200px;
+        }
+    }
+    
+    /* На больших экранах - кнопки с большей минимальной шириной */
+    @media (min-width: 992px) {
+        .quiz-warning-buttons .btn {
+            min-width: 250px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h2 class="mb-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Тест недоступен
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    В тесте "{{ quiz.name }}" пока нет вопросов
+                </h4>
+                <p class="mb-0">
+                    К сожалению, данный тест недоступен для прохождения, так как в нём отсутствуют вопросы.
+                </p>
+            </div>
+
+            {% if is_staff_or_superuser %}
+                <div class="alert alert-info" role="alert">
+                    <h5 class="alert-heading">
+                        <i class="bi bi-gear-fill me-2"></i>
+                        Вы можете заполнить тест вопросами
+                    </h5>
+                    <p>
+                        Как администратор, вы можете добавить вопросы к этому тесту через админ-панель.
+                    </p>
+                    <hr>
+                    <div class="quiz-warning-buttons">
+                        <a href="/admin/quizzes/quiz/{{ quiz.id }}/change/" 
+                           class="btn btn-primary">
+                            <i class="bi bi-pencil-square me-2"></i>
+                            Заполнить тест вопросами
+                        </a>
+                        {% if quiz.directory %}
+                            <a href="{% url 'knowledge_base:kb_directory' quiz.directory.id %}" 
+                               class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Вернуться в категорию
+                            </a>
+                        {% else %}
+                            <a href="{% url 'quizzes:quizzes' %}" 
+                               class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Вернуться к списку тестов
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center mt-4">
+                    {% if quiz.directory %}
+                        <a href="{% url 'knowledge_base:kb_directory' quiz.directory.id %}" 
+                           class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Вернуться в категорию
+                        </a>
+                    {% else %}
+                        <a href="{% url 'quizzes:quizzes' %}" 
+                           class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Вернуться к списку тестов
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
