@@ -63,14 +63,16 @@ class KbHome(TemplateView):
                 course__isnull=True
             ).order_by('order', 'title')
         
-        # Уроки для каждого курса (общая логика для всех курсов)
+        # Уроки и тесты для каждого курса (общая логика для всех курсов)
         courses_with_lessons = []
         for course in courses:
             lessons = Lesson.objects.filter(course=course).order_by('order')
+            quizzes_count = course.quizzes.count()
             courses_with_lessons.append({
                 'course': course,
                 'lessons': lessons,
-                'lessons_count': lessons.count()
+                'lessons_count': lessons.count(),
+                'quizzes_count': quizzes_count
             })
         
         context.update({

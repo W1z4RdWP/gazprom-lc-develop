@@ -211,6 +211,11 @@
                                                 <i class="bi bi-file-text"></i> {{ course_data.lessons_count }} урок(ов)
                                             </small>
                                         {% endif %}
+                                        {% if course_data.quizzes_count > 0 %}
+                                            <small class="text-muted ms-2">
+                                                <i class="bi bi-clipboard-check"></i> {{ course_data.quizzes_count }} тест(ов)
+                                            </small>
+                                        {% endif %}
                                     </div>
                                     
                                 </div>

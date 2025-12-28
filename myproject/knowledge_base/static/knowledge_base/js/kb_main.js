@@ -406,11 +406,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 button.classList.remove('btn-primary');
                 button.classList.add('btn-success');
                 
-                setTimeout(() => {
-                    const modal = bootstrap.Modal.getInstance(addLessonModal);
-                    modal.hide();
-                    window.location.reload();
-                }, 1000);
+                // Удаляем элемент из списка после успешного добавления
+                const lessonItem = button.closest('.list-group-item');
+                if (lessonItem) {
+                    setTimeout(() => {
+                        lessonItem.style.transition = 'opacity 0.3s';
+                        lessonItem.style.opacity = '0';
+                        setTimeout(() => {
+                            lessonItem.remove();
+                            // Проверяем, остались ли еще уроки в списке
+                            const container = document.getElementById('lessons-container');
+                            if (!container || container.children.length === 0) {
+                                document.getElementById('lessons-list').style.display = 'none';
+                                document.getElementById('lessons-empty').style.display = 'block';
+                            }
+                        }, 300);
+                    }, 500);
+                }
             } else {
                 button.innerHTML = originalHtml;
                 button.disabled = false;
@@ -448,11 +460,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 button.classList.remove('btn-primary');
                 button.classList.add('btn-success');
                 
-                setTimeout(() => {
-                    const modal = bootstrap.Modal.getInstance(addLessonModal);
-                    modal.hide();
-                    window.location.reload();
-                }, 1000);
+                // Удаляем элемент из списка после успешного добавления
+                const quizItem = button.closest('.list-group-item');
+                if (quizItem) {
+                    setTimeout(() => {
+                        quizItem.style.transition = 'opacity 0.3s';
+                        quizItem.style.opacity = '0';
+                        setTimeout(() => {
+                            quizItem.remove();
+                            // Проверяем, остались ли еще тесты в списке
+                            const container = document.getElementById('quizzes-container');
+                            if (!container || container.children.length === 0) {
+                                document.getElementById('quizzes-list').style.display = 'none';
+                                document.getElementById('quizzes-empty').style.display = 'block';
+                            }
+                        }, 300);
+                    }, 500);
+                }
             } else {
                 button.innerHTML = originalHtml;
                 button.disabled = false;
