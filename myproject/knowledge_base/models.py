@@ -42,7 +42,7 @@ class Directory(models.Model):
     def get_lessons_count(self):
         """Возвращает количество уроков в этой категории и подкатегориях"""
         from courses.models import Lesson
-        count = Lesson.objects.filter(course__directory=self).count()
+        count = Lesson.objects.filter(directory=self).count()
         for subdir in self.subdirectories.all():
             count += subdir.get_lessons_count()
         return count

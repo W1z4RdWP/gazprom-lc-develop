@@ -11,7 +11,7 @@ class LessonInlineForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.pk and hasattr(self.instance, 'userlessontrajectory'):
             trajectory = self.instance.userlessontrajectory
-            self.fields['lesson'].queryset = Lesson.objects.filter(course=trajectory.course)
+            self.fields['lesson'].queryset = Lesson.objects.filter(courses=trajectory.course)
 
 class LessonInline(admin.TabularInline):
     model = UserLessonTrajectory.lessons.through
@@ -24,7 +24,7 @@ class LessonInline(admin.TabularInline):
     def get_formset(self, request, obj=None, **kwargs):
         formset = super().get_formset(request, obj, **kwargs)
         if obj:
-            formset.form.base_fields['lesson'].queryset = Lesson.objects.filter(course=obj.course)
+            formset.form.base_fields['lesson'].queryset = Lesson.objects.filter(courses=obj.course)
         return formset
 
 @admin.register(Course)
@@ -39,9 +39,18 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ['title', 'order', 'course']
-    list_filter = ['course']
-    search_fields = ['title', 'course__title']
+    list_display = ['title', 'order', 'get_courses', 'directory']
+    list_filter = ['courses', 'directory']
+    search_fields = ['title']
+    filter_horizontal = ['courses']
+    
+    def get_courses(self, obj):
+        """Отображает список курсов для урока"""
+        courses = obj.courses.all()
+        if courses.exists():
+            return ', '.join([course.title for course in courses])
+        return 'Без курсов'
+    get_courses.short_description = 'Курсы'
 
 
 @admin.register(UserLessonTrajectory)

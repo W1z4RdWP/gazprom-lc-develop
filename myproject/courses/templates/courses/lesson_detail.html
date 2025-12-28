@@ -7,8 +7,8 @@
 
 
     <div class="content-section">
-        {% if lesson.course %}
-            <h1>{{ lesson.course.title }}</h1>
+        {% if course %}
+            <h1>{{ course.title }}</h1>
         {% elif lesson.directory %}
             <h1>{{ lesson.directory.name }}</h1>
         {% endif %}
@@ -28,8 +28,8 @@
         </div>
     </div>
     <div class="lesson-actions">
-        {% if lesson.course %}
-            <form method="POST" action="{% url 'courses:complete_lesson' course_slug=lesson.course.slug lesson_id=lesson.id %}">
+        {% if course %}
+            <form method="POST" action="{% url 'courses:complete_lesson' course_slug=course.slug lesson_id=lesson.id %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-success">
                     ✔ Завершить урок

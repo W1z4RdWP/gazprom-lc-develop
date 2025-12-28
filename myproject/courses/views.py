@@ -139,7 +139,7 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
             ).aggregate(max_order=Max('lesson__order'))['max_order'] or 0
 
             next_lesson = Lesson.objects.filter(
-                course=self.object,
+                courses=self.object,
                 order__gt=max_completed_order
             ).order_by('order').first()
 
@@ -314,13 +314,18 @@ def lesson_detail(request, course_slug=None, lesson_id=None):
 
     # Если передан lesson_id без course_slug, это урок без курса
     if lesson_id and not course_slug:
-        lesson = get_object_or_404(Lesson, id=lesson_id, course__isnull=True)
+        lesson = get_object_or_404(Lesson, id=lesson_id)
+        # Проверяем, есть ли у урока курсы
+        if lesson.courses.exists():
+            # Если есть курсы, берем первый для отображения
+            course = lesson.courses.first()
+            return render(request, 'courses/lesson_detail.html', {'lesson': lesson, 'course': course})
         return render(request, 'courses/lesson_detail.html', {'lesson': lesson, 'course': None})
     
     # Старый вариант - урок с курсом
     if course_slug and lesson_id:
         course = get_object_or_404(Course, slug=course_slug)
-        lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
+        lesson = get_object_or_404(Lesson, id=lesson_id, courses=course)
 
         # Проверка доступа к курсу
         user_course = UserCourse.objects.filter(user=request.user, course=course).first()
@@ -477,8 +482,9 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def get_success_url(self):
         """Перенаправление после успешного создания"""
         lesson = self.object
-        if lesson.course:
-            return reverse_lazy('courses:course_detail', kwargs={'slug': lesson.course.slug})
+        if lesson.courses.exists():
+            # Если урок привязан к курсам, берем первый курс
+            return reverse_lazy('courses:course_detail', kwargs={'slug': lesson.courses.first().slug})
         elif lesson.directory:
             from django.urls import reverse
             return reverse('knowledge_base:kb_directory', kwargs={'directory_id': lesson.directory.id})
@@ -505,19 +511,20 @@ def delete_course(request, slug):
 def delete_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
     if request.method == 'POST':
-        course = lesson.course  # Сохраняем курс до удаления
-        directory = lesson.directory  # Сохраняем директорию до удаления
+        # Сохраняем информацию о курсах и директории до удаления
+        courses = list(lesson.courses.all())
+        directory = lesson.directory
         lesson.delete()
-        if course:
-            return redirect('courses:course_detail', slug=course.slug)
+        if courses:
+            return redirect('courses:course_detail', slug=courses[0].slug)
         elif directory:
             from django.urls import reverse
             return redirect('knowledge_base:kb_directory', directory_id=directory.id)
         else:
             return redirect('knowledge_base:kb_home')
     # Для GET запроса
-    if lesson.course:
-        return redirect('courses:course_detail', slug=lesson.course.slug)
+    if lesson.courses.exists():
+        return redirect('courses:course_detail', slug=lesson.courses.first().slug)
     elif lesson.directory:
         from django.urls import reverse
         return redirect('knowledge_base:kb_directory', directory_id=lesson.directory.id)
@@ -557,7 +564,8 @@ def edit_course(request, slug):
 @user_passes_test(is_admin, login_url='/')
 def edit_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
-    course = lesson.course
+    # Берем первый курс, если есть
+    course = lesson.courses.first() if lesson.courses.exists() else None
     directory = lesson.directory
     
     if request.method == 'POST':
@@ -575,7 +583,7 @@ def edit_lesson(request, lesson_id):
     
     return render(request, 'courses/edit_lesson.html', {
         'form': form,
-        'course': lesson.course,
+        'course': course,
         'lesson': lesson
     })
 
@@ -607,7 +615,7 @@ def complete_lesson(request, course_slug, lesson_id):
         return redirect('login')
     
     course = get_object_or_404(Course, slug=course_slug)
-    lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
+    lesson = get_object_or_404(Lesson, id=lesson_id, courses=course)
     
     if not UserCourse.objects.filter(user=request.user, course=course).exists():
         return redirect('courses:course_detail', slug=course.slug)
@@ -715,16 +723,19 @@ def get_available_lessons(request, course_slug):
     """Получение списка доступных уроков для добавления в курс (JSON API)"""
     course = get_object_or_404(Course, slug=course_slug)
     
+    # Получаем ID уроков, которые уже привязаны к этому курсу
+    course_lesson_ids = course.lessons.values_list('id', flat=True)
+    
     # Получаем уроки, которые еще не привязаны к этому курсу
-    # Это могут быть уроки без курса или уроки из других курсов
-    available_lessons = Lesson.objects.exclude(course=course).order_by('title')
+    available_lessons = Lesson.objects.exclude(id__in=course_lesson_ids).order_by('title')
     
     lessons_data = []
     for lesson in available_lessons:
+        courses_list = ', '.join([c.title for c in lesson.courses.all()]) if lesson.courses.exists() else 'Без курса'
         lessons_data.append({
             'id': lesson.id,
             'title': lesson.title,
-            'current_course': lesson.course.title if lesson.course else 'Без курса',
+            'current_course': courses_list,
             'directory': lesson.directory.name if lesson.directory else 'Без категории',
         })
     
@@ -746,15 +757,12 @@ def add_lesson_to_course(request, course_slug):
     
     try:
         lesson = Lesson.objects.get(id=lesson_id)
-        # Привязываем урок к курсу
-        lesson.course = course
-        # Автоматически устанавливаем order, если он не указан
-        if not lesson.order or lesson.order == 0:
-            max_order = Lesson.objects.filter(course=course).exclude(pk=lesson.pk).aggregate(
-                max_order=Max('order')
-            )['max_order'] or 0
-            lesson.order = max_order + 1
-        lesson.save()
+        # Проверяем, не добавлен ли уже урок в этот курс
+        if lesson.courses.filter(id=course.id).exists():
+            return JsonResponse({'success': False, 'error': 'Урок уже добавлен в этот курс'}, status=400)
+        
+        # Добавляем урок в курс через ManyToMany
+        lesson.courses.add(course)
         
         return JsonResponse({'success': True, 'message': f'Урок "{lesson.title}" успешно добавлен в курс'})
     except Lesson.DoesNotExist:

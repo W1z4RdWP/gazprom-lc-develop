@@ -20,7 +20,9 @@ class UserProgress(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.course_id:
-            self.course = self.lesson.course
+            # Берем первый курс из урока, если есть
+            if self.lesson.courses.exists():
+                self.course = self.lesson.courses.first()
         super().save(*args, **kwargs)
 
 

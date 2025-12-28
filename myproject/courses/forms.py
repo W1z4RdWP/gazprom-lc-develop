@@ -69,46 +69,50 @@ class CourseForm(forms.ModelForm):
 class LessonForm(forms.ModelForm):
     class Meta:
         model = Lesson
-        fields = ['title', 'content', 'video_id', 'course', 'directory', 'order']
+        fields = ['title', 'content', 'video_id', 'courses', 'directory', 'order']
         widgets = {
             'content': CKEditor5Widget(
                 attrs={'class': 'django_ckeditor_5'}, 
                 config_name='extends'
             ),
-            'course': forms.Select(attrs={'class': 'form-control'}),
+            'courses': forms.SelectMultiple(attrs={'class': 'form-control'}),
             'directory': forms.Select(attrs={'class': 'form-control'})
         }
 
         labels = {
             'video_id': 'Ссылка на видео с Rutube',
-            'course': 'Курс (необязательно)',
+            'courses': 'Курсы (необязательно)',
             'directory': 'Категория (необязательно)'
         }
 
         help_texts = {
             'video_id': 'Введите полную ссылку на видео. Пример: https://rutube.ru/video/abcdef12345/',
-            'course': 'Выберите курс, к которому относится урок, или оставьте пустым',
+            'courses': 'Выберите курсы, к которым относится урок, или оставьте пустым',
             'directory': 'Выберите категорию базы знаний, к которой относится урок, или оставьте пустым'
         }
 
 
     def __init__(self, *args, **kwargs):
-        self.course = kwargs.pop('course', None)
+        self.course = kwargs.pop('course', None)  # Для обратной совместимости
         self.directory = kwargs.pop('directory', None)
         super().__init__(*args, **kwargs)
 
-        # Делаем поле course необязательным
-        self.fields['course'].required = False
-        self.fields['course'].empty_label = '--- Без курса ---'
+        # Делаем поле courses необязательным
+        self.fields['courses'].required = False
         
         # Делаем поле directory необязательным
         self.fields['directory'].required = False
         self.fields['directory'].empty_label = '--- Без категории ---'
         
-        # Если курс передан явно, скрываем поле и устанавливаем его значение
+        # Если курс передан явно (для обратной совместимости), добавляем его к courses
         if self.course:
-            self.fields['course'].widget = forms.HiddenInput()
-            self.fields['course'].initial = self.course
+            if self.instance and self.instance.pk:
+                # При редактировании добавляем курс, если его еще нет
+                if self.course not in self.instance.courses.all():
+                    self.initial['courses'] = list(self.instance.courses.all()) + [self.course]
+            else:
+                # При создании устанавливаем курс
+                self.initial['courses'] = [self.course]
 
         # Если директория передана явно, устанавливаем её значение
         if self.directory:
@@ -138,12 +142,13 @@ class LessonForm(forms.ModelForm):
     
     def save(self, commit=True):
         lesson = super().save(commit=False)
-        # Если курс передан через kwargs, привязываем урок к курсу
-        # (это для обратной совместимости со старым кодом)
-        if self.course and not lesson.course:
-            lesson.course = self.course
         if commit:
             lesson.save()
+            # Сохраняем ManyToMany связи
+            self.save_m2m()
+            # Если курс передан через kwargs (для обратной совместимости), добавляем его
+            if self.course and self.course not in lesson.courses.all():
+                lesson.courses.add(self.course)
         return lesson
     
 
@@ -167,7 +172,7 @@ class UserLessonTrajectoryForm(forms.ModelForm):
 
         if course and lessons:
             for lesson in lessons:
-                if lesson.course != course:
+                if course not in lesson.courses.all():
                     raise forms.ValidationError(
                         f"Урок '{lesson.title}' не принадлежит выбранному курсу."
                     )
