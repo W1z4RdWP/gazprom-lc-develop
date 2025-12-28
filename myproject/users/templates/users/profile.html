@@ -71,15 +71,38 @@
         </div>
 
         <!-- Форма для обновления профиля -->
-        <div id="edit-profile-form" class="edit-form-container" style="display: none;">
+        <div id="edit-profile-form" class="edit-form-container" style="display: {% if show_edit_form %}block{% else %}none{% endif %};">
             <div class="form-card">
                 <h2 class="form-title">Редактирование профиля</h2>
-                <form method="POST" enctype="multipart/form-data" autocomplete="off">
+                <form method="POST" action="{% url 'profile' %}" enctype="multipart/form-data" autocomplete="off" id="profile-update-form">
                     {% csrf_token %}
                     <fieldset class="form-group">
                         {{ user_form|crispy }}
                         {{ profile_form|crispy }}
                     </fieldset>
+                    {% if user_form.errors or profile_form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Ошибка:</strong> Пожалуйста, исправьте ошибки в форме.
+                            {% if user_form.errors %}
+                                <ul>
+                                    {% for field, errors in user_form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ field }}: {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {% if profile_form.errors %}
+                                <ul>
+                                    {% for field, errors in profile_form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ field }}: {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     <div class="form-actions">
                         <button class="action-btn primary" type="submit">Сохранить изменения</button>
                         <button class="action-btn cancel" id="cancel-edit-btn" type="button">Отмена</button>

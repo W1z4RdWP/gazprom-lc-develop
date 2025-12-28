@@ -111,10 +111,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileActions = document.querySelector('.profile-actions');
     const profileHeader = document.querySelector('.profile-header');
 
-    if (editProfileBtn && cancelEditBtn) {
-        editProfileBtn.addEventListener('click', function() {
+    // Функция для показа формы редактирования
+    function showEditForm() {
+        if (editProfileForm) {
             editProfileForm.style.display = 'block';
-            editProfileBtn.style.display = 'none';
+            if (editProfileBtn) editProfileBtn.style.display = 'none';
             if (toggleCoursesBtn) toggleCoursesBtn.style.display = 'none';
             if (toggleQuizzesBtn) toggleQuizzesBtn.style.display = 'none';
             if (experienceSection) experienceSection.style.display = 'none';
@@ -123,12 +124,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const otherButtons = profileActions.querySelectorAll('.action-btn:not(#edit-profile-btn)');
                 otherButtons.forEach(btn => btn.style.display = 'none');
             }
-        });
+        }
+    }
 
-        cancelEditBtn.addEventListener('click', function(event) {
-            event.preventDefault();
+    // Функция для скрытия формы редактирования
+    function hideEditForm() {
+        if (editProfileForm) {
             editProfileForm.style.display = 'none';
-            editProfileBtn.style.display = 'block';
+            if (editProfileBtn) editProfileBtn.style.display = 'block';
             if (toggleCoursesBtn) toggleCoursesBtn.style.display = 'block';
             if (toggleQuizzesBtn) toggleQuizzesBtn.style.display = 'block';
             if (experienceSection) experienceSection.style.display = 'block';
@@ -137,6 +140,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 const otherButtons = profileActions.querySelectorAll('.action-btn:not(#edit-profile-btn)');
                 otherButtons.forEach(btn => btn.style.display = 'block');
             }
+        }
+    }
+
+    // Показываем форму, если она уже видима (из-за ошибок валидации)
+    if (editProfileForm) {
+        const computedStyle = window.getComputedStyle(editProfileForm);
+        if (computedStyle.display === 'block') {
+            showEditForm();
+        }
+    }
+
+    if (editProfileBtn && cancelEditBtn) {
+        editProfileBtn.addEventListener('click', showEditForm);
+        cancelEditBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            hideEditForm();
+        });
+    }
+
+    // Обработчик для формы профиля - убеждаемся, что форма отправляется
+    const profileUpdateForm = document.getElementById('profile-update-form');
+    if (profileUpdateForm) {
+        profileUpdateForm.addEventListener('submit', function(event) {
+            // Не блокируем отправку формы, просто логируем
+            console.log('Форма профиля отправляется...');
+            // Форма должна отправиться нормально
         });
     }
 });

@@ -154,16 +154,25 @@ def profile(request: HttpRequest) -> HttpResponse:
     level, progress = count_exp(exp, level)
 
     if request.method == 'POST':
-        user_form = UserUpdateForm(request.POST, instance=request.user)
+        # Создаем копию POST данных и гарантируем, что username всегда установлен
+        post_data = request.POST.copy()
+        if 'username' not in post_data or not post_data['username']:
+            post_data['username'] = request.user.username
+        
+        user_form = UserUpdateForm(post_data, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
+            messages.success(request, 'Профиль успешно обновлен!')
             return redirect('profile')
     else:
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
 
+    # Показывать форму редактирования, если есть ошибки валидации
+    show_edit_form = request.method == 'POST' and (user_form.errors or profile_form.errors)
+    
     return render(request, 'users/profile.html', {
         'user_form': user_form,
         'profile_form': profile_form,
@@ -175,6 +184,7 @@ def profile(request: HttpRequest) -> HttpResponse:
         'quiz_results': quiz_results,
         'page_obj': page_obj,
         'all_lessons_completed': all_lessons_completed,
+        'show_edit_form': show_edit_form,
     })
 
 

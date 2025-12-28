@@ -28,7 +28,7 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'disabled': True, 'autocomplete': 'off'}),
+            'username': forms.TextInput(attrs={'class': 'form-control', 'readonly': True, 'autocomplete': 'off'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email', 'autocomplete': 'off'}),
