@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.models import Group
 from .models import Course, Lesson, UserLessonTrajectory, Quiz
 from django_ckeditor_5.fields import CKEditor5Widget
 from captcha.fields import CaptchaField
@@ -6,9 +7,18 @@ import re
 
 class CourseForm(forms.ModelForm):
     captcha = CaptchaField()
+    
+    assigned_groups = forms.ModelMultipleChoiceField(
+        queryset=Group.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'group-checkbox-list'}),
+        label="Назначить группам",
+        help_text="Пользователям из выбранных групп будет автоматически назначен этот курс"
+    )
+    
     class Meta:
         model = Course
-        fields = ['title', 'description', 'image', 'slug', 'directory', 'final_quiz']
+        fields = ['title', 'description', 'image', 'slug', 'directory', 'final_quiz', 'assigned_groups']
         quizzes = forms.ModelMultipleChoiceField(
             queryset=Quiz.objects.all(),
             required=False,
@@ -17,7 +27,8 @@ class CourseForm(forms.ModelForm):
         )
         labels = {
             'slug': 'ЧПУ (оставьте пустым для автогенерации)',
-            'directory': 'Категория (необязательно)'
+            'directory': 'Категория (необязательно)',
+            'assigned_groups': 'Назначить группам'
         }
         required = {'slug': False}  # Поле slug не обязательно
         widgets = {
@@ -28,7 +39,8 @@ class CourseForm(forms.ModelForm):
             'directory': forms.Select(attrs={'class': 'form-control'})
         }
         help_texts = {
-            'directory': 'Выберите категорию базы знаний, к которой относится курс, или оставьте пустым'
+            'directory': 'Выберите категорию базы знаний, к которой относится курс, или оставьте пустым',
+            'assigned_groups': 'Пользователям из выбранных групп будет автоматически назначен этот курс'
         }
 
     def clean_slug(self):
@@ -65,6 +77,43 @@ class CourseForm(forms.ModelForm):
         # Если директория передана явно, устанавливаем её значение
         if self.directory:
             self.fields['directory'].initial = self.directory
+        
+        # Инициализируем поле assigned_groups текущими значениями при редактировании
+        if self.instance and self.instance.pk:
+            self.fields['assigned_groups'].initial = self.instance.assigned_groups.all()
+
+    def save(self, commit=True):
+        # ВАЖНО: Сохраняем старые группы ДО вызова super().save(),
+        # потому что после него ManyToMany связи уже будут обновлены
+        if self.instance and self.instance.pk:
+            old_groups = set(self.instance.assigned_groups.all())
+        else:
+            old_groups = set()
+        
+        # Получаем выбранные группы из формы
+        assigned_groups = self.cleaned_data.get('assigned_groups', [])
+        new_groups = set(assigned_groups)
+        
+        # Находим новые группы (которые были добавлены)
+        added_groups = new_groups - old_groups
+        
+        # Сохраняем курс
+        course = super().save(commit=commit)
+        
+        if commit and added_groups:
+            # Назначаем курс пользователям из новых групп
+            from myapp.models import UserCourse
+            from django.contrib.auth.models import User
+            
+            for group in added_groups:
+                users_in_group = User.objects.filter(groups=group)
+                for user in users_in_group:
+                    UserCourse.objects.get_or_create(
+                        user=user,
+                        course=course
+                    )
+        
+        return course
 
 class LessonForm(forms.ModelForm):
     class Meta:

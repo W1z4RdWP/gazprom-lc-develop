@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import Max
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
 from django_ckeditor_5.fields import CKEditor5Field
 
@@ -44,6 +44,13 @@ class Course(models.Model):
         related_name='courses',
         blank=True,
         verbose_name="Тесты курса"
+    )
+    assigned_groups = models.ManyToManyField(
+        Group,
+        related_name='assigned_courses',
+        blank=True,
+        verbose_name="Назначить группам",
+        help_text="Пользователям из выбранных групп будет автоматически назначен этот курс"
     )
 
     class Meta:
