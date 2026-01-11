@@ -297,6 +297,12 @@ function saveNewDirectory() {
                             onclick="editDirectoryName(${directoryId})">
                         <i class="bi bi-pencil"></i>
                     </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger delete-directory-btn" 
+                            title="Удалить категорию"
+                            onclick="deleteDirectory(${directoryId}, '${escapeHtml(directoryName).replace(/'/g, "\\'")}')">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
             `;
             
@@ -360,6 +366,70 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+// Функция для удаления категории
+function deleteDirectory(directoryId, directoryName) {
+    if (!confirm(`Вы уверены, что хотите удалить категорию "${directoryName}"?`)) {
+        return;
+    }
+    
+    fetch(`/kb/directory/${directoryId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Удаляем элемент из DOM
+            const container = document.querySelector(`.item-name-container[data-directory-id="${directoryId}"]`);
+            if (container) {
+                const folderItem = container.closest('.folder-item');
+                if (folderItem) {
+                    folderItem.style.transition = 'opacity 0.3s';
+                    folderItem.style.opacity = '0';
+                    setTimeout(() => {
+                        folderItem.remove();
+                        
+                        // Проверяем, остались ли ещё папки
+                        const foldersSection = document.querySelector('.content-section h5.section-header .bi-folder-fill');
+                        if (foldersSection) {
+                            const itemsGrid = foldersSection.closest('.content-section').querySelector('.items-grid');
+                            if (itemsGrid && itemsGrid.children.length === 0) {
+                                // Удаляем секцию папок, если она пуста
+                                foldersSection.closest('.content-section').remove();
+                                
+                                // Проверяем, пуста ли вся папка
+                                const folderContent = document.querySelector('.folder-content');
+                                const hasContent = folderContent.querySelector('.content-section');
+                                if (!hasContent) {
+                                    // Показываем сообщение о пустой папке
+                                    folderContent.innerHTML = `
+                                        <div class="empty-folder">
+                                            <div class="empty-folder-icon">
+                                                <i class="bi bi-folder-x"></i>
+                                            </div>
+                                            <p class="text-muted">Папка пуста</p>
+                                            <p class="text-muted small">Создайте категорию, курс, урок или тест в этой папке</p>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        }
+                    }, 300);
+                }
+            }
+        } else {
+            alert('Ошибка: ' + (data.error || 'Не удалось удалить категорию'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при удалении категории');
+    });
 }
 
 // Обработка нажатия Enter и Escape в поле ввода, а также клика вне области редактирования

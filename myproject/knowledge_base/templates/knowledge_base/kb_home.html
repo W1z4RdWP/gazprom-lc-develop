@@ -126,6 +126,12 @@
                                                 onclick="editDirectoryName({{ subdir.id }})">
                                             <i class="bi bi-pencil"></i>
                                         </button>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger delete-directory-btn" 
+                                                title="Удалить категорию"
+                                                onclick="deleteDirectory({{ subdir.id }}, '{{ subdir.name|escapejs }}')">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
                                     </div>
                                 {% endif %}
                             </div>

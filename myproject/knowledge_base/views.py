@@ -148,6 +148,34 @@ def edit_directory_name(request, directory_id):
 @login_required
 @user_passes_test(lambda u: u.is_staff)
 @require_POST
+def delete_directory(request, directory_id):
+    """AJAX представление для удаления категории"""
+    directory = get_object_or_404(Directory, id=directory_id)
+    
+    try:
+        # Проверяем, есть ли вложенные элементы
+        has_subdirectories = Directory.objects.filter(parent=directory).exists()
+        has_courses = Course.objects.filter(directory=directory).exists()
+        has_lessons = Lesson.objects.filter(directory=directory).exists()
+        has_quizzes = Quiz.objects.filter(directory=directory).exists()
+        
+        if has_subdirectories or has_courses or has_lessons or has_quizzes:
+            return JsonResponse({
+                'success': False, 
+                'error': 'Невозможно удалить категорию, содержащую вложенные элементы. Сначала удалите или переместите все содержимое.'
+            }, status=400)
+        
+        directory_name = directory.name
+        directory.delete()
+        
+        return JsonResponse({'success': True, 'message': f'Категория "{directory_name}" успешно удалена'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+@require_POST
 def create_directory(request):
     """AJAX представление для inline создания категории"""
     try:
