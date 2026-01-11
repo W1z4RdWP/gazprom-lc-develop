@@ -153,22 +153,76 @@ def delete_directory(request, directory_id):
     directory = get_object_or_404(Directory, id=directory_id)
     
     try:
+        data = json.loads(request.body) if request.body else {}
+        action = data.get('action', 'check')  # check, move_to_root, delete_all
+        
         # Проверяем, есть ли вложенные элементы
         has_subdirectories = Directory.objects.filter(parent=directory).exists()
         has_courses = Course.objects.filter(directory=directory).exists()
         has_lessons = Lesson.objects.filter(directory=directory).exists()
         has_quizzes = Quiz.objects.filter(directory=directory).exists()
         
-        if has_subdirectories or has_courses or has_lessons or has_quizzes:
+        has_content = has_subdirectories or has_courses or has_lessons or has_quizzes
+        
+        # Если просто проверка - возвращаем информацию о содержимом
+        if action == 'check':
             return JsonResponse({
-                'success': False, 
-                'error': 'Невозможно удалить категорию, содержащую вложенные элементы. Сначала удалите или переместите все содержимое.'
-            }, status=400)
+                'success': True,
+                'has_content': has_content,
+                'has_subdirectories': has_subdirectories,
+                'has_courses': has_courses,
+                'has_lessons': has_lessons,
+                'has_quizzes': has_quizzes
+            })
         
         directory_name = directory.name
-        directory.delete()
         
-        return JsonResponse({'success': True, 'message': f'Категория "{directory_name}" успешно удалена'})
+        if action == 'move_to_root':
+            # Перемещаем всё содержимое в корень
+            Directory.objects.filter(parent=directory).update(parent=None)
+            Course.objects.filter(directory=directory).update(directory=None)
+            Lesson.objects.filter(directory=directory).update(directory=None)
+            Quiz.objects.filter(directory=directory).update(directory=None)
+            
+            # Удаляем саму категорию
+            directory.delete()
+            
+            return JsonResponse({
+                'success': True, 
+                'message': f'Категория "{directory_name}" удалена. Содержимое перемещено в корень.'
+            })
+        
+        elif action == 'delete_all':
+            # Рекурсивная функция для удаления всего содержимого
+            def delete_directory_recursive(dir_obj):
+                # Сначала удаляем все вложенные директории рекурсивно
+                for subdir in Directory.objects.filter(parent=dir_obj):
+                    delete_directory_recursive(subdir)
+                
+                # Удаляем курсы в этой директории (и связанные с ними уроки через курс)
+                Course.objects.filter(directory=dir_obj).delete()
+                
+                # Удаляем уроки в этой директории
+                Lesson.objects.filter(directory=dir_obj).delete()
+                
+                # Удаляем тесты в этой директории
+                Quiz.objects.filter(directory=dir_obj).delete()
+                
+                # Удаляем саму директорию
+                dir_obj.delete()
+            
+            delete_directory_recursive(directory)
+            
+            return JsonResponse({
+                'success': True, 
+                'message': f'Категория "{directory_name}" и всё её содержимое удалены безвозвратно.'
+            })
+        
+        else:
+            return JsonResponse({'success': False, 'error': 'Неизвестное действие'}, status=400)
+            
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 

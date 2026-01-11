@@ -370,8 +370,91 @@ function escapeHtml(text) {
 
 // Функция для удаления категории
 function deleteDirectory(directoryId, directoryName) {
-    if (!confirm(`Вы уверены, что хотите удалить категорию "${directoryName}"?`)) {
-        return;
+    // Сначала проверяем, есть ли содержимое
+    fetch(`/kb/directory/${directoryId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ action: 'check' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.has_content) {
+                // Есть вложенное содержимое - показываем модальное окно с выбором
+                showDeleteDirectoryModal(directoryId, directoryName);
+            } else {
+                // Нет содержимого - простое подтверждение
+                if (confirm(`Вы уверены, что хотите удалить категорию "${directoryName}"?`)) {
+                    performDeleteDirectory(directoryId, 'delete_all');
+                }
+            }
+        } else {
+            alert('Ошибка: ' + (data.error || 'Не удалось проверить категорию'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при проверке категории');
+    });
+}
+
+// Показать модальное окно выбора действия при удалении
+function showDeleteDirectoryModal(directoryId, directoryName) {
+    // Удаляем существующее модальное окно, если есть
+    const existingModal = document.getElementById('deleteDirectoryModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Создаём модальное окно
+    const modalHtml = `
+        <div class="modal fade" id="deleteDirectoryModal" tabindex="-1" aria-labelledby="deleteDirectoryModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title" id="deleteDirectoryModalLabel">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Удаление категории
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Категория <strong>"${escapeHtml(directoryName)}"</strong> содержит вложенные элементы.</p>
+                        <p>Что вы хотите сделать?</p>
+                    </div>
+                    <div class="modal-footer d-flex flex-column gap-2">
+                        <button type="button" class="btn btn-primary w-100" onclick="performDeleteDirectory(${directoryId}, 'move_to_root')">
+                            <i class="bi bi-box-arrow-up me-2"></i>Переместить всё в корень БЗ
+                        </button>
+                        <button type="button" class="btn btn-danger w-100" onclick="performDeleteDirectory(${directoryId}, 'delete_all')">
+                            <i class="bi bi-trash me-2"></i>Удалить всё безвозвратно
+                        </button>
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">
+                            Отмена
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteDirectoryModal'));
+    modal.show();
+}
+
+// Выполнить удаление категории с указанным действием
+function performDeleteDirectory(directoryId, action) {
+    // Закрываем модальное окно, если открыто
+    const modal = document.getElementById('deleteDirectoryModal');
+    if (modal) {
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) {
+            bsModal.hide();
+        }
     }
     
     fetch(`/kb/directory/${directoryId}/delete/`, {
@@ -379,48 +462,18 @@ function deleteDirectory(directoryId, directoryName) {
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken')
-        }
+        },
+        body: JSON.stringify({ action: action })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Удаляем элемент из DOM
-            const container = document.querySelector(`.item-name-container[data-directory-id="${directoryId}"]`);
-            if (container) {
-                const folderItem = container.closest('.folder-item');
-                if (folderItem) {
-                    folderItem.style.transition = 'opacity 0.3s';
-                    folderItem.style.opacity = '0';
-                    setTimeout(() => {
-                        folderItem.remove();
-                        
-                        // Проверяем, остались ли ещё папки
-                        const foldersSection = document.querySelector('.content-section h5.section-header .bi-folder-fill');
-                        if (foldersSection) {
-                            const itemsGrid = foldersSection.closest('.content-section').querySelector('.items-grid');
-                            if (itemsGrid && itemsGrid.children.length === 0) {
-                                // Удаляем секцию папок, если она пуста
-                                foldersSection.closest('.content-section').remove();
-                                
-                                // Проверяем, пуста ли вся папка
-                                const folderContent = document.querySelector('.folder-content');
-                                const hasContent = folderContent.querySelector('.content-section');
-                                if (!hasContent) {
-                                    // Показываем сообщение о пустой папке
-                                    folderContent.innerHTML = `
-                                        <div class="empty-folder">
-                                            <div class="empty-folder-icon">
-                                                <i class="bi bi-folder-x"></i>
-                                            </div>
-                                            <p class="text-muted">Папка пуста</p>
-                                            <p class="text-muted small">Создайте категорию, курс, урок или тест в этой папке</p>
-                                        </div>
-                                    `;
-                                }
-                            }
-                        }
-                    }, 300);
-                }
+            // Если переместили в корень - перезагружаем страницу чтобы увидеть изменения
+            if (action === 'move_to_root') {
+                window.location.reload();
+            } else {
+                // Удаляем элемент из DOM
+                removeDirectoryFromDOM(directoryId);
             }
         } else {
             alert('Ошибка: ' + (data.error || 'Не удалось удалить категорию'));
@@ -430,6 +483,47 @@ function deleteDirectory(directoryId, directoryName) {
         console.error('Error:', error);
         alert('Произошла ошибка при удалении категории');
     });
+}
+
+// Удалить элемент категории из DOM
+function removeDirectoryFromDOM(directoryId) {
+    const container = document.querySelector(`.item-name-container[data-directory-id="${directoryId}"]`);
+    if (container) {
+        const folderItem = container.closest('.folder-item');
+        if (folderItem) {
+            folderItem.style.transition = 'opacity 0.3s';
+            folderItem.style.opacity = '0';
+            setTimeout(() => {
+                folderItem.remove();
+                
+                // Проверяем, остались ли ещё папки
+                const foldersSection = document.querySelector('.content-section h5.section-header .bi-folder-fill');
+                if (foldersSection) {
+                    const itemsGrid = foldersSection.closest('.content-section').querySelector('.items-grid');
+                    if (itemsGrid && itemsGrid.children.length === 0) {
+                        // Удаляем секцию папок, если она пуста
+                        foldersSection.closest('.content-section').remove();
+                        
+                        // Проверяем, пуста ли вся папка
+                        const folderContent = document.querySelector('.folder-content');
+                        const hasContent = folderContent.querySelector('.content-section');
+                        if (!hasContent) {
+                            // Показываем сообщение о пустой папке
+                            folderContent.innerHTML = `
+                                <div class="empty-folder">
+                                    <div class="empty-folder-icon">
+                                        <i class="bi bi-folder-x"></i>
+                                    </div>
+                                    <p class="text-muted">Папка пуста</p>
+                                    <p class="text-muted small">Создайте категорию, курс, урок или тест в этой папке</p>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+            }, 300);
+        }
+    }
 }
 
 // Обработка нажатия Enter и Escape в поле ввода, а также клика вне области редактирования
