@@ -173,3 +173,59 @@ class UserLessonTrajectory(models.Model):
 
     def __str__(self):
         return f"Траектория {self.user.username} для {self.course.title}"
+
+
+class LessonAttachment(models.Model):
+    """
+    Модель для хранения файлов, прикреплённых к уроку.
+    """
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name='attachments',
+        verbose_name="Урок"
+    )
+    file = models.FileField(
+        upload_to='lesson_attachments/',
+        verbose_name="Файл"
+    )
+    name = models.CharField(
+        max_length=255,
+        verbose_name="Название файла",
+        blank=True
+    )
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата загрузки"
+    )
+
+    class Meta:
+        verbose_name = 'Прикреплённый файл'
+        verbose_name_plural = 'Прикреплённые файлы'
+        ordering = ['uploaded_at']
+
+    def save(self, *args, **kwargs):
+        # Если имя не указано, используем имя файла
+        if not self.name and self.file:
+            self.name = self.file.name.split('/')[-1]
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name or self.file.name
+    
+    @property
+    def file_extension(self):
+        """Возвращает расширение файла"""
+        if self.file:
+            return self.file.name.split('.')[-1].lower()
+        return ''
+    
+    @property
+    def is_image(self):
+        """Проверяет, является ли файл изображением"""
+        return self.file_extension in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
+    
+    @property
+    def is_document(self):
+        """Проверяет, является ли файл документом"""
+        return self.file_extension in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt']

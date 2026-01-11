@@ -10,8 +10,8 @@ from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import CreateView, DetailView, ListView
 
 from quizzes.models import Quiz
-from .forms import CourseForm, LessonForm
-from .models import Course, Lesson, UserLessonTrajectory
+from .forms import CourseForm, LessonForm, LessonAttachmentsForm
+from .models import Course, Lesson, UserLessonTrajectory, LessonAttachment
 from myapp.models import UserProgress, UserCourse, QuizResult
 from myapp.views import is_admin, is_author_or_admin
 
@@ -315,12 +315,21 @@ def lesson_detail(request, course_slug=None, lesson_id=None):
     # Если передан lesson_id без course_slug, это урок без курса
     if lesson_id and not course_slug:
         lesson = get_object_or_404(Lesson, id=lesson_id)
+        attachments = lesson.attachments.all()
         # Проверяем, есть ли у урока курсы
         if lesson.courses.exists():
             # Если есть курсы, берем первый для отображения
             course = lesson.courses.first()
-            return render(request, 'courses/lesson_detail.html', {'lesson': lesson, 'course': course})
-        return render(request, 'courses/lesson_detail.html', {'lesson': lesson, 'course': None})
+            return render(request, 'courses/lesson_detail.html', {
+                'lesson': lesson, 
+                'course': course,
+                'attachments': attachments
+            })
+        return render(request, 'courses/lesson_detail.html', {
+            'lesson': lesson, 
+            'course': None,
+            'attachments': attachments
+        })
     
     # Старый вариант - урок с курсом
     if course_slug and lesson_id:
@@ -345,7 +354,13 @@ def lesson_detail(request, course_slug=None, lesson_id=None):
             lesson=lesson,
             defaults={'course': course}
         )
-        return render(request, 'courses/lesson_detail.html', {'lesson': lesson, 'course': course})
+        
+        attachments = lesson.attachments.all()
+        return render(request, 'courses/lesson_detail.html', {
+            'lesson': lesson, 
+            'course': course,
+            'attachments': attachments
+        })
     
     return redirect('knowledge_base:kb_home')
 
@@ -452,8 +467,19 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 
     def form_valid(self, form):
-        """Обработка валидной формы"""
-        return super().form_valid(form)
+        """Обработка валидной формы и загрузки файлов"""
+        response = super().form_valid(form)
+        
+        # Обрабатываем загруженные файлы
+        files = self.request.FILES.getlist('attachments')
+        for file in files:
+            LessonAttachment.objects.create(
+                lesson=self.object,
+                file=file,
+                name=file.name
+            )
+        
+        return response
     
     
     def get_context_data(self, **kwargs):
@@ -475,6 +501,9 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 context['directory'] = Directory.objects.get(id=directory_id)
             except (Directory.DoesNotExist, ValueError):
                 pass
+        
+        # Форма для загрузки файлов
+        context['attachments_form'] = LessonAttachmentsForm()
         
         return context
     
@@ -570,8 +599,24 @@ def edit_lesson(request, lesson_id):
     
     if request.method == 'POST':
         form = LessonForm(request.POST, instance=lesson, course=course, directory=directory)
+        
+        # Обработка удаления файлов
+        delete_attachments = request.POST.getlist('delete_attachments')
+        if delete_attachments:
+            LessonAttachment.objects.filter(id__in=delete_attachments, lesson=lesson).delete()
+        
         if form.is_valid():
             form.save()
+            
+            # Обработка загрузки новых файлов
+            files = request.FILES.getlist('attachments')
+            for file in files:
+                LessonAttachment.objects.create(
+                    lesson=lesson,
+                    file=file,
+                    name=file.name
+                )
+            
             if course:
                 return redirect('courses:lesson_detail', course_slug=course.slug, lesson_id=lesson.id)
             elif lesson.directory:
@@ -584,7 +629,9 @@ def edit_lesson(request, lesson_id):
     return render(request, 'courses/edit_lesson.html', {
         'form': form,
         'course': course,
-        'lesson': lesson
+        'lesson': lesson,
+        'attachments': lesson.attachments.all(),
+        'attachments_form': LessonAttachmentsForm()
     })
 
 
@@ -814,3 +861,20 @@ def add_quiz_to_course(request, course_slug):
         return JsonResponse({'success': True, 'message': f'Тест "{quiz.name}" успешно добавлен в курс'})
     except Quiz.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Тест не найден'}, status=404)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/')
+@require_POST
+def delete_attachment(request, attachment_id):
+    """Удаление прикреплённого файла"""
+    attachment = get_object_or_404(LessonAttachment, id=attachment_id)
+    lesson = attachment.lesson
+    attachment.delete()
+    
+    # Если это AJAX-запрос, возвращаем JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': 'Файл удалён'})
+    
+    # Иначе редирект обратно на страницу редактирования
+    return redirect('courses:edit_lesson', lesson_id=lesson.id)

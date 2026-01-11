@@ -20,5 +20,6 @@ urlpatterns = [
     path('course/<slug:course_slug>/available-lessons/', course_views.get_available_lessons, name='get_available_lessons'),
     path('course/<slug:course_slug>/add-lesson/', course_views.add_lesson_to_course, name='add_lesson_to_course'),
     path('course/<slug:course_slug>/available-quizzes/', course_views.get_available_quizzes, name='get_available_quizzes'),
-    path('course/<slug:course_slug>/add-quiz/', course_views.add_quiz_to_course, name='add_quiz_to_course')
+    path('course/<slug:course_slug>/add-quiz/', course_views.add_quiz_to_course, name='add_quiz_to_course'),
+    path('attachment/<int:attachment_id>/delete/', course_views.delete_attachment, name='delete_attachment'),
 ]

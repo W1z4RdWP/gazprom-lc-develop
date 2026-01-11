@@ -23,9 +23,47 @@
                         allowfullscreen>
                 </iframe>
             </div>
-
             {% endif %}
         </div>
+        
+        <!-- Прикреплённые файлы -->
+        {% if attachments %}
+        <div class="lesson-attachments mt-4">
+            <h4><i class="bi bi-paperclip me-2"></i>Прикреплённые материалы</h4>
+            <div class="attachments-list">
+                {% for attachment in attachments %}
+                    <div class="attachment-item d-flex align-items-center p-2 mb-2 border rounded">
+                        <div class="attachment-icon me-3">
+                            {% if attachment.is_image %}
+                                <i class="bi bi-file-image fs-4 text-success"></i>
+                            {% elif attachment.file_extension == 'pdf' %}
+                                <i class="bi bi-file-pdf fs-4 text-danger"></i>
+                            {% elif attachment.file_extension in 'doc,docx' %}
+                                <i class="bi bi-file-word fs-4 text-primary"></i>
+                            {% elif attachment.file_extension in 'xls,xlsx' %}
+                                <i class="bi bi-file-excel fs-4 text-success"></i>
+                            {% elif attachment.file_extension in 'ppt,pptx' %}
+                                <i class="bi bi-file-ppt fs-4 text-warning"></i>
+                            {% else %}
+                                <i class="bi bi-file-earmark fs-4 text-secondary"></i>
+                            {% endif %}
+                        </div>
+                        <div class="attachment-info flex-grow-1">
+                            <a href="{{ attachment.file.url }}" target="_blank" class="text-decoration-none fw-medium">
+                                {{ attachment.name }}
+                            </a>
+                            <div class="text-muted small">
+                                Загружен: {{ attachment.uploaded_at|date:"d.m.Y" }}
+                            </div>
+                        </div>
+                        <a href="{{ attachment.file.url }}" download class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-download"></i> Скачать
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
     <div class="lesson-actions">
         {% if course %}

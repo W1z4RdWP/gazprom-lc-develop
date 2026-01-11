@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import Group
-from .models import Course, Lesson, UserLessonTrajectory, Quiz
+from .models import Course, Lesson, UserLessonTrajectory, Quiz, LessonAttachment
 from django_ckeditor_5.fields import CKEditor5Widget
 # from captcha.fields import CaptchaField
 import re
@@ -226,3 +226,55 @@ class UserLessonTrajectoryForm(forms.ModelForm):
                         f"Урок '{lesson.title}' не принадлежит выбранному курсу."
                     )
         return cleaned_data
+
+
+class LessonAttachmentForm(forms.ModelForm):
+    """Форма для прикрепления файла к уроку"""
+    class Meta:
+        model = LessonAttachment
+        fields = ['file', 'name']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Название файла (необязательно)'
+            }),
+            'file': forms.ClearableFileInput(attrs={
+                'class': 'form-control'
+            })
+        }
+        labels = {
+            'file': 'Файл',
+            'name': 'Название (необязательно)'
+        }
+
+
+class MultipleFileInput(forms.ClearableFileInput):
+    """Виджет для загрузки нескольких файлов"""
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    """Поле для загрузки нескольких файлов"""
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = [single_file_clean(data, initial)]
+        return result
+
+
+class LessonAttachmentsForm(forms.Form):
+    """Форма для загрузки нескольких файлов к уроку"""
+    files = MultipleFileField(
+        required=False,
+        label='Прикрепить файлы',
+        widget=MultipleFileInput(attrs={
+            'class': 'form-control',
+            'multiple': True
+        })
+    )

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django import forms
-from .models import Course, Lesson, UserLessonTrajectory
+from .models import Course, Lesson, UserLessonTrajectory, LessonAttachment
 
 class LessonInlineForm(forms.ModelForm):
     class Meta:
@@ -37,12 +37,22 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 
+class LessonAttachmentInline(admin.TabularInline):
+    model = LessonAttachment
+    extra = 1
+    verbose_name = "Прикреплённый файл"
+    verbose_name_plural = "Прикреплённые файлы"
+    fields = ['file', 'name', 'uploaded_at']
+    readonly_fields = ['uploaded_at']
+
+
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ['title', 'order', 'get_courses', 'directory']
+    list_display = ['title', 'order', 'get_courses', 'directory', 'get_attachments_count']
     list_filter = ['courses', 'directory']
     search_fields = ['title']
     filter_horizontal = ['courses']
+    inlines = [LessonAttachmentInline]
     
     def get_courses(self, obj):
         """Отображает список курсов для урока"""
@@ -51,6 +61,19 @@ class LessonAdmin(admin.ModelAdmin):
             return ', '.join([course.title for course in courses])
         return 'Без курсов'
     get_courses.short_description = 'Курсы'
+    
+    def get_attachments_count(self, obj):
+        """Отображает количество прикреплённых файлов"""
+        return obj.attachments.count()
+    get_attachments_count.short_description = 'Файлов'
+
+
+@admin.register(LessonAttachment)
+class LessonAttachmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'lesson', 'uploaded_at']
+    list_filter = ['lesson', 'uploaded_at']
+    search_fields = ['name', 'lesson__title']
+    readonly_fields = ['uploaded_at']
 
 
 @admin.register(UserLessonTrajectory)

@@ -24,6 +24,62 @@
                 {% endif %}
             {% endfor %}
             
+            <!-- Секция прикреплённых файлов -->
+            <div class="mb-4 mt-4">
+                <h5>Прикреплённые файлы</h5>
+                
+                {% if attachments %}
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Файл</th>
+                                    <th>Дата загрузки</th>
+                                    <th style="width: 100px;">Удалить</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attachment in attachments %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ attachment.file.url }}" target="_blank" class="text-decoration-none">
+                                                {% if attachment.is_image %}
+                                                    <i class="bi bi-file-image me-1"></i>
+                                                {% elif attachment.is_document %}
+                                                    <i class="bi bi-file-earmark-text me-1"></i>
+                                                {% else %}
+                                                    <i class="bi bi-file-earmark me-1"></i>
+                                                {% endif %}
+                                                {{ attachment.name }}
+                                            </a>
+                                        </td>
+                                        <td>{{ attachment.uploaded_at|date:"d.m.Y H:i" }}</td>
+                                        <td class="text-center">
+                                            <div class="form-check d-flex justify-content-center">
+                                                <input class="form-check-input" type="checkbox" 
+                                                       name="delete_attachments" 
+                                                       value="{{ attachment.id }}" 
+                                                       id="delete_{{ attachment.id }}">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-muted small">Отметьте файлы, которые хотите удалить, и нажмите "Сохранить изменения"</p>
+                {% else %}
+                    <p class="text-muted">Нет прикреплённых файлов</p>
+                {% endif %}
+                
+                <!-- Загрузка новых файлов -->
+                <div class="mt-3">
+                    <label class="form-label"><strong>Добавить новые файлы</strong></label>
+                    <input type="file" name="attachments" class="form-control" multiple>
+                    <small class="text-muted">Можно выбрать несколько файлов</small>
+                </div>
+            </div>
+            
             <div class="button-group mt-4">
                 <button type="submit" class="btn btn-primary">Сохранить изменения</button>
                 {% if course %}

@@ -10,22 +10,33 @@
         {% if course %}
             <p class="text-muted">Урок будет привязан к курсу "{{ course.title }}"</p>
         {% endif %}
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.media }}
         
             {% for field in form %}
-    {% if field.name == "content" %}
-            <div class="mb-3">
-                {{ field.label_tag }}
-                {{ field }}
+                {% if field.name == "content" %}
+                    <div class="mb-3">
+                        {{ field.label_tag }}
+                        {{ field }}
+                    </div>
+                {% elif field.name == "course" and field.widget.input_type == "hidden" %}
+                    {{ field }}
+                {% else %}
+                    {{ field|as_crispy_field }}
+                {% endif %}
+            {% endfor %}
+            
+            <!-- Секция прикрепления файлов -->
+            <div class="mb-4 mt-4">
+                <h5>Прикрепить файлы к уроку</h5>
+                <p class="text-muted small">Вы можете прикрепить документы, презентации, изображения и другие материалы</p>
+                <div class="mb-3">
+                    <input type="file" name="attachments" class="form-control" multiple>
+                    <small class="text-muted">Можно выбрать несколько файлов</small>
+                </div>
             </div>
-        {% elif field.name == "course" and field.widget.input_type == "hidden" %}
-            {{ field }}
-        {% else %}
-            {{ field|as_crispy_field }}
-        {% endif %}
-    {% endfor %}
+            
             <button type="submit" class="btn btn-primary">Создать урок</button>
         </form>
     </div>
