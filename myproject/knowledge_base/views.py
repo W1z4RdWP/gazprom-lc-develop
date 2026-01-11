@@ -3,6 +3,7 @@ from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db import models
 import json
 from .models import Directory
 from courses.models import Course, Lesson
@@ -138,6 +139,53 @@ def edit_directory_name(request, directory_id):
         directory.save()
         
         return JsonResponse({'success': True, 'name': directory.name})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Неверный формат данных'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+@require_POST
+def create_directory(request):
+    """AJAX представление для inline создания категории"""
+    try:
+        data = json.loads(request.body)
+        name = data.get('name', '').strip()
+        parent_id = data.get('parent_id')
+        
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Название не может быть пустым'}, status=400)
+        
+        if len(name) > 255:
+            return JsonResponse({'success': False, 'error': 'Название слишком длинное (максимум 255 символов)'}, status=400)
+        
+        # Получаем родительскую директорию (если указана)
+        parent = None
+        if parent_id:
+            parent = get_object_or_404(Directory, id=parent_id)
+        
+        # Определяем порядок для новой директории
+        if parent:
+            max_order = Directory.objects.filter(parent=parent).aggregate(max_order=models.Max('order'))['max_order']
+        else:
+            max_order = Directory.objects.filter(parent__isnull=True).aggregate(max_order=models.Max('order'))['max_order']
+        
+        new_order = (max_order or 0) + 1
+        
+        # Создаём новую директорию
+        directory = Directory.objects.create(
+            name=name,
+            parent=parent,
+            order=new_order
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'id': directory.id,
+            'name': directory.name
+        })
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Неверный формат данных'}, status=400)
     except Exception as e:

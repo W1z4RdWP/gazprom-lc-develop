@@ -116,6 +116,252 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// Переменная для отслеживания активного создания категории
+let isCreatingDirectory = false;
+
+// Функция для inline создания новой категории
+function createNewDirectory(parentId) {
+    // Проверяем, есть ли уже активное создание
+    if (isCreatingDirectory) {
+        // Фокусируемся на уже существующем инпуте
+        const existingInput = document.querySelector('.new-directory-input');
+        if (existingInput) {
+            existingInput.focus();
+        }
+        return;
+    }
+    
+    isCreatingDirectory = true;
+    
+    // Находим или создаём секцию "Папки"
+    let foldersSection = document.querySelector('.content-section h5.section-header .bi-folder-fill');
+    let itemsGrid = null;
+    
+    if (foldersSection) {
+        // Секция существует - находим её grid
+        itemsGrid = foldersSection.closest('.content-section').querySelector('.items-grid');
+    } else {
+        // Секция не существует - создаём её
+        const folderContent = document.querySelector('.folder-content');
+        
+        // Удаляем сообщение о пустой папке, если есть
+        const emptyFolder = folderContent.querySelector('.empty-folder');
+        if (emptyFolder) {
+            emptyFolder.style.display = 'none';
+        }
+        
+        // Создаём секцию папок
+        const newSection = document.createElement('div');
+        newSection.className = 'content-section';
+        newSection.id = 'folders-section';
+        newSection.innerHTML = `
+            <h5 class="section-header">
+                <i class="bi bi-folder-fill me-2"></i>Папки
+            </h5>
+            <div class="items-grid"></div>
+        `;
+        
+        // Вставляем секцию в начало folder-content
+        folderContent.insertBefore(newSection, folderContent.firstChild);
+        itemsGrid = newSection.querySelector('.items-grid');
+    }
+    
+    // Создаём элемент новой категории
+    const newFolderItem = document.createElement('div');
+    newFolderItem.className = 'folder-item new-directory-item';
+    newFolderItem.setAttribute('data-parent-id', parentId || '');
+    newFolderItem.innerHTML = `
+        <div class="item-icon">
+            <i class="bi bi-folder-fill"></i>
+        </div>
+        <div class="item-name-container">
+            <form class="edit-name-form" style="display: inline-block;" onsubmit="return false;">
+                <input type="text" 
+                       class="form-control form-control-sm d-inline-block new-directory-input" 
+                       placeholder="Название категории"
+                       style="width: auto; min-width: 150px;">
+                <button type="button" 
+                        class="btn btn-sm btn-success ms-1" 
+                        onclick="saveNewDirectory()"
+                        title="Сохранить">
+                    <i class="bi bi-check"></i>
+                </button>
+            </form>
+        </div>
+    `;
+    
+    // Вставляем в начало grid
+    itemsGrid.insertBefore(newFolderItem, itemsGrid.firstChild);
+    
+    // Фокусируемся на инпуте
+    const input = newFolderItem.querySelector('.new-directory-input');
+    input.focus();
+    
+    // Добавляем обработчики событий для нового инпута
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveNewDirectory();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            cancelNewDirectory();
+        }
+    });
+    
+    input.addEventListener('blur', function(e) {
+        // Проверяем, что клик не был по кнопке сохранения
+        setTimeout(() => {
+            const relatedTarget = e.relatedTarget;
+            if (!relatedTarget || !relatedTarget.closest('.new-directory-item')) {
+                const inputValue = input.value.trim();
+                if (!inputValue) {
+                    cancelNewDirectory();
+                }
+            }
+        }, 100);
+    });
+}
+
+// Функция для сохранения новой категории
+function saveNewDirectory() {
+    const newDirItem = document.querySelector('.new-directory-item');
+    if (!newDirItem) return;
+    
+    const input = newDirItem.querySelector('.new-directory-input');
+    const name = input.value.trim();
+    const parentId = newDirItem.getAttribute('data-parent-id') || null;
+    
+    // Если название пустое - отменяем создание
+    if (!name) {
+        cancelNewDirectory();
+        return;
+    }
+    
+    // Отключаем инпут на время запроса
+    input.disabled = true;
+    const saveBtn = newDirItem.querySelector('.btn-success');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    
+    // Отправляем запрос на создание
+    fetch('/kb/directory/create/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ 
+            name: name, 
+            parent_id: parentId 
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Заменяем временный элемент на постоянный
+            const directoryId = data.id;
+            const directoryName = data.name;
+            
+            newDirItem.className = 'folder-item';
+            newDirItem.removeAttribute('data-parent-id');
+            newDirItem.onclick = function(event) {
+                if (!event.target.closest('.item-actions') && !event.target.closest('.edit-name-form')) {
+                    window.location.href = `/kb/directory/${directoryId}/`;
+                }
+            };
+            
+            newDirItem.innerHTML = `
+                <div class="item-icon">
+                    <i class="bi bi-folder-fill"></i>
+                </div>
+                <div class="item-name-container" data-directory-id="${directoryId}">
+                    <span class="item-name-display">${escapeHtml(directoryName)}</span>
+                    <form class="edit-name-form" style="display: none;" onsubmit="return false;">
+                        <input type="text" 
+                               class="form-control form-control-sm d-inline-block directory-name-input" 
+                               value="${escapeHtml(directoryName)}" 
+                               style="width: auto; min-width: 150px;"
+                               data-directory-id="${directoryId}">
+                        <button type="button" 
+                                class="btn btn-sm btn-success ms-1" 
+                                onclick="saveDirectoryName(${directoryId})"
+                                title="Сохранить">
+                            <i class="bi bi-check"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="item-actions" onclick="event.stopPropagation();">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary edit-directory-btn" 
+                            title="Редактировать название"
+                            onclick="editDirectoryName(${directoryId})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                </div>
+            `;
+            
+            isCreatingDirectory = false;
+        } else {
+            // Показываем ошибку
+            alert('Ошибка: ' + (data.error || 'Не удалось создать категорию'));
+            input.disabled = false;
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="bi bi-check"></i>';
+            input.focus();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при создании категории');
+        input.disabled = false;
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="bi bi-check"></i>';
+        input.focus();
+    });
+}
+
+// Функция для отмены создания категории
+function cancelNewDirectory() {
+    const newDirItem = document.querySelector('.new-directory-item');
+    if (!newDirItem) return;
+    
+    newDirItem.remove();
+    isCreatingDirectory = false;
+    
+    // Проверяем, осталась ли секция папок пустой
+    const foldersSection = document.getElementById('folders-section');
+    if (foldersSection) {
+        const itemsGrid = foldersSection.querySelector('.items-grid');
+        if (itemsGrid && itemsGrid.children.length === 0) {
+            foldersSection.remove();
+            
+            // Проверяем, пуста ли вся папка
+            const folderContent = document.querySelector('.folder-content');
+            const hasContent = folderContent.querySelector('.content-section');
+            if (!hasContent) {
+                // Показываем сообщение о пустой папке
+                const emptyFolder = folderContent.querySelector('.empty-folder');
+                if (emptyFolder) {
+                    emptyFolder.style.display = '';
+                }
+            }
+        }
+    }
+}
+
+// Вспомогательная функция для экранирования HTML (глобальная версия)
+function escapeHtml(text) {
+    if (!text) return '';
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
 // Обработка нажатия Enter и Escape в поле ввода, а также клика вне области редактирования
 document.addEventListener('DOMContentLoaded', function() {
     // Используем делегирование событий для динамически создаваемых элементов
@@ -139,13 +385,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Обработка клика вне области редактирования
+    // Обработка клика вне области редактирования или создания
     document.addEventListener('click', function(e) {
-        // Проверяем, есть ли активное редактирование
-        const activeForm = document.querySelector('.edit-name-form[style*="inline"]');
-        if (!activeForm) return;
-        
         const clickedElement = e.target;
+        
+        // Проверяем активное создание категории
+        const newDirectoryItem = document.querySelector('.new-directory-item');
+        if (newDirectoryItem) {
+            const isClickInsideNewItem = newDirectoryItem.contains(clickedElement);
+            const isClickOnCreateButton = clickedElement.closest('[onclick*="createNewDirectory"]');
+            
+            if (!isClickInsideNewItem && !isClickOnCreateButton) {
+                const input = newDirectoryItem.querySelector('.new-directory-input');
+                if (input && !input.value.trim()) {
+                    cancelNewDirectory();
+                    return;
+                }
+            }
+        }
+        
+        // Проверяем, есть ли активное редактирование
+        const activeForm = document.querySelector('.edit-name-form[style*="inline"]:not(.new-directory-item .edit-name-form)');
+        if (!activeForm) return;
         
         // Проверяем, что клик был не по форме редактирования и не по кнопке редактирования
         const isClickInsideForm = activeForm.contains(clickedElement);

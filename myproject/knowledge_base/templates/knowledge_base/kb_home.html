@@ -18,7 +18,7 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                    <a class="dropdown-item" href="/admin/knowledge_base/directory/add/{% if current_directory %}?parent={{ current_directory.id }}{% endif %}">
+                    <a class="dropdown-item" href="#" onclick="event.preventDefault(); createNewDirectory({% if current_directory %}{{ current_directory.id }}{% else %}null{% endif %});">
                         <i class="bi bi-folder-plus me-2"></i> Создать категорию
                     </a>
                 </li>
@@ -208,7 +208,7 @@
                                 </div>
                                 {% if user.is_authenticated and user.is_staff %}
                                     <div class="item-actions">
-                                        <a href="/admin/courses/course/{{ course_data.course.id }}/change/" 
+                                        <a href="{% url 'courses:edit_course' course_data.course.slug %}" 
                                            class="btn btn-sm btn-outline-secondary" 
                                            title="Редактировать">
                                             <i class="bi bi-pencil"></i>
