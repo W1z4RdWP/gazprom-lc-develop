@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     'django.contrib.staticfiles',
 
-    'captcha',
+    # 'captcha',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_ckeditor_5',

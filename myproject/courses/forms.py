@@ -2,11 +2,11 @@ from django import forms
 from django.contrib.auth.models import Group
 from .models import Course, Lesson, UserLessonTrajectory, Quiz
 from django_ckeditor_5.fields import CKEditor5Widget
-from captcha.fields import CaptchaField
+# from captcha.fields import CaptchaField
 import re
 
 class CourseForm(forms.ModelForm):
-    captcha = CaptchaField()
+    # captcha = CaptchaField()
     
     assigned_groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),

@@ -31,7 +31,7 @@ from quizzes.models import Answer
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.IndexView.as_view(), name='home'),
-    path('captcha/', include('captcha.urls')),
+    # path('captcha/', include('captcha.urls')),
     path('profile/', user_views.profile, name='profile'),
     path('login/', user_views.CustomLoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
