@@ -61,7 +61,7 @@
                                 </li>
                             {% endif %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
+                                <a class="nav-link" href="{% url 'users:profile' %}">Профиль</a>
                             </li>
                             <li class="nav-item">
                                 <form action="{% url 'logout' %}" method="post" style="display: inline;">
@@ -71,7 +71,7 @@
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'login' %}">Вход</a>
+                                <a class="nav-link" href="{% url 'users:login' %}">Вход</a>
                             </li>
                         {% endif %}
                     </ul>

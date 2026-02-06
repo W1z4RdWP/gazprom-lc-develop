@@ -227,3 +227,16 @@ class CustomLoginView(LoginView):
         user = form.get_user()
         auth_login(self.request, user)
         return redirect(self.get_success_url())
+
+
+@login_required
+def get_user_progress(request):
+    
+
+    context = {
+        'total_courses': 0,
+        'completed_courses': 2,
+        'quizzes_attempts': 5
+    }
+
+    return render(request, 'users/user_progress.html', context=context)

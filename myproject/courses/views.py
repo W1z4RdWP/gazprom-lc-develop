@@ -217,9 +217,16 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
         # Следующий урок
         next_lesson = self.get_next_lesson(trajectory, lesson_ids) if has_started else None
 
+        # Курс с 0 материалами не может быть завершён
+        total_items = total_lessons + total_quizzes
+        has_materials = total_items > 0
+
         # Проверка завершения всех уроков и тестов курса
-        all_lessons_and_quizzes_completed = (completed_lessons >= total_lessons and 
-                                             completed_quizzes >= total_quizzes)
+        all_lessons_and_quizzes_completed = (
+            has_materials
+            and completed_lessons >= total_lessons
+            and completed_quizzes >= total_quizzes
+        )
         
         # Проверка завершения финального теста (если есть)
         final_quiz_passed = False
@@ -230,12 +237,19 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
                 passed=True
             ).exists() if self.request.user.is_authenticated else False
 
-        # Курс считается завершенным только если все уроки, все тесты курса и финальный тест (если есть) пройдены
+        # Курс считается завершенным только если есть материалы, все уроки,
+        # все тесты курса и финальный тест (если есть) пройдены
         all_completed = all_lessons_and_quizzes_completed and (
             not self.object.final_quiz or final_quiz_passed
         )
 
-        # Обновление анимации завершения 
+        # Определяем, нужно ли показать анимацию (только один раз — при первом завершении)
+        animation_already_shown = (
+            user_course.course_complete_animation_shown if user_course else True
+        )
+        show_completion_animation = all_completed and not animation_already_shown
+
+        # Обновление флага анимации завершения (ставим флаг ПОСЛЕ определения показа)
         self.update_course_completion_animation(user_course, all_completed)
 
         # Доп. данные
@@ -251,7 +265,7 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
             'course_quizzes': course_quizzes,
             'total_lessons': total_lessons,
             'total_quizzes': total_quizzes,
-            'total_items': total_lessons + total_quizzes,
+            'total_items': total_items,
             'completed_lessons': completed_lessons,
             'completed_quizzes': completed_quizzes,
             'completed_items': completed_lessons + completed_quizzes,
@@ -263,7 +277,7 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
             'exp_earned': exp_earned,
             'show_final_quiz': show_final_quiz,
             'final_quiz_passed': final_quiz_passed,
-            'shown_animation': user_course.course_complete_animation_shown if user_course else False
+            'show_completion_animation': show_completion_animation,
         })
 
         return context
@@ -274,7 +288,7 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
 class CourseListView(ListView):
     """CBV для отображения списка всех доступных курсов пользователя"""
     template_name = 'courses/all_courses_list.html'
-    paginate_by = 10
+    paginate_by = 12
     model = UserCourse
 
 
@@ -286,21 +300,51 @@ class CourseListView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
-        courses = []
-        completed_courses = []
 
-        # Получаем курсы, назначенные пользователю
-        user_courses = UserCourse.objects.filter(user=self.request.user).values_list('course', flat=True)
-        courses = Course.objects.filter(id__in=user_courses)
-        # Получаем список завершенных курсов
-        completed_courses = UserCourse.objects.filter(
-            user=self.request.user, 
-            is_completed=True
-        ).values_list('course_id', flat=True)
+        user_courses_qs = UserCourse.objects.filter(
+            user=self.request.user
+        ).select_related('course')
+
+        courses_data = []
+        for uc in user_courses_qs:
+            course = uc.course
+            total_lessons = course.lessons.count()
+            total_quizzes = course.quizzes.count()
+            total_materials = total_lessons + total_quizzes
+
+            # Вычисляем прогресс по урокам
+            completed_lessons = UserProgress.objects.filter(
+                user=self.request.user,
+                course=course,
+                completed=True
+            ).count()
+
+            # Вычисляем прогресс по тестам
+            completed_quizzes_count = 0
+            for quiz in course.quizzes.all():
+                if QuizResult.objects.filter(
+                    user=self.request.user,
+                    quiz_title=quiz.name,
+                    passed=True
+                ).exists():
+                    completed_quizzes_count += 1
+
+            total_items = total_lessons + total_quizzes
+            completed_items = completed_lessons + completed_quizzes_count
+            progress = int((completed_items / total_items) * 100) if total_items > 0 else 0
+
+            courses_data.append({
+                'course': course,
+                'total_materials': total_materials,
+                'total_lessons': total_lessons,
+                'total_quizzes': total_quizzes,
+                'progress': progress,
+                'is_completed': uc.is_completed,
+            })
 
         context.update({
-            'courses': courses,
-            'completed_courses': completed_courses,
+            'courses_data': courses_data,
+            'has_courses': len(courses_data) > 0,
         })
 
         return context
@@ -742,6 +786,11 @@ def complete_lesson(request, course_slug, lesson_id):
 def complete_course(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     user_course = UserCourse.objects.get(user=request.user, course=course)
+
+    # Курс с 0 материалами не может быть завершён
+    total_materials = course.lessons.count() + course.quizzes.count()
+    if total_materials == 0:
+        return redirect('courses:course_detail', slug=course.slug)
     
     if course.final_quiz:
         quiz_result = QuizResult.objects.filter(
