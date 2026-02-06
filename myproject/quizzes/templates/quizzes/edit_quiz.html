@@ -1,25 +1,137 @@
 {% extends "layout.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 
-{% block title %}Редактировать тест{% endblock %}
+{% block title %}Редактировать тест — {{ quiz.name }}{% endblock %}
+
+{% block specific_styles %}
+    <link rel="stylesheet" href="{% static 'quizzes/css/edit_quiz.css' %}">
+{% endblock %}
+
+{% block specific_scripts %}
+    <script src="{% static 'quizzes/js/edit_quiz.js' %}" defer></script>
+{% endblock %}
+
 {% block content %}
-<div class="content-section">
-    <h2>Редактировать тест{% if quiz.directory %} в категории "{{ quiz.directory.name }}"{% endif %}</h2>
-    <form method="POST">
-        {% csrf_token %}
-        <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Редактировать тест "{{ quiz.name }}"</legend>
-            {{ form|crispy }}
-        </fieldset>
-        <div class="form-group mt-4">
-            <button class="btn btn-primary" type="submit">Сохранить изменения</button>
-            {% if quiz.directory %}
-                <a href="{% url 'knowledge_base:kb_directory' quiz.directory.id %}" class="btn btn-secondary">Отмена</a>
-            {% else %}
-                <a href="{% url 'quizzes:quizzes' %}" class="btn btn-secondary">Отмена</a>
-            {% endif %}
-        </div>
-    </form>
-</div>
-{% endblock content %}
 
+<div class="eq-section">
+    <!-- Настройки теста -->
+    <div class="eq-settings-card">
+        <h2><i class="bi bi-pencil-square"></i> Редактировать тест{% if quiz.directory %} в категории «{{ quiz.directory.name }}»{% endif %}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                {{ form|crispy }}
+            </fieldset>
+            <div class="form-group mt-3">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-check-lg"></i> Сохранить настройки
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Вопросы и ответы -->
+    <div class="eq-questions-header">
+        <h3>
+            <i class="bi bi-list-check"></i> Вопросы
+            <span class="eq-badge" id="questions-count">{{ questions|length }}</span>
+        </h3>
+    </div>
+
+    <div id="questions-container">
+        {% for question in questions %}
+        <div class="eq-question-card" data-question-id="{{ question.id }}" data-question-type="{{ question.question_type }}">
+            <div class="eq-question-header">
+                <div class="eq-question-number">{{ forloop.counter }}</div>
+                <div class="eq-question-body">
+                    <input
+                        type="text"
+                        class="eq-inline-input js-question-text"
+                        value="{{ question.text }}"
+                        data-original="{{ question.text }}"
+                        placeholder="Текст вопроса..."
+                    >
+                    <div class="mt-1">
+                        <select class="eq-type-select js-question-type" data-original="{{ question.question_type }}">
+                            <option value="single" {% if question.question_type == 'single' %}selected{% endif %}>Один правильный ответ</option>
+                            <option value="multiple" {% if question.question_type == 'multiple' %}selected{% endif %}>Несколько правильных ответов</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="eq-question-actions">
+                    <button class="eq-icon-btn eq-save js-save-question" title="Сохранить вопрос">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                    <button class="eq-icon-btn eq-delete js-delete-question" title="Удалить вопрос">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div> 
+            </div>
+
+            <div class="eq-answers-section js-answers-container">
+                {% for answer in question.answer_set.all %}
+                <div class="eq-answer-row" data-answer-id="{{ answer.id }}">
+                    <input
+                        type="{% if question.question_type == 'multiple' %}checkbox{% else %}radio{% endif %}"
+                        class="eq-correct-toggle js-answer-correct"
+                        {% if question.question_type == 'single' %}name="question_{{ question.id }}"{% endif %}
+                        {% if answer.is_correct %}checked{% endif %}
+                        title="Правильный ответ"
+                    >
+                    <input
+                        type="text"
+                        class="eq-answer-input js-answer-text"
+                        value="{{ answer.text }}"
+                        data-original="{{ answer.text }}"
+                        placeholder="Текст ответа..."
+                    >
+                    <button class="eq-icon-btn eq-save js-save-answer" title="Сохранить ответ">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                    <button class="eq-icon-btn eq-delete js-delete-answer" title="Удалить ответ">
+                        <i class="bi bi-x-lg"></i>
+                    </button> 
+                </div>
+                {% endfor %}
+                <button class="eq-add-answer-btn js-add-answer">
+                    <i class="bi bi-plus-circle"></i> Добавить ответ
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="eq-empty-state" id="empty-state">
+            <i class="bi bi-journal-plus"></i>
+            <p>В этом тесте пока нет вопросов</p>
+            <p style="font-size:.85rem;">Нажмите кнопку ниже, чтобы добавить первый вопрос</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button class="eq-add-question-btn" id="add-question-btn">
+        <i class="bi bi-plus-lg"></i> Добавить вопрос
+    </button>
+
+    <!-- Нижние действия -->
+    <div class="eq-bottom-actions">
+        {% if quiz.directory %}
+            <a href="{% url 'knowledge_base:kb_directory' quiz.directory.id %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Вернуться в категорию
+            </a>
+        {% else %}
+            <a href="{% url 'quizzes:quizzes' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> К списку тестов
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Toast-уведомление -->
+<div class="eq-toast" id="eq-toast"></div>
+
+<script>
+    {% comment %} Django переменные для JS {% endcomment %}
+    const QUIZ_ID = {{ quiz.id }};
+    const CSRF = '{{ csrf_token }}';
+</script>
+{% endblock content %}

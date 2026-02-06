@@ -27,8 +27,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="{% static 'global/css/style.css' %}" />
-    <script src="{% static 'global/js/scripts.js' %}" defer></script>
     {% block specific_styles %} {% endblock %}
+    <script src="{% static 'global/js/scripts.js' %}" defer></script>
+    {% block specific_scripts %} {% endblock %}
 </head>
 <body>
     <header class='header'>
