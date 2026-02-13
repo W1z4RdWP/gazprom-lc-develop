@@ -16,7 +16,6 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from django.urls import path, include, re_path
 from django.views.static import serve
 from django.conf import settings
@@ -32,12 +31,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.IndexView.as_view(), name='home'),
     # path('captcha/', include('captcha.urls')),
-    path('profile/', user_views.profile, name='profile'),
-    path('login/', user_views.CustomLoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
     path('courses/', include('courses.urls'), name='courses'),
     path('quizzes/', include('quizzes.urls'), name='quizzes'),
     path('kb/', include('knowledge_base.urls'), name='knowledge_base'),
+    path('users/', include('users.urls')),
     path('profile/quiz_report/<int:quiz_id>/', user_views.quiz_report, name='quiz_report'),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     path('error_found/', views.page_not_found_view, {'exception': Answer.MultipleObjectsReturned}, name='error'),

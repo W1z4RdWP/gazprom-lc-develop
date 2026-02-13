@@ -8,8 +8,9 @@ from django.http import HttpRequest, HttpResponse
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from django.views.decorators.cache import cache_page
 from django.urls import reverse_lazy
 
@@ -213,6 +214,23 @@ def quiz_report(request, quiz_id):
         'multiple_choice_answers': multiple_choice_answers,
     }
     return render(request, 'users/includes/_quiz_report.html', context)
+
+
+
+
+class UserManagementView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'users/user_management.html'
+
+    def test_func(self):
+        """Проверка прав доступа - только для администраторов"""
+        return self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['users'] = User.objects.all()
+        return context
+
+    
 
 
 class CustomLoginView(LoginView):
