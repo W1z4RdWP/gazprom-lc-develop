@@ -1,0 +1,164 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Профиль: {{ profile_user.username }}{% endblock %}
+{% block specific_styles %}
+<link rel="stylesheet" href="{% static 'users/css/profile.css' %}">
+{% endblock %}
+{% block content %}
+<div class="profile-wrapper">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% url 'users:user_management' %}" class="btn btn-outline-secondary btn-sm" title="К списку пользователей">
+            <i class="bi bi-arrow-left"></i> Назад
+        </a>
+        <h1 class="h5 mb-0">Профиль пользователя</h1>
+    </div>
+
+    <!-- Профиль -->
+    <div class="profile-header">
+        <div class="profile-avatar-section">
+            {% if profile_user.profile.image %}
+                <img class="profile-avatar" src="{{ profile_user.profile.image.url }}" alt="Аватар">
+            {% else %}
+                <img class="profile-avatar" src="https://via.placeholder.com/150" alt="Аватар">
+            {% endif %}
+            <div class="level-badge">Уровень {{ level }}</div>
+        </div>
+        <div class="profile-info">
+            <h2 class="profile-username">{{ profile_user.username }}</h2>
+            {% if profile_user.get_full_name %}
+                <p class="profile-email">{{ profile_user.get_full_name }}</p>
+            {% endif %}
+            <p class="profile-email">
+                <i class="bi bi-envelope"></i> {{ profile_user.email|default:"—" }}
+            </p>
+            <p class="profile-groups">
+                <i class="bi bi-people"></i>
+                {% if profile_user.groups.all %}
+                    {% for group in profile_user.groups.all %}
+                        <span class="group-badge">{{ group.name }}</span>{% if not forloop.last %} {% endif %}
+                    {% endfor %}
+                {% else %}
+                    Нет групп
+                {% endif %}
+            </p>
+            {% if profile_user.profile.bio %}
+                <p class="profile-bio">{{ profile_user.profile.bio }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Опыт -->
+    <div class="experience-section">
+        <div class="experience-header">
+            <span class="experience-label">Опыт</span>
+            <span class="experience-value">{{ exp }} XP</span>
+        </div>
+        <div class="experience-bar">
+            <div class="experience-fill" style="width: {{ progress }}%;"></div>
+            <div class="experience-text">{{ progress }}% до следующего уровня</div>
+        </div>
+    </div>
+
+    <!-- Прогресс по курсам -->
+    <div class="courses-section">
+        <h2 class="section-title">
+            <i class="bi bi-journal-book"></i> Прогресс по курсам
+        </h2>
+        <div class="courses-grid">
+            {% for progress in unfinished_courses %}
+            <div class="course-card">
+                <div class="course-card-header">
+                    <h3 class="course-title">{{ progress.course.title }}</h3>
+                    <span class="course-progress-badge">{{ progress.percent }}%</span>
+                </div>
+                <div class="course-progress-bar">
+                    <div class="course-progress-fill" style="width: {{ progress.percent }}%;"></div>
+                </div>
+                <p class="course-stats">
+                    Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
+                    {% if progress.total_quizzes > 0 %}
+                        <br>Пройдено тестов: {{ progress.completed_quizzes }} из {{ progress.total_quizzes }}
+                    {% endif %}
+                </p>
+                {% if progress.course.final_quiz %}
+                    <div class="quiz-status">
+                        {% if progress.quiz_passed %}
+                            <span class="status-badge success"><i class="bi bi-check-circle"></i> Тест пройден</span>
+                        {% else %}
+                            <span class="status-badge warning"><i class="bi bi-clock"></i> Требуется тест</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <div class="course-actions">
+                    <a href="{% url 'courses:course_detail' progress.course.slug %}" class="btn-course-primary">Курс</a>
+                </div>
+            </div>
+            {% endfor %}
+            {% for progress in finished_courses %}
+            <div class="course-card completed">
+                <div class="course-card-header">
+                    <h3 class="course-title">{{ progress.course.title }}</h3>
+                    <span class="course-progress-badge completed">{{ progress.percent }}%</span>
+                </div>
+                <div class="course-progress-bar">
+                    <div class="course-progress-fill completed" style="width: {{ progress.percent }}%;"></div>
+                </div>
+                <p class="course-stats">
+                    Пройдено уроков: {{ progress.completed }} из {{ progress.total }}
+                    {% if progress.total_quizzes > 0 %}
+                        <br>Пройдено тестов: {{ progress.completed_quizzes }} из {{ progress.total_quizzes }}
+                    {% endif %}
+                </p>
+                <div class="course-actions">
+                    <span class="btn-course-success"><i class="bi bi-check-circle"></i> Завершён</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% if not unfinished_courses and not finished_courses %}
+            <div class="empty-state">
+                <i class="bi bi-journal-x empty-icon" style="font-size: 3rem;"></i>
+                <p>Курсы не начаты</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- История тестов -->
+    <div class="courses-section">
+        <h2 class="section-title">
+            <i class="bi bi-card-checklist"></i> Последние тесты
+        </h2>
+        {% if quiz_results %}
+            <div class="quiz-grid">
+                {% for result in quiz_results %}
+                <div class="quiz-card">
+                    <div class="quiz-card-header">
+                        <h3 class="quiz-title">{{ result.quiz_title }}</h3>
+                        {% if result.passed %}
+                            <span class="quiz-status-badge passed"><i class="bi bi-check-circle"></i> Пройден</span>
+                        {% else %}
+                            <span class="quiz-status-badge failed"><i class="bi bi-x-circle"></i> Не пройден</span>
+                        {% endif %}
+                    </div>
+                    <div class="quiz-card-body">
+                        <div class="quiz-progress-wrapper">
+                            <div class="quiz-progress-bar">
+                                <div class="quiz-progress-fill" style="width: {{ result.percent|floatformat:0 }}%;"></div>
+                            </div>
+                            <span class="quiz-progress-text">{{ result.percent|floatformat:0 }}%</span>
+                        </div>
+                        <p class="quiz-score">Правильных: <strong>{{ result.score }}/{{ result.total_questions }}</strong></p>
+                        <span class="quiz-date">{{ result.completed_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-card-list empty-icon" style="font-size: 3rem;"></i>
+                <p>Тесты не проходились</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

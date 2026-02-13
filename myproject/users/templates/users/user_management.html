@@ -25,7 +25,7 @@
                     <td>{{ user.email|default:"—" }}</td>
                     <td>{% if user.groups.all %}{{ user.groups.first.name }}{% else %}—{% endif %}</td>
                     <td class="text-end">
-                        <a href="#" class="btn btn-sm btn-outline-secondary">Подробнее</a>
+                        <a href="{% url 'users:user_detail' user.pk %}" class="btn btn-sm btn-outline-secondary">Подробнее</a>
                     </td>
                 </tr>
                 {% empty %}

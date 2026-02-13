@@ -218,6 +218,108 @@ def quiz_report(request, quiz_id):
 
 
 
+def _get_user_learning_stats(target_user):
+    """Собирает статистику обучения пользователя: курсы, опыт, уровень, тесты."""
+    started_courses = UserCourse.objects.filter(user=target_user).select_related('course')
+    unfinished_courses = []
+    finished_courses = []
+    exp = 0
+    level = 1
+
+    for user_course in started_courses:
+        course = user_course.course
+        trajectory = UserLessonTrajectory.objects.filter(user=target_user, course=course).first()
+
+        if trajectory:
+            lesson_ids = trajectory.lessons.values_list('id', flat=True)
+            completed_lessons = UserProgress.objects.filter(
+                user=target_user,
+                course=course,
+                completed=True,
+                lesson_id__in=lesson_ids
+            ).count()
+            total_lessons = trajectory.lessons.count()
+        else:
+            lesson_ids = course.lessons.values_list('id', flat=True)
+            completed_lessons = UserProgress.objects.filter(
+                user=target_user,
+                course=course,
+                completed=True,
+                lesson_id__in=lesson_ids
+            ).count()
+            total_lessons = course.lessons.count()
+
+        course_quizzes = course.quizzes.all()
+        total_quizzes = course_quizzes.count()
+        completed_quizzes = sum(
+            1 for q in course_quizzes
+            if QuizResult.objects.filter(user=target_user, quiz_title=q.name, passed=True).exists()
+        )
+        total_items = total_lessons + total_quizzes
+        completed_items = completed_lessons + completed_quizzes
+        percent = int((completed_items / total_items) * 100) if total_items > 0 else 0
+
+        course_data = {
+            'course': course,
+            'completed': completed_lessons,
+            'total': total_lessons,
+            'completed_quizzes': completed_quizzes,
+            'total_quizzes': total_quizzes,
+            'percent': percent,
+        }
+        if course.final_quiz:
+            course_data['quiz_passed'] = QuizResult.objects.filter(
+                user=target_user,
+                quiz_title=course.final_quiz.name,
+                passed=True
+            ).exists()
+        else:
+            course_data['quiz_passed'] = True
+
+        all_done = completed_lessons >= total_lessons and completed_quizzes >= total_quizzes
+        is_course_completed = all_done and course_data.get('quiz_passed', True)
+
+        if is_course_completed:
+            if user_course.can_receive_exp():
+                finished_courses.append(course_data)
+                exp += user_course.exp_reward()
+            else:
+                unfinished_courses.append(course_data)
+                exp += 15
+        else:
+            unfinished_courses.append(course_data)
+            exp += 15
+
+    while exp >= level * 100:
+        level += 1
+    progress = ((exp - ((level - 1) * 100)) / 100) * 100
+    progress = min(progress, 100)
+
+    quiz_results = QuizResult.objects.filter(user=target_user).order_by('-completed_at')[:10]
+    return {
+        'unfinished_courses': unfinished_courses,
+        'finished_courses': finished_courses,
+        'exp': exp,
+        'level': level,
+        'progress': int(progress),
+        'quiz_results': quiz_results,
+    }
+
+
+@login_required
+def user_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    """Детальный просмотр пользователя и статистики обучения (только для staff)."""
+    if not request.user.is_staff:
+        return redirect('home')
+    profile_user = get_object_or_404(User, pk=pk)
+    stats = _get_user_learning_stats(profile_user)
+    context = {
+        'profile_user': profile_user,
+        **stats,
+    }
+    return render(request, 'users/user_detail.html', context)
+
+
 class UserManagementView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'users/user_management.html'
 
