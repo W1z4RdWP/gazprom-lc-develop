@@ -89,7 +89,7 @@
         <div id="edit-profile-form" class="edit-form-container" style="display: {% if show_edit_form %}block{% else %}none{% endif %};">
             <div class="form-card">
                 <h2 class="form-title">Редактирование профиля</h2>
-                <form method="POST" action="{% url 'profile' %}" enctype="multipart/form-data" autocomplete="off" id="profile-update-form">
+                <form method="POST" action="{% url 'users:profile' %}" enctype="multipart/form-data" autocomplete="off" id="profile-update-form">
                     {% csrf_token %}
                     <fieldset class="form-group">
                         {{ user_form|crispy }}

@@ -17,7 +17,7 @@ from django.urls import reverse_lazy
 from myapp.models import UserCourse, UserProgress, QuizResult, UserAnswer
 from quizzes.models import Answer
 from courses.models import UserLessonTrajectory
-from .forms import UserUpdateForm, ProfileUpdateForm
+from .forms import UserUpdateForm, ProfileUpdateForm, UserRegistrationForm
  
 
 
@@ -230,7 +230,27 @@ class UserManagementView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['users'] = User.objects.all()
         return context
 
-    
+
+class RegisterUserView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+    """Регистрация нового пользователя (только для staff)."""
+    template_name = 'users/register.html'
+    form_class = UserRegistrationForm
+    success_url = reverse_lazy('users:user_management')
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.email = form.cleaned_data['email']
+        user.first_name = form.cleaned_data.get('first_name', '')
+        user.last_name = form.cleaned_data.get('last_name', '')
+        user.save()
+        group = form.cleaned_data.get('group')
+        if group:
+            user.groups.add(group)
+        messages.success(self.request, f'Пользователь «{user.username}» успешно создан.')
+        return super().form_valid(form)
 
 
 class CustomLoginView(LoginView):
