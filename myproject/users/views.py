@@ -17,7 +17,7 @@ from django.urls import reverse_lazy
 from myapp.models import UserCourse, UserProgress, QuizResult, UserAnswer
 from quizzes.models import Answer
 from courses.models import UserLessonTrajectory
-from .forms import UserUpdateForm, ProfileUpdateForm, UserRegistrationForm
+from .forms import UserUpdateForm, ProfileUpdateForm, UserRegistrationForm, AdminUserEditForm
  
 
 
@@ -318,6 +318,27 @@ def user_detail(request: HttpRequest, pk: int) -> HttpResponse:
         **stats,
     }
     return render(request, 'users/user_detail.html', context)
+
+
+
+@login_required
+def user_edit(request: HttpRequest, pk: int) -> HttpResponse:
+    """Редактирование пользователя администратором: имя, фамилия, почта, группа."""
+    if not request.user.is_staff:
+        return redirect('home')
+    profile_user = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        form = AdminUserEditForm(user=profile_user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Данные пользователя «{profile_user.username}» обновлены.')
+            return redirect('users:user_detail', pk=pk)
+    else:
+        form = AdminUserEditForm(user=profile_user)
+    return render(request, 'users/user_edit.html', {'form': form, 'profile_user': profile_user})
+    
+
+
 
 
 class UserManagementView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):

@@ -54,7 +54,7 @@
                 </thead>
                 <tbody>
                     {% for user in users %}
-                    <tr class="user-row" data-href="{% url 'users:user_detail' user.pk %}">
+                    <tr class="user-row" data-href="{% url 'users:user_detail' user.pk %}" data-edit-href="{% url 'users:user_edit' user.pk %}">
                         <td>{{ user.username }}</td>
                         <td>{{ user.email|default:"—" }}</td>
                         <td>{% if user.groups.all %}{{ user.groups.first.name }}{% else %}—{% endif %}</td>
@@ -98,8 +98,8 @@
                     var url = activeRow.getAttribute('data-href');
                     if (url) window.location.href = url;
                 } else if (action === 'edit') {
-                    // Заглушка: Редактировать
-                    console.log('Редактировать пользователя — в разработке');
+                    var editUrl = activeRow.getAttribute('data-edit-href');
+                    if (editUrl) window.location.href = editUrl;
                 }
                 activeRow = null;
             });
