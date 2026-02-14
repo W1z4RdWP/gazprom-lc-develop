@@ -55,7 +55,7 @@
                             <div class="mb-2">
                                 <span class="text-muted small">
                                     <i class="bi bi-file-earmark-text me-1"></i>
-                                    Материалов: {{ course.lessons_count }}
+                                    Материалов: {{ course.lessons_count|add:course.quizzes_count }}
                                 </span>
                             </div>
                             <div class="mb-3">

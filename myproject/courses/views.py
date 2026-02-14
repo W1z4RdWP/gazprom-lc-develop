@@ -291,7 +291,11 @@ class CourseListView(ListView):
 
         # Получаем курсы, назначенные пользователю (с количеством уроков за один запрос)
         user_courses = UserCourse.objects.filter(user=self.request.user).values_list('course', flat=True)
-        courses = Course.objects.filter(id__in=user_courses).annotate(lessons_count=Count('lessons'))
+        # total_items как в course_detail: уроки + тесты курса (только M2M quizzes, без final_quiz)
+        courses = Course.objects.filter(id__in=user_courses).annotate(
+            lessons_count=Count('lessons', distinct=True),
+            quizzes_count=Count('quizzes', distinct=True)
+        )
         # Получаем список завершенных курсов
         completed_courses = UserCourse.objects.filter(
             user=self.request.user, 
