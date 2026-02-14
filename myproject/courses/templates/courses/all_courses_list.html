@@ -1,43 +1,79 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% block specific_styles %}
+    <style>
+        .course-card-image-wrapper {
+            height: 180px;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+        .course-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .course-card-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        }
+        .course-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .course-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
 
-<div class="container mt-4">
-    <h1>Список Курсов</h1>
+    <div class="container mt-4 mb-5">
+        <h1 class="mb-4">Список курсов</h1>
 
-    <div class="row">
-        <div class="col-md-12">
-            <h3>Доступные курсы</h3>
-            <div class="list-group">
-                {% if not user.course %}
-                    <p>Вам пока еще не назначили ни одного курса. Обратитесь к администрации сайта</p>
-                {% endif %}
+        {% if not courses %}
+            <div class="alert alert-info">
+                Вам пока ещё не назначили ни одного курса. Обратитесь к администрации сайта.
+            </div>
+        {% else %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                 {% for course in courses %}
-                <a href="{% url 'courses:course_detail' course.slug %}"
-                   class="list-group-item list-group-item-action">
-                    {{ course.title }}
-                    {% if user.is_authenticated and course.id in completed_courses %}
-                        <span class="badge bg-success float-end">Завершен</span>
-                    {% endif %}
-                </a>
+                <div class="col">
+                    <div class="card h-100 shadow-sm course-card">
+                        <div class="course-card-image-wrapper">
+                            {% if course.image %}
+                                <img src="{{ course.image.url }}" class="card-img-top course-card-img" alt="{{ course.title }}">
+                            {% else %}
+                                <div class="course-card-placeholder d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-journal-bookmark-fill text-secondary" style="font-size: 3rem;"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ course.title }}</h5>
+                            <div class="mb-2">
+                                <span class="text-muted small">
+                                    <i class="bi bi-file-earmark-text me-1"></i>
+                                    Материалов: {{ course.lessons_count }}
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                {% if course.id in completed_courses %}
+                                    <span class="badge bg-success">Завершён</span>
+                                {% else %}
+                                    <span class="badge bg-primary">В процессе</span>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-outline-primary mt-auto">
+                                Перейти к курсу <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
                 {% endfor %}
             </div>
-        </div>
+        {% endif %}
     </div>
-<br><br>
-    {% comment %} <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    {% if request.user.is_authenticated %}
-                        <p>Выберите курс</p>
-                    {% else %}
-                    <p>Чтобы начать курс, пожалуйста, войдите.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div> {% endcomment %}
+
 {% endblock %}

@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Max
+from django.db.models import Max, Count
 from django.db import transaction
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -289,9 +289,9 @@ class CourseListView(ListView):
         courses = []
         completed_courses = []
 
-        # Получаем курсы, назначенные пользователю
+        # Получаем курсы, назначенные пользователю (с количеством уроков за один запрос)
         user_courses = UserCourse.objects.filter(user=self.request.user).values_list('course', flat=True)
-        courses = Course.objects.filter(id__in=user_courses)
+        courses = Course.objects.filter(id__in=user_courses).annotate(lessons_count=Count('lessons'))
         # Получаем список завершенных курсов
         completed_courses = UserCourse.objects.filter(
             user=self.request.user, 
