@@ -1,7 +1,39 @@
 {% extends 'layout.html' %}
 {% block title %}Управление пользователями{% endblock %}
 {% block specific_styles %}
-    <style>.user-row { cursor: pointer; }</style>
+    <style>
+        .user-row { cursor: context-menu; }
+        #user-context-menu {
+            display: none;
+            position: fixed;
+            z-index: 1050;
+            min-width: 160px;
+            padding: 4px 0;
+            background: var(--bs-body-bg, #fff);
+            border: 1px solid var(--bs-border-color, #dee2e6);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.15);
+            list-style: none;
+            margin: 0;
+        }
+        #user-context-menu.show { display: block; }
+        #user-context-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: var(--bs-body-color);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        #user-context-menu button:hover {
+            background: var(--bs-secondary-bg, #e9ecef);
+        }
+        #user-context-menu button i { margin-right: 8px; }
+    </style>
 {% endblock %}
 {% block content %}
     <div class="container py-4">
@@ -22,7 +54,7 @@
                 </thead>
                 <tbody>
                     {% for user in users %}
-                    <tr class="user-row" data-href="{% url 'users:user_detail' user.pk %}" role="button" title="Двойной клик — подробнее">
+                    <tr class="user-row" data-href="{% url 'users:user_detail' user.pk %}">
                         <td>{{ user.username }}</td>
                         <td>{{ user.email|default:"—" }}</td>
                         <td>{% if user.groups.all %}{{ user.groups.first.name }}{% else %}—{% endif %}</td>
@@ -35,16 +67,47 @@
                 </tbody>
             </table>
         </div>
+        <ul id="user-context-menu">
+            <li><button type="button" data-action="detail"><i class="bi bi-eye"></i>Подробнее</button></li>
+            <li><button type="button" data-action="edit"><i class="bi bi-pencil"></i>Редактировать</button></li>
+        </ul>
     </div>
 {% endblock %}
 
 {% block specific_scripts %}
     (function() {
+        var menu = document.getElementById('user-context-menu');
+        var activeRow = null;
+
         document.querySelectorAll('.user-row').forEach(function(row) {
-            row.addEventListener('dblclick', function() {
-                var url = this.getAttribute('data-href');
-                if (url) window.location.href = url;
+            row.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                activeRow = row;
+                menu.classList.add('show');
+                menu.style.left = e.clientX + 'px';
+                menu.style.top = e.clientY + 'px';
             });
+        });
+
+        menu.querySelectorAll('button[data-action]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var action = this.getAttribute('data-action');
+                menu.classList.remove('show');
+                if (!activeRow) return;
+                if (action === 'detail') {
+                    var url = activeRow.getAttribute('data-href');
+                    if (url) window.location.href = url;
+                } else if (action === 'edit') {
+                    // Заглушка: Редактировать
+                    console.log('Редактировать пользователя — в разработке');
+                }
+                activeRow = null;
+            });
+        });
+
+        document.addEventListener('click', function() {
+            menu.classList.remove('show');
+            activeRow = null;
         });
     })();
 {% endblock %}
