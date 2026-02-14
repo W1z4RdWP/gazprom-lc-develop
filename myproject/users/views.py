@@ -231,12 +231,17 @@ class CustomLoginView(LoginView):
 
 @login_required
 def get_user_progress(request):
-    
+    quizresults = QuizResult.objects.all()
+    user_courses = UserCourse.objects.all()
+
+    quizzes_attempt = quizresults.filter(user=request.user).count()
+    total_courses = user_courses.filter(user=request.user).count()
+    completed_courses = user_courses.filter(user=request.user, is_completed=True).count() 
 
     context = {
-        'total_courses': 0,
-        'completed_courses': 2,
-        'quizzes_attempts': 5
+        'total_courses': total_courses,
+        'completed_courses': completed_courses,
+        'quizzes_attempts': quizzes_attempt
     }
 
     return render(request, 'users/user_progress.html', context=context)
