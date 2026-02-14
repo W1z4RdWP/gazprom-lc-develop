@@ -67,22 +67,21 @@ class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=150, required=False, label='Имя')
     last_name = forms.CharField(max_length=150, required=False, label='Фамилия')
-    group = forms.ModelChoiceField(
+    groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
         required=False,
-        label='Группа',
-        empty_label='— не выбрано —'
+        label='Группы',
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
     )
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'group']
+        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'groups']
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'username'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'email'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'given-name'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'family-name'}),
-            'group': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -95,16 +94,15 @@ class UserRegistrationForm(UserCreationForm):
 
 
 class AdminUserEditForm(forms.Form):
-    """Форма редактирования пользователя администратором (is_staff): имя, фамилия, почта, группа."""
+    """Форма редактирования пользователя администратором (is_staff): имя, фамилия, почта, группы."""
     first_name = forms.CharField(max_length=150, required=False, label='Имя', widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}))
     last_name = forms.CharField(max_length=150, required=False, label='Фамилия', widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}))
     email = forms.EmailField(required=False, label='Email', widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'off'}))
-    group = forms.ModelChoiceField(
+    groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
         required=False,
-        label='Группа',
-        empty_label='— не выбрано —',
-        widget=forms.Select(attrs={'class': 'form-select'})
+        label='Группы',
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
     )
 
     def __init__(self, user=None, *args, **kwargs):
@@ -114,9 +112,7 @@ class AdminUserEditForm(forms.Form):
             self.fields['first_name'].initial = user.first_name
             self.fields['last_name'].initial = user.last_name
             self.fields['email'].initial = user.email
-            current_group = user.groups.first()
-            if current_group:
-                self.fields['group'].initial = current_group
+            self.fields['groups'].initial = user.groups.all()
 
     def save(self):
         if not self._user:
@@ -125,10 +121,7 @@ class AdminUserEditForm(forms.Form):
         self._user.last_name = self.cleaned_data.get('last_name', '')
         self._user.email = self.cleaned_data.get('email', '')
         self._user.save()
-        self._user.groups.clear()
-        group = self.cleaned_data.get('group')
-        if group:
-            self._user.groups.add(group)
+        self._user.groups.set(self.cleaned_data.get('groups', []))
         return self._user
 
 

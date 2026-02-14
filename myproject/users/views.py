@@ -332,7 +332,7 @@ def user_edit(request: HttpRequest, pk: int) -> HttpResponse:
         if form.is_valid():
             form.save()
             messages.success(request, f'Данные пользователя «{profile_user.username}» обновлены.')
-            return redirect('users:user_detail', pk=pk)
+            return redirect('users:user_management')
     else:
         form = AdminUserEditForm(user=profile_user)
     return render(request, 'users/user_edit.html', {'form': form, 'profile_user': profile_user})
@@ -370,7 +370,7 @@ class UserManagementView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users'] = User.objects.all()
+        context['users'] = User.objects.prefetch_related('groups').all()
         return context
 
 
@@ -389,9 +389,9 @@ class RegisterUserView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         user.first_name = form.cleaned_data.get('first_name', '')
         user.last_name = form.cleaned_data.get('last_name', '')
         user.save()
-        group = form.cleaned_data.get('group')
-        if group:
-            user.groups.add(group)
+        groups = form.cleaned_data.get('groups', [])
+        if groups:
+            user.groups.set(groups)
         messages.success(self.request, f'Пользователь «{user.username}» успешно создан.')
         return super().form_valid(form)
 

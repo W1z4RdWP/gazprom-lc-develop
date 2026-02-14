@@ -57,7 +57,7 @@
                     <tr class="user-row" data-href="{% url 'users:user_detail' user.pk %}" data-edit-href="{% url 'users:user_edit' user.pk %}">
                         <td>{{ user.username }}</td>
                         <td>{{ user.email|default:"—" }}</td>
-                        <td>{% if user.groups.all %}{{ user.groups.first.name }}{% else %}—{% endif %}</td>
+                        <td>{% for group in user.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
                     </tr>
                     {% empty %}
                     <tr>

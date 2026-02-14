@@ -36,8 +36,17 @@
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label for="id_group" class="form-label">{{ form.group.label }}</label>
-                    {{ form.group }}
+                    <label class="form-label">{{ form.groups.label }}</label>
+                    <div class="border rounded p-3 bg-white" style="max-height: 200px; overflow-y: auto;">
+                        {% for choice in form.groups %}
+                            <div class="form-check">
+                                {{ choice.tag }}
+                                <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.groups.help_text %}<div class="form-text">{{ form.groups.help_text }}</div>{% endif %}
+                    {% if form.groups.errors %}<div class="form-text text-danger">{{ form.groups.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="mb-3">
                     <label for="id_password1" class="form-label">{{ form.password1.label }}</label>
