@@ -1,6 +1,8 @@
+import json
+
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpRequest, HttpResponse
-from django.views.decorators.http import require_http_methods
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.views.decorators.http import require_http_methods, require_POST
 from django.db.models import Count, Exists, OuterRef
 from django.contrib import messages  # Добавлен импорт
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -107,18 +109,167 @@ def edit_quiz(request, quiz_id):
         form = QuizForm(request.POST, instance=quiz, directory=directory)
         if form.is_valid():
             form.save()
-            # Перенаправляем в зависимости от того, где находится тест
-            if quiz.directory:
-                return redirect('knowledge_base:kb_directory', directory_id=quiz.directory.id)
-            else:
-                return redirect('quizzes:quizzes')
+            messages.success(request, 'Тест успешно сохранён.')
+            return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
     else:
         form = QuizForm(instance=quiz, directory=directory)
     
+    # Загружаем вопросы с ответами для отображения
+    questions = Question.objects.filter(quiz=quiz).order_by('id').prefetch_related('answer_set')
+    
     return render(request, 'quizzes/edit_quiz.html', {
         'form': form,
-        'quiz': quiz
+        'quiz': quiz,
+        'questions': questions,
     })
+
+
+# ==================== AJAX API для вопросов и ответов ====================
+
+def _staff_required_json(user):
+    """Проверка прав для AJAX-эндпоинтов"""
+    return user.is_authenticated and user.is_staff
+
+
+@login_required
+@require_POST
+@user_passes_test(_staff_required_json)
+def api_add_question(request, quiz_id):
+    """Добавить вопрос к тесту"""
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
+
+    text = data.get('text', '').strip()
+    question_type = data.get('question_type', Question.SINGLE)
+
+    if not text:
+        return JsonResponse({'error': 'Текст вопроса не может быть пустым'}, status=400)
+
+    question = Question.objects.create(
+        quiz=quiz,
+        text=text,
+        question_type=question_type
+    )
+    return JsonResponse({
+        'id': question.id,
+        'text': question.text,
+        'question_type': question.question_type,
+    })
+
+
+@login_required
+@require_POST
+@user_passes_test(_staff_required_json)
+def api_update_question(request, quiz_id, question_id):
+    """Обновить вопрос"""
+    question = get_object_or_404(Question, id=question_id, quiz_id=quiz_id)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
+
+    text = data.get('text')
+    question_type = data.get('question_type')
+
+    if text is not None:
+        text = text.strip()
+        if not text:
+            return JsonResponse({'error': 'Текст вопроса не может быть пустым'}, status=400)
+        question.text = text
+
+    if question_type is not None:
+        if question_type in [Question.SINGLE, Question.MULTIPLE]:
+            question.question_type = question_type
+
+    question.save()
+    return JsonResponse({
+        'id': question.id,
+        'text': question.text,
+        'question_type': question.question_type,
+    })
+
+
+@login_required
+@require_POST
+@user_passes_test(_staff_required_json)
+def api_delete_question(request, quiz_id, question_id):
+    """Удалить вопрос"""
+    question = get_object_or_404(Question, id=question_id, quiz_id=quiz_id)
+    question.delete()
+    return JsonResponse({'success': True})
+
+
+@login_required
+@require_POST
+@user_passes_test(_staff_required_json)
+def api_add_answer(request, quiz_id, question_id):
+    """Добавить ответ к вопросу"""
+    question = get_object_or_404(Question, id=question_id, quiz_id=quiz_id)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
+
+    text = data.get('text', '').strip()
+    is_correct = data.get('is_correct', False)
+
+    if not text:
+        return JsonResponse({'error': 'Текст ответа не может быть пустым'}, status=400)
+
+    answer = Answer.objects.create(
+        question=question,
+        text=text,
+        is_correct=is_correct
+    )
+    return JsonResponse({
+        'id': answer.id,
+        'text': answer.text,
+        'is_correct': answer.is_correct,
+    })
+
+
+@login_required
+@require_POST
+@user_passes_test(_staff_required_json)
+def api_update_answer(request, quiz_id, answer_id):
+    """Обновить ответ"""
+    answer = get_object_or_404(Answer, id=answer_id, question__quiz_id=quiz_id)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
+
+    text = data.get('text')
+    is_correct = data.get('is_correct')
+
+    if text is not None:
+        text = text.strip()
+        if not text:
+            return JsonResponse({'error': 'Текст ответа не может быть пустым'}, status=400)
+        answer.text = text
+
+    if is_correct is not None:
+        answer.is_correct = bool(is_correct)
+
+    answer.save()
+    return JsonResponse({
+        'id': answer.id,
+        'text': answer.text,
+        'is_correct': answer.is_correct,
+    })
+
+
+@login_required
+@require_POST
+@user_passes_test(_staff_required_json)
+def api_delete_answer(request, quiz_id, answer_id):
+    """Удалить ответ"""
+    answer = get_object_or_404(Answer, id=answer_id, question__quiz_id=quiz_id)
+    answer.delete()
+    return JsonResponse({'success': True})
 
 
 
@@ -231,7 +382,12 @@ def get_answer(request) -> HttpResponse:
         else:
             submitted_answer_id = request.POST.get('answer_id')
             if submitted_answer_id:
-                submitted_answer = get_object_or_404(Answer, id=submitted_answer_id)
+                try:
+                    submitted_answer = Answer.objects.get(id=submitted_answer_id)
+                except Answer.DoesNotExist:
+                    messages.error(request, 'Выбранный ответ не найден.')
+                    return redirect('quizzes:quizzes')
+
                 is_correct = submitted_answer.is_correct
 
                 # Сохраняем выбранный ответ в сессии
@@ -241,6 +397,12 @@ def get_answer(request) -> HttpResponse:
                     'question_type': 'single'
                 }
 
+                try:
+                    correct_answer = Answer.objects.get(question=question, is_correct=True)
+                except Answer.DoesNotExist:
+                    messages.error(request, 'Ошибка данных вопроса: не найден правильный ответ.')
+                    return redirect('quizzes:quizzes')
+
                 context = {
                     'current_question_number': list(Question.objects.filter(quiz_id=quiz_id).order_by('id').values_list('id', flat=True)).index(current_question_id) + 1,
                     'total_questions': Question.objects.filter(quiz_id=quiz_id).count(),
@@ -248,8 +410,7 @@ def get_answer(request) -> HttpResponse:
                     'is_correct': is_correct,
                     'question': question,
                     'submitted_answer': submitted_answer,
-                    'correct_answer': Answer.objects.get(question=question, is_correct=True),
-                    
+                    'correct_answer': correct_answer,
                 }
             else:
                 return redirect('quizzes:quizzes')

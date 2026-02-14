@@ -185,8 +185,8 @@
         </div>
     </div>
 
-    <!-- Анимация завершения курса -->
-    {% if all_completed %}
+    <!-- Анимация завершения курса (показывается только один раз) -->
+    {% if show_completion_animation %}
     <div id="course-completion-animation" class="completion-animation">
         <div class="confetti"></div>
         <div class="completion-message">
