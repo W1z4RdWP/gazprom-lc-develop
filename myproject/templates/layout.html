@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="{% static 'global/css/style.css' %}" />
     {% block specific_styles %} {% endblock %}
     <script src="{% static 'global/js/scripts.js' %}" defer></script>
-    {% block specific_scripts %} {% endblock %}
+    {% comment %} {% block specific_scripts %} {% endblock %} {% endcomment %}
 </head>
 <body>
     <header class='header'>

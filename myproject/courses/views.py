@@ -300,21 +300,47 @@ class CourseListView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
-        courses = []
-        completed_courses = []
+        user_courses_qs = UserCourse.objects.filter(
+            user=self.request.user
+        ).select_related('course')
 
-        # Получаем курсы, назначенные пользователю (с количеством уроков за один запрос)
-        user_courses = UserCourse.objects.filter(user=self.request.user).values_list('course', flat=True)
-        # total_items как в course_detail: уроки + тесты курса (только M2M quizzes, без final_quiz)
-        courses = Course.objects.filter(id__in=user_courses).annotate(
-            lessons_count=Count('lessons', distinct=True),
-            quizzes_count=Count('quizzes', distinct=True)
-        )
-        # Получаем список завершенных курсов
-        completed_courses = UserCourse.objects.filter(
-            user=self.request.user, 
-            is_completed=True
-        ).values_list('course_id', flat=True)
+        courses_data = []
+        for uc in user_courses_qs:
+            course = uc.course
+            total_lessons = course.lessons.count()
+            total_quizzes = course.quizzes.count()
+            total_materials = total_lessons + total_quizzes
+
+            # Вычисляем прогресс по урокам
+            completed_lessons = UserProgress.objects.filter(
+                user=self.request.user,
+                course=course,
+                completed=True
+            ).count()
+
+            # Вычисляем прогресс по тестам
+            completed_quizzes_count = 0
+
+            for quiz in course.quizzes.all():
+                if QuizResult.objects.filter(
+                    user=self.request.user,
+                    quiz_title=quiz.name,
+                    passed=True
+                ).exists():
+                    completed_quizzes_count += 1
+
+            total_items = total_lessons + total_quizzes
+            completed_items = completed_lessons + completed_quizzes_count
+            progress = int((completed_items / total_items) * 100) if total_items > 0 else 0
+
+            courses_data.append({
+                'course': course,
+                'total_materials': total_materials,
+                'total_lessons': total_lessons,
+                'total_quizzes': total_quizzes,
+                'progress': progress,
+                'is_completed': uc.is_completed,
+            })
 
         context.update({
             'courses_data': courses_data,
