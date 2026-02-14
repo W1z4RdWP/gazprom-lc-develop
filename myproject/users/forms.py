@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.password_validation import validate_password
 from .models import Profile
 # from captcha.fields import CaptchaField
 
@@ -128,4 +129,45 @@ class AdminUserEditForm(forms.Form):
         group = self.cleaned_data.get('group')
         if group:
             self._user.groups.add(group)
+        return self._user
+
+
+class ChangeUserPasswordForm(forms.Form):
+    """Форма смены пароля пользователя администратором."""
+
+    password1 = forms.CharField(
+        label='Новый пароль',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
+        min_length=8,
+        required=True,
+    )
+    password2 = forms.CharField(
+        label='Подтверждение пароля',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
+        min_length=8,
+        required=True,
+    )
+
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._user = user
+
+    def clean_password1(self):
+        password1 = self.cleaned_data.get('password1')
+        if password1:
+            validate_password(password1, self._user)
+        return password1
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError('Пароли не совпадают.')
+        return password2
+
+    def save(self):
+        if not self._user:
+            return None
+        self._user.set_password(self.cleaned_data['password1'])
+        self._user.save()
         return self._user

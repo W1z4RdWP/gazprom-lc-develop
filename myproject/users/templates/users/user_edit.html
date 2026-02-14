@@ -43,23 +43,12 @@
                 <div class="d-flex flex-wrap gap-2 align-items-center">
                     <button type="submit" class="btn btn-primary">Сохранить</button>
                     <a href="{% url 'users:user_detail' profile_user.pk %}" class="btn btn-outline-secondary">Отмена</a>
-                    <button type="button" id="btn-change-password" class="btn btn-outline-warning ms-auto">
+                    <a href="{% url 'users:user_change_password' profile_user.pk %}" class="btn btn-outline-warning ms-auto">
                         <i class="bi bi-key me-1"></i>Сменить пароль
-                    </button>
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block specific_scripts %}
-<script>
-(function() {
-    document.getElementById('btn-change-password').addEventListener('click', function() {
-        // Заглушка: смена пароля — в разработке
-        alert('Смена пароля — в разработке');
-    });
-})();
-</script>
 {% endblock %}

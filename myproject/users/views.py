@@ -17,7 +17,7 @@ from django.urls import reverse_lazy
 from myapp.models import UserCourse, UserProgress, QuizResult, UserAnswer
 from quizzes.models import Answer
 from courses.models import UserLessonTrajectory
-from .forms import UserUpdateForm, ProfileUpdateForm, UserRegistrationForm, AdminUserEditForm
+from .forms import ChangeUserPasswordForm, UserUpdateForm, ProfileUpdateForm, UserRegistrationForm, AdminUserEditForm
  
 
 
@@ -336,6 +336,26 @@ def user_edit(request: HttpRequest, pk: int) -> HttpResponse:
     else:
         form = AdminUserEditForm(user=profile_user)
     return render(request, 'users/user_edit.html', {'form': form, 'profile_user': profile_user})
+
+
+
+@login_required
+def user_change_password(request: HttpRequest, pk: int) -> HttpResponse:
+    """Смена пароля пользователя администратором (is_staff)."""
+    if not request.user.is_staff:
+        messages.info(request, 'У вас нет доступа к этой странице')
+        return redirect('home')
+    profile_user = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        form = ChangeUserPasswordForm(user=profile_user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Пароль пользователя «{profile_user.username}» успешно изменён.')
+            return redirect('users:user_detail', pk=pk)
+    else:
+        form = ChangeUserPasswordForm(user=profile_user)
+    return render(request, 'users/change_user_password.html', {'form': form, 'profile_user': profile_user})
+        
     
 
 
