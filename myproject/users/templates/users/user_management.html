@@ -39,6 +39,9 @@
     <div class="container py-4">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             <h1 class="h4 mb-0">Пользователи</h1>
+            <a href="{% url 'users:create_group' %}" class="btn btn-primary">
+                <i class="bi bi-plus-square me-1"></i>Создать группу
+            </a>
             <a href="{% url 'users:register' %}" class="btn btn-primary">
                 <i class="bi bi-person-plus me-1"></i>Новый пользователь
             </a>

@@ -92,6 +92,22 @@ class UserRegistrationForm(UserCreationForm):
 
 
 
+class GroupCreationForm(forms.ModelForm):
+    class Meta:
+        model = Group
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Название группы'
+            })
+        }
+        labels = {
+            'name': 'Название группы'
+        }
+
+
+
 
 class AdminUserEditForm(forms.Form):
     """Форма редактирования пользователя администратором (is_staff): имя, фамилия, почта, группы."""

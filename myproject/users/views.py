@@ -10,14 +10,21 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, CreateView
 from django.views.decorators.cache import cache_page
 from django.urls import reverse_lazy
 
 from myapp.models import UserCourse, UserProgress, QuizResult, UserAnswer
 from quizzes.models import Answer
 from courses.models import UserLessonTrajectory
-from .forms import ChangeUserPasswordForm, UserUpdateForm, ProfileUpdateForm, UserRegistrationForm, AdminUserEditForm
+from .forms import (
+    ChangeUserPasswordForm, 
+    UserUpdateForm, 
+    ProfileUpdateForm, 
+    UserRegistrationForm, 
+    AdminUserEditForm, 
+    GroupCreationForm
+)
  
 
 
@@ -422,3 +429,20 @@ def get_user_progress(request):
     }
 
     return render(request, 'users/user_progress.html', context=context)
+
+
+
+
+class CreateGroupView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    template_name = 'users/create_group.html'
+    form_class = GroupCreationForm
+    success_url = reverse_lazy('users:user_management')
+
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def form_valid(self, form):
+        group = form.save()
+        return super().form_valid(form)
+
