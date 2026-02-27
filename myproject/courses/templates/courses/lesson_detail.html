@@ -86,19 +86,6 @@
             <a href="{% url 'courses:edit_lesson' lesson.id %}" class="btn btn-warning lesson-btns">
                 Редактировать
             </a>
-        {% else %}
-            <button class="btn btn-outline-info lesson-btns" 
-                    onclick="informUser()">
-                Редактировать
-            </button>
         {% endif %}
     </div>
-
-    <script>
-        
-        function informUser() {
-            alert("Обратитесь к администратору сайта, чтобы изменить содержимое урока.");
-        }
-    </script>
-
 {% endblock %}
