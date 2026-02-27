@@ -1,6 +1,3 @@
-from collections import defaultdict
-
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -11,11 +8,9 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.views.generic import FormView, TemplateView, CreateView
-from django.views.decorators.cache import cache_page
 from django.urls import reverse_lazy
 
-from myapp.models import UserCourse, UserProgress, QuizResult, UserAnswer
-from quizzes.models import Answer
+from myapp.models import UserCourse, UserProgress, QuizResult
 from courses.models import UserLessonTrajectory
 from .forms import (
     ChangeUserPasswordForm, 
@@ -29,7 +24,6 @@ from .forms import (
 
 
 
-# @cache_page(60*15)
 @login_required
 def profile(request: HttpRequest) -> HttpResponse:
     """
@@ -313,6 +307,8 @@ def _get_user_learning_stats(target_user):
     }
 
 
+
+
 @login_required
 def user_detail(request: HttpRequest, pk: int) -> HttpResponse:
     """Детальный просмотр пользователя и статистики обучения (только для staff)."""
@@ -325,6 +321,7 @@ def user_detail(request: HttpRequest, pk: int) -> HttpResponse:
         **stats,
     }
     return render(request, 'users/user_detail.html', context)
+
 
 
 
@@ -364,8 +361,6 @@ def user_change_password(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, 'users/change_user_password.html', {'form': form, 'profile_user': profile_user})
         
     
-
-
 
 
 class UserManagementView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):

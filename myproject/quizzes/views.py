@@ -2,16 +2,15 @@ import json
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.views.decorators.http import require_http_methods, require_POST
-from django.db.models import Count, Exists, OuterRef
-from django.contrib import messages  # Добавлен импорт
+from django.views.decorators.http import require_POST
+from django.db.models import Count
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.generic import DetailView, TemplateView, CreateView
+from django.views.generic import TemplateView, CreateView
 from django.urls import reverse_lazy
 
 from myapp.models import QuizResult, UserCourse, UserAnswer
-from courses.models import Course  # Добавлен импорт модели Course
 from .models import Quiz, Question, Answer
 from .forms import QuizForm
 from .utils import DataMixin
