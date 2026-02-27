@@ -80,6 +80,7 @@
 {% endblock %}
 
 {% block specific_scripts %}
+<script>
     (function() {
         var menu = document.getElementById('user-context-menu');
         var activeRow = null;
@@ -115,4 +116,5 @@
             activeRow = null;
         });
     })();
+</script>
 {% endblock %}
