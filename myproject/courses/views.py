@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Max, Count
 from django.db import transaction
 from django.http import JsonResponse
+from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST, require_http_methods
@@ -927,3 +928,26 @@ def delete_attachment(request, attachment_id):
     
     # Иначе редирект обратно на страницу редактирования
     return redirect('courses:edit_lesson', lesson_id=lesson.id)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/')
+@require_POST
+def cancel_course_assignment(request, user_id, slug):
+    """Снятие назначения курса"""
+    user = get_object_or_404(User, id=user_id)
+    course = get_object_or_404(Course, slug=slug)
+
+    usercourse = get_object_or_404(
+        UserCourse,
+        user=user,
+        course=course,
+    )
+    usercourse.delete()
+
+    return JsonResponse(
+        {
+            'success': True,
+            'message': 'Назначение курса снято',
+        }
+    )

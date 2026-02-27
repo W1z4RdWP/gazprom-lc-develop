@@ -3,6 +3,81 @@
 {% block title %}Профиль: {{ profile_user.username }}{% endblock %}
 {% block specific_styles %}
 <link rel="stylesheet" href="{% static 'users/css/profile.css' %}">
+<style>
+    .course-cancel-button{
+        position: absolute;
+        background-color: pink;
+        width: 24px;
+        min-height: 24px;
+        border-radius: 10px;
+        top: -12px;
+        right: -12px;
+    }
+</style>
+{% endblock %}
+{% block specific_scripts %}
+    <script>
+        const CSRF = '{{ csrf_token }}';
+
+        function apiCall(url, body) {
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF,
+                },
+                body: JSON.stringify(body),
+            }).then(async (r) => {
+                let data;
+                try {
+                    data = await r.json();
+                } catch (e) {
+                    data = await r.text();
+                }
+                if (!r.ok) {
+                    return Promise.reject(data);
+                }
+                return data;
+            });
+        }
+
+        const cancelCourseBtns = document.querySelectorAll('.course-cancel-button');
+
+        cancelCourseBtns.forEach((btn) => {
+            const url = btn.dataset.cancelUrl;
+
+            if (!url) {
+                console.error('URL отмены курса не найден для кнопки: ', btn);
+                return;
+            }
+
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                const confirmed = window.confirm('Вы уверены, что хотите снять назначение этого курса для пользователя?');
+                if (!confirmed) {
+                    return;
+                }
+
+                try {
+                    btn.textContent = 'Отмена...';
+                    btn.disabled = true;
+
+                    const response = await apiCall(url, {});
+
+                    btn.remove();
+                    console.log('Курс успешно отменен: ', response);
+                } catch (error) {
+                    console.error('Ошибка отмены курса: ', error);
+                    btn.textContent = 'Ошибка';
+                    setTimeout(() => {
+                        btn.textContent = 'Отменить курс';
+                        btn.disabled = false;
+                    }, 2000);
+                }
+            });
+        });
+    </script>
 {% endblock %}
 {% block content %}
 <div class="profile-wrapper">
@@ -66,10 +141,14 @@
         </h2>
         <div class="courses-grid">
             {% for progress in unfinished_courses %}
-            <div class="course-card">
+            <div class="course-card" style="position: relative;">
                 <div class="course-card-header">
                     <h3 class="course-title">{{ progress.course.title }}</h3>
                     <span class="course-progress-badge">{{ progress.percent }}%</span>
+                    <button
+                        class="course-cancel-button"
+                        data-cancel-url="{% url 'courses:cancel_course_assignment' user_id=profile_user.id slug=progress.course.slug %}"
+                    >X</button>
                 </div>
                 <div class="course-progress-bar">
                     <div class="course-progress-fill" style="width: {{ progress.percent }}%;"></div>
@@ -95,10 +174,14 @@
             </div>
             {% endfor %}
             {% for progress in finished_courses %}
-            <div class="course-card completed">
+            <div class="course-card completed" style="position: relative;">
                 <div class="course-card-header">
                     <h3 class="course-title">{{ progress.course.title }}</h3>
                     <span class="course-progress-badge completed">{{ progress.percent }}%</span>
+                    <button
+                        class="course-cancel-button"
+                        data-cancel-url="{% url 'courses:cancel_course_assignment' user_id=profile_user.id slug=progress.course.slug %}"
+                    >X</button>
                 </div>
                 <div class="course-progress-bar">
                     <div class="course-progress-fill completed" style="width: {{ progress.percent }}%;"></div>
