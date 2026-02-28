@@ -13,24 +13,8 @@ from django.urls import reverse_lazy
 from myapp.models import QuizResult, UserCourse, UserAnswer
 from .models import Quiz, Question, Answer
 from .forms import QuizForm
-from .utils import DataMixin
 
 from typing import Optional
-
-
-class StartQuizView(DataMixin, TemplateView):
-    """
-    Класс представление для рендера стартовой страницы тестов.
-
-    Атрибуты:
-     - template_name - путь к шаблону;
-     - get_context_data() - в шаблон передается переменная topics, которая возвращает количество вопросов в каждом тесте
-    """
-    template_name = 'quizzes/start.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return self.get_mixin_context(context, topics=Quiz.objects.annotate(questions_count=Count('question')))
 
 
 
