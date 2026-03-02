@@ -64,13 +64,22 @@
                                 <i class="bi bi-file-text me-3 fs-5 text-primary"></i>
                                 <span class="fw-medium">{{ lesson.title }}</span>
                             </div>
-                            {% if has_started and lesson.id in completed_lessons_ids %}
-                                <span class="badge bg-success rounded-pill">
-                                    <i class="bi bi-check-circle me-1"></i>Завершено
+                            <div class="d-flex align-items-center gap-2">
+                                {% if user.is_staff or user.is_superuser %}
+                                <span class="btn btn-sm btn-outline-warning py-0 px-1" style="width: 50%!important;"
+                                      onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{% url 'courses:edit_lesson' lesson_id=lesson.id %}';"
+                                      title="Редактировать урок">
+                                    <i class="bi bi-pencil"></i>
                                 </span>
-                            {% else %}
-                                <i class="bi bi-chevron-right text-muted"></i>
-                            {% endif %}
+                                {% endif %}
+                                {% if has_started and lesson.id in completed_lessons_ids %}
+                                    <span class="badge bg-success rounded-pill">
+                                        <i class="bi bi-check-circle me-1"></i>Завершено
+                                    </span>
+                                {% else %}
+                                    <i class="bi bi-chevron-right text-muted"></i>
+                                {% endif %}
+                            </div>
                         </a>
                         {% endfor %}
                     </div>
@@ -95,13 +104,22 @@
                                 <i class="bi bi-question-circle me-3 fs-5 text-info"></i>
                                 <span class="fw-medium">{{ quiz.name }}</span>
                             </div>
-                            {% if has_started and quiz.id in completed_quizzes_ids %}
-                                <span class="badge bg-success rounded-pill">
-                                    <i class="bi bi-check-circle me-1"></i>Завершено
+                            <div class="d-flex align-items-center gap-2">
+                                {% if user.is_staff or user.is_superuser %}
+                                <span class="btn btn-sm btn-outline-warning py-0 px-1" style="width: 50%!important;"
+                                      onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{% url 'quizzes:edit_quiz' quiz_id=quiz.id %}';"
+                                      title="Редактировать тест">
+                                    <i class="bi bi-pencil"></i>
                                 </span>
-                            {% else %}
-                                <i class="bi bi-chevron-right text-muted"></i>
-                            {% endif %}
+                                {% endif %}
+                                {% if has_started and quiz.id in completed_quizzes_ids %}
+                                    <span class="badge bg-success rounded-pill">
+                                        <i class="bi bi-check-circle me-1"></i>Завершено
+                                    </span>
+                                {% else %}
+                                    <i class="bi bi-chevron-right text-muted"></i>
+                                {% endif %}
+                            </div>
                         </a>
                         {% endfor %}
                     </div>

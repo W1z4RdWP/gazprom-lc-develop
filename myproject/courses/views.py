@@ -383,12 +383,12 @@ def lesson_detail(request, course_slug=None, lesson_id=None):
 
         # Проверка доступа к курсу
         user_course = UserCourse.objects.filter(user=request.user, course=course).first()
-        if not user_course:
+        if not user_course and not is_admin(request.user):
             return redirect('courses:course_detail', slug=course.slug)
 
         # Проверка траектории
         trajectory = UserLessonTrajectory.objects.filter(user=request.user, course=course).first()
-        if trajectory:
+        if trajectory and not is_admin(request.user):
             lessons_in_trajectory = trajectory.lessons.all()
             if lesson not in lessons_in_trajectory:
                 return redirect('courses:course_detail', slug=course.slug)
