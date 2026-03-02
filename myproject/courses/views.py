@@ -690,9 +690,10 @@ def redir_to_quiz(request, course_slug):
         # Проверяем, какую кнопку нажал пользователь
         action = request.POST.get('action')
         if action == 'start_quiz':
+            request.session['quiz_return_course_slug'] = course.slug
             return redirect('quizzes:quiz_start', quiz_id=course.final_quiz.id)
         else:
-            return redirect('profile')
+            return redirect('users:profile')
 
     # GET-запрос - показываем страницу с подтверждением
     return render(request, 'courses/redir_to_quiz.html', {'course': course})

@@ -187,7 +187,7 @@
                                     </svg>
                                     Требуется тест
                                 </span>
-                                <a href="{% url 'quizzes:quiz_start' progress.course.final_quiz.id %}" class="btn-quiz">
+                                <a href="{% url 'quizzes:quiz_start' quiz_id=progress.course.final_quiz.id %}?course_slug={{ progress.course.slug }}" class="btn-quiz">
                                     Пройти тест
                                 </a>
                             {% endif %}

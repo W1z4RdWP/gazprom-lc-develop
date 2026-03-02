@@ -13,9 +13,15 @@
         <div class="progress-bar-finish">
             <div class="progress-bar-finish__progress" style="width: {{ percent_score }}%"></div>
         </div>
-        <a href="{% url 'quizzes:quizzes' %}" class="btn-quiz finish-btn">
-            ← Вернуться к списку тестов
+        {% if return_to_course %}
+        <a href="{% url 'courses:course_detail' slug=return_to_course.slug %}" class="btn-quiz finish-btn">
+            ← Вернуться к курсу
         </a>
+        {% else %}
+        <a href="{% url 'knowledge_base:kb_home' %}" class="btn-quiz finish-btn">
+            ← Вернуться в базу знаний
+        </a>
+        {% endif %}
     </div>
 </div>
 <script>

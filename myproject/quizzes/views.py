@@ -11,6 +11,7 @@ from django.views.generic import TemplateView, CreateView
 from django.urls import reverse_lazy
 
 from myapp.models import QuizResult, UserCourse, UserAnswer
+from courses.models import Course
 from .models import Quiz, Question, Answer
 from .forms import QuizForm
 
@@ -261,14 +262,14 @@ def get_questions(request, quiz_id: int = None, is_start: bool = False) -> HttpR
     if request.method == 'POST' or is_start:
         # Если is_start=True, quiz_id берется из URL
         if is_start and not quiz_id:
-            return redirect('quizzes:quizzes')
+            return redirect('knowledge_base:kb_home')
         
         # Если не стартовая страница, получаем quiz_id из сессии
         if not is_start:
             quiz_id = request.session.get('quiz_id')
             current_question_id = request.session.get('current_question_id')
             if not quiz_id or not current_question_id:
-                return redirect('quizzes:quizzes')
+                return redirect('knowledge_base:kb_home')
 
             # Получаем следующий вопрос
             question = _get_subsequent_question(quiz_id, current_question_id)
@@ -282,7 +283,13 @@ def get_questions(request, quiz_id: int = None, is_start: bool = False) -> HttpR
             request.session['quiz_id'] = quiz_id
             request.session['score'] = 0
             request.session['current_question_id'] = None
-            
+            # Сохраняем курс для кнопки «Вернуться к курсу» на странице завершения
+            course_slug = request.GET.get('course_slug')
+            if course_slug:
+                request.session['quiz_return_course_slug'] = course_slug
+            elif 'quiz_return_course_slug' in request.session:
+                del request.session['quiz_return_course_slug']
+
             # Получаем первый вопрос
             question = _get_first_question(quiz_id)
 
@@ -369,7 +376,7 @@ def get_answer(request) -> HttpResponse:
                     submitted_answer = Answer.objects.get(id=submitted_answer_id)
                 except Answer.DoesNotExist:
                     messages.error(request, 'Выбранный ответ не найден.')
-                    return redirect('quizzes:quizzes')
+                    return redirect('knowledge_base:kb_home')
 
                 is_correct = submitted_answer.is_correct
 
@@ -384,7 +391,7 @@ def get_answer(request) -> HttpResponse:
                     correct_answer = Answer.objects.get(question=question, is_correct=True)
                 except Answer.DoesNotExist:
                     messages.error(request, 'Ошибка данных вопроса: не найден правильный ответ.')
-                    return redirect('quizzes:quizzes')
+                    return redirect('knowledge_base:kb_home')
 
                 context = {
                     'current_question_number': list(Question.objects.filter(quiz_id=quiz_id).order_by('id').values_list('id', flat=True)).index(current_question_id) + 1,
@@ -396,7 +403,7 @@ def get_answer(request) -> HttpResponse:
                     'correct_answer': correct_answer,
                 }
             else:
-                return redirect('quizzes:quizzes')
+                return redirect('knowledge_base:kb_home')
 
         # Сохраняем обновлённые ответы в сессии
         request.session['quiz_answers'] = quiz_answers
@@ -409,7 +416,7 @@ def get_answer(request) -> HttpResponse:
 
         return render(request, 'quizzes/answer.html', context)
     
-    return redirect('quizzes:quizzes')
+    return redirect('knowledge_base:kb_home')
 
 
 
@@ -419,7 +426,7 @@ def get_finish(request) -> HttpResponse:
 
     quiz_id = request.session.get('quiz_id')
     if not quiz_id:
-        return redirect('quizzes:quizzes')
+        return redirect('knowledge_base:kb_home')
     
     quiz = get_object_or_404(Quiz, id=quiz_id)
     questions_count = Question.objects.filter(quiz=quiz).count() # Количество вопросов в тесте всего
@@ -476,18 +483,25 @@ def get_finish(request) -> HttpResponse:
             messages.error(request, "Тест не пройден. Попробуйте снова!")
             return redirect('quizzes:quiz_start', quiz_id=quiz.id)
 
+    # Курс для кнопки «Вернуться к курсу» (если пользователь пришёл из курса)
+    return_to_course = None
+    course_slug = request.session.pop('quiz_return_course_slug', None)
+    if course_slug:
+        return_to_course = Course.objects.filter(slug=course_slug).first()
+
     context = {
         'score': score,
         'questions_count': questions_count,
         'percent_score': percent_score,
-        'quiz_title': quiz.name
+        'quiz_title': quiz.name,
+        'return_to_course': return_to_course,
     }
-    
+
     _reset_quiz(request)
     return render(request, 'quizzes/finish.html', context)
 
 def _reset_quiz(request) -> HttpRequest:
-    keys = ['quiz_id', 'current_question_id', 'score']
+    keys = ['quiz_id', 'current_question_id', 'score', 'quiz_return_course_slug']
     for key in keys:
         if key in request.session:
             del request.session[key]
@@ -497,7 +511,7 @@ def start_quiz_handler(request):
     if request.method == 'POST':
         quiz_id = request.POST.get('quiz_id')
         if not quiz_id:
-            return redirect('quizzes:quizzes')
+            return redirect('knowledge_base:kb_home')
         
         # Сохраняем в сессии и перенаправляем на тест
         request.session['quiz_id'] = int(quiz_id)
@@ -505,7 +519,7 @@ def start_quiz_handler(request):
         request.session['current_question_id'] = None
         return redirect('quizzes:quiz_start', quiz_id=quiz_id)
     
-    return redirect('quizzes:quizzes')
+    return redirect('knowledge_base:kb_home')
 
 
 def quiz_empty_warning(request, quiz_id: int) -> HttpResponse:
