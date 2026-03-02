@@ -1,4 +1,4 @@
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Max, Count
@@ -690,8 +690,8 @@ def redir_to_quiz(request, course_slug):
         # Проверяем, какую кнопку нажал пользователь
         action = request.POST.get('action')
         if action == 'start_quiz':
-            request.session['quiz_return_course_slug'] = course.slug
-            return redirect('quizzes:quiz_start', quiz_id=course.final_quiz.id)
+            quiz_url = reverse('quizzes:quiz_start', kwargs={'quiz_id': course.final_quiz.id})
+            return redirect(f"{quiz_url}?course_slug={course.slug}")
         else:
             return redirect('users:profile')
 
@@ -806,7 +806,8 @@ def complete_course(request, course_id):
             user_course.save()
             return redirect('courses:course_detail', slug=course.slug)
         else:
-            return redirect('quizzes:quiz_start', quiz_id=course.final_quiz.id)
+            quiz_url = reverse('quizzes:quiz_start', kwargs={'quiz_id': course.final_quiz.id})
+            return redirect(f"{quiz_url}?course_slug={course.slug}")
     else:
         user_course.is_completed = True
         user_course.save()
