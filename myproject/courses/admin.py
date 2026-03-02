@@ -2,6 +2,9 @@ from django.contrib import admin
 from django import forms
 from .models import Course, Lesson, UserLessonTrajectory, LessonAttachment
 
+
+
+
 class LessonInlineForm(forms.ModelForm):
     class Meta:
         model = UserLessonTrajectory.lessons.through
@@ -12,6 +15,9 @@ class LessonInlineForm(forms.ModelForm):
         if self.instance.pk and hasattr(self.instance, 'userlessontrajectory'):
             trajectory = self.instance.userlessontrajectory
             self.fields['lesson'].queryset = Lesson.objects.filter(courses=trajectory.course)
+
+
+
 
 class LessonInline(admin.TabularInline):
     model = UserLessonTrajectory.lessons.through
@@ -27,6 +33,9 @@ class LessonInline(admin.TabularInline):
             formset.form.base_fields['lesson'].queryset = Lesson.objects.filter(courses=obj.course)
         return formset
 
+
+
+
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ['title', 'directory', 'author', 'image', 'slug', 'final_quiz']
@@ -37,6 +46,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 
+
 class LessonAttachmentInline(admin.TabularInline):
     model = LessonAttachment
     extra = 1
@@ -44,6 +54,8 @@ class LessonAttachmentInline(admin.TabularInline):
     verbose_name_plural = "Прикреплённые файлы"
     fields = ['file', 'name', 'uploaded_at']
     readonly_fields = ['uploaded_at']
+
+
 
 
 @admin.register(Lesson)
@@ -68,54 +80,11 @@ class LessonAdmin(admin.ModelAdmin):
     get_attachments_count.short_description = 'Файлов'
 
 
+
+
 @admin.register(LessonAttachment)
 class LessonAttachmentAdmin(admin.ModelAdmin):
     list_display = ['name', 'lesson', 'uploaded_at']
     list_filter = ['lesson', 'uploaded_at']
     search_fields = ['name', 'lesson__title']
     readonly_fields = ['uploaded_at']
-
-
-@admin.register(UserLessonTrajectory)
-class UserLessonTrajectoryAdmin(admin.ModelAdmin):
-    list_display = ('user', 'course', 'get_lessons_count')
-    list_filter = ('course', 'user')
-    search_fields = ('user__username', 'course__title')
-    inlines = [LessonInline]
-    exclude = ('lessons',)
-    autocomplete_fields = ['course', 'lessons']
-
-    def get_lessons_count(self, obj):
-        return obj.lessons.count()
-    get_lessons_count.short_description = 'Кол-во уроков'
-
-
-
-
-
-# from django.contrib import admin
-# from django import forms
-# from .models import Course, Lesson, UserLessonTrajectory
-# from .forms import UserLessonTrajectoryForm
-
-
-
-
-# class LessonInline(admin.TabularInline):
-#     model = UserLessonTrajectory.lessons.through
-#     extra = 1
-#     verbose_name = "Урок в траектории"
-#     verbose_name_plural = "Уроки в траектории"
-
-# @admin.register(UserLessonTrajectory)
-# class UserLessonTrajectoryAdmin(admin.ModelAdmin):
-#     form = UserLessonTrajectoryForm
-#     list_display = ('user', 'course')
-#     list_filter = ('course', 'user')
-#     search_fields = ('user__username', 'course__title')
-#     inlines = [LessonInline]
-#     exclude = ('lessons',)
-    
-#     def get_lessons_count(self, obj):
-#         return obj.lessons.count()
-#     get_lessons_count.short_description = 'Кол-во уроков'

@@ -161,10 +161,14 @@
                     <div class="border-top pt-3 mt-3">
                         <h6 class="fw-semibold mb-3">Управление курсом</h6>
                         <div class="d-grid gap-2">
-                            <a href="{% url 'courses:create_lesson_for_course' course.slug %}" 
-                               class="btn btn-success w-100 admin-course-btn">
-                                <i class="bi bi-plus-circle me-2"></i>Добавить урок
-                            </a>
+                            <button type="button" 
+                                    class="btn btn-success w-100 admin-course-btn"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#addLessonModal"
+                                    data-course-slug="{{ course.slug }}"
+                                    data-course-title="{{ course.title }}">
+                                <i class="bi bi-plus-circle me-2"></i>Добавить материал
+                            </button>
                             <a href="{% url 'courses:edit_course' course.slug %}" 
                                class="btn btn-warning w-100 admin-course-btn">
                                 <i class="bi bi-pencil me-2"></i>Редактировать курс
@@ -197,4 +201,75 @@
     {% endif %}
 </div>
 
+{% if user.is_authenticated and user.is_staff %}
+<!-- Модальное окно для добавления урока/теста в курс -->
+<div class="modal fade" id="addLessonModal" tabindex="-1" aria-labelledby="addLessonModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addLessonModalLabel">Добавить в курс</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs mb-3" id="contentTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="lessons-tab" data-bs-toggle="tab" data-bs-target="#lessons-pane" type="button" role="tab" aria-controls="lessons-pane" aria-selected="true">
+                            <i class="bi bi-file-text"></i> Уроки
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="quizzes-tab" data-bs-toggle="tab" data-bs-target="#quizzes-pane" type="button" role="tab" aria-controls="quizzes-pane" aria-selected="false">
+                            <i class="bi bi-clipboard-check"></i> Тесты
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="contentTabsContent">
+                    <div class="tab-pane fade show active" id="lessons-pane" role="tabpanel" aria-labelledby="lessons-tab">
+                        <div id="lessons-loading" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
+                            <p class="mt-2">Загрузка списка уроков...</p>
+                        </div>
+                        <div id="lessons-error" class="alert alert-danger" style="display: none;"></div>
+                        <div id="lessons-list" style="display: none;">
+                            <p class="text-muted mb-3">Выберите урок для добавления в курс:</p>
+                            <div class="list-group" id="lessons-container"></div>
+                        </div>
+                        <div id="lessons-empty" class="alert alert-info" style="display: none;">
+                            Нет доступных уроков для добавления в этот курс.
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="quizzes-pane" role="tabpanel" aria-labelledby="quizzes-tab">
+                        <div id="quizzes-loading" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
+                            <p class="mt-2">Загрузка списка тестов...</p>
+                        </div>
+                        <div id="quizzes-error" class="alert alert-danger" style="display: none;"></div>
+                        <div id="quizzes-list" style="display: none;">
+                            <p class="text-muted mb-3">Выберите тест для добавления в курс:</p>
+                            <div class="list-group" id="quizzes-container"></div>
+                        </div>
+                        <div id="quizzes-empty" class="alert alert-info" style="display: none;">
+                            Нет доступных тестов для добавления в этот курс.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block specific_scripts %}
+{% if user.is_authenticated and user.is_staff %}
+<script src="{% static 'knowledge_base/js/kb_main.js' %}"></script>
+{% endif %}
 {% endblock %}
