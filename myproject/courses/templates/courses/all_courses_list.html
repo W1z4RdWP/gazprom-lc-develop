@@ -28,10 +28,10 @@
         color: #6c757d;
     }
 
-    /* Сетка карточек */
+    /* Сетка карточек — по 3 в ряд */
     .courses-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 1.5rem;
     }
 
@@ -260,6 +260,12 @@
     }
 
     /* Адаптивность */
+    @media (max-width: 992px) {
+        .courses-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
     @media (max-width: 768px) {
         .courses-grid {
             grid-template-columns: 1fr;
@@ -390,9 +396,8 @@
                         </a>
                     {% endif %}
                 </div>
-                {% endfor %}
             </div>
-            {% comment %} {% endfor %}  ЛИШНИЙ??? Если да то убрать{% endcomment %}
+            {% endfor %}
         </div>
     {% else %}
         <div class="courses-empty">
