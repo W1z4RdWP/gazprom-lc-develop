@@ -155,10 +155,16 @@
                                         <i class="bi bi-check-circle me-2"></i>
                                         <strong>Завершено:</strong> {{ user_course.end_date|date:"d.m.Y" }}
                                     </div>
+                                    <form method="post" action="{% url 'courses:reset_course_progress' slug=course.slug %}" class="d-grid">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-primary w-100">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>Начать заново
+                                        </button>
+                                    </form>
                                 {% endif %}
                             {% endif %}
                             
-                            {% if next_lesson %}
+                            {% if next_lesson and not all_completed %}
                             <a href="{% url 'courses:lesson_detail' course_slug=course.slug lesson_id=next_lesson.id %}" 
                                class="btn btn-primary w-100 btn-lg mb-3">
                                 <i class="bi bi-play-fill me-2"></i>Продолжить обучение

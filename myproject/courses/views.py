@@ -284,6 +284,28 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+@login_required
+@require_POST
+def reset_course_progress(request, slug):
+    """
+    Сбрасывает весь прогресс по курсу (уроки, тесты). Опыт не сбрасывается —
+    UserCourse.is_completed и end_date не трогаем, чтобы при повторном прохождении
+    опыт не начислялся снова.
+    """
+    course = get_object_or_404(Course, slug=slug)
+    user_course = UserCourse.objects.filter(user=request.user, course=course).first()
+    if not user_course:
+        return redirect('courses:course_detail', slug=slug)
+
+    with transaction.atomic():
+        UserProgress.objects.filter(user=request.user, course=course).delete()
+        quiz_names = list(course.quizzes.values_list('name', flat=True))
+        if course.final_quiz:
+            quiz_names.append(course.final_quiz.name)
+        if quiz_names:
+            QuizResult.objects.filter(user=request.user, quiz_title__in=quiz_names).delete()
+
+    return redirect('courses:course_detail', slug=slug)
 
 
 class CourseListView(ListView):

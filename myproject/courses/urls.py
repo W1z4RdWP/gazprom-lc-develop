@@ -6,6 +6,7 @@ app_name = 'courses'
 urlpatterns = [
     path('create_course/', course_views.CreateCourseView.as_view(), name='create_course'),
     path('create_lesson/', course_views.CreateLessonView.as_view(), name='create_lesson'),
+    path('course/<slug:slug>/reset-progress/', course_views.reset_course_progress, name='reset_course_progress'),
     path('course/<slug:slug>/', course_views.CourseDetailView.as_view(), name='course_detail'),
     path('courses_list/', course_views.CourseListView.as_view(), name='course_detail_all'),
     path('lesson/<int:lesson_id>/', course_views.lesson_detail, name='lesson_detail_standalone'),
