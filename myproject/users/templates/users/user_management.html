@@ -33,6 +33,12 @@
             background: var(--bs-secondary-bg, #e9ecef);
         }
         #user-context-menu button i { margin-right: 8px; }
+        .exp-cell { min-width: 140px; }
+        .exp-cell .exp-head { font-size: 0.8rem; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 6px; }
+        .exp-cell .exp-level { font-weight: 600; color: var(--bs-primary); }
+        .exp-cell .exp-value { color: var(--bs-secondary); }
+        .exp-cell .exp-bar { height: 6px; background: var(--bs-border-color-translucent, #dee2e6); border-radius: 3px; overflow: hidden; }
+        .exp-cell .exp-fill { height: 100%; background: var(--bs-primary); border-radius: 3px; transition: width 0.2s ease; }
     </style>
 {% endblock %}
 {% block content %}
@@ -55,6 +61,7 @@
                         <th>Имя</th>
                         <th>Email</th>
                         <th>Группа</th>
+                        <th>Опыт</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,10 +70,19 @@
                         <td>{{ user.username }}</td>
                         <td>{{ user.email|default:"—" }}</td>
                         <td>{% for group in user.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+                        <td class="exp-cell">
+                            <div class="exp-head">
+                                <span class="exp-level">Ур. {{ user.exp_level|default:1 }}</span>
+                                <span class="exp-value">{{ user.exp|default:0 }} XP</span>
+                            </div>
+                            <div class="exp-bar">
+                                <div class="exp-fill" style="width: {{ user.exp_progress|default:0 }}%;"></div>
+                            </div>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="3" class="text-muted text-center py-4">Пользователей пока нет</td>
+                        <td colspan="4" class="text-muted text-center py-4">Пользователей пока нет</td>
                     </tr>
                     {% endfor %}
                 </tbody>

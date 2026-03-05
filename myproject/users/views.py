@@ -372,7 +372,13 @@ class UserManagementView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users'] = User.objects.prefetch_related('groups').all()
+        users = list(User.objects.prefetch_related('groups').all())
+        for u in users:
+            stats = _get_user_learning_stats(u)
+            u.exp = stats['exp']
+            u.exp_level = stats['level']
+            u.exp_progress = stats['progress']
+        context['users'] = users
         return context
 
 
