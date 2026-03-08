@@ -68,6 +68,7 @@
 .profile-avatar-section {
     position: relative;
     flex-shrink: 0;
+    min-height: 120px;
 }
 
 .profile-avatar {
@@ -79,6 +80,8 @@
     box-shadow: var(--profile-shadow-xl);
     background: var(--profile-bg-card);
     padding: 4px;
+    min-height: 120px;
+
 }
 
 .level-badge {
