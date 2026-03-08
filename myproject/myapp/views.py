@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.http import HttpResponse, HttpRequest
 from django.views.generic import TemplateView
 from .models import Course, UserCourse
@@ -12,6 +13,11 @@ class IndexView(TemplateView):
             get_context_data: функция передает контекст в шаблон 
     """
     template_name = 'home.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_staff:
+            return redirect(reverse_lazy('knowledge_base:kb_home'))
+        return super().dispatch(request, *args, **kwargs)        
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

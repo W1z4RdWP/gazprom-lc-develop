@@ -35,7 +35,7 @@
     <header class='header'>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'home' %}" id="logolink">
+                {% if not user.is_staff %}<a class="navbar-brand" href="{% url 'home' %}" id="logolink">{% endif %}
                     <img src="{% static 'global/imgs/gazprom_logo.jpg' %}" alt="Logo" id='logopng'>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,9 +44,11 @@
 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'home' %}">Главная</a>
-                        </li>
+                        {% if not user.is_staff %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'home' %}">Главная</a>
+                            </li>
+                        {% endif %}
 
                         {% if user.is_authenticated %}
                             {% if user.is_staff %}
@@ -96,7 +98,7 @@
 
     <footer>
         <div class="footer-content">
-            <a href="{% url 'home' %}"><img src="{% static 'global/imgs/gazprom_logo.jpg' %}" alt="" class="footer-logo"></a>
+            {% if not user.is_staff %}<a href="{% url 'home' %}">{% endif %}<img src="{% static 'global/imgs/gazprom_logo.jpg' %}" alt="" class="footer-logo"></a>
         </div>
     </footer>
 </body>
