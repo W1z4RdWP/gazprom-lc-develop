@@ -66,7 +66,7 @@
         {% endif %}
     </div>
     <div class="lesson-actions">
-        {% if course %}
+        {% if course and not request.user.is_staff %}
             <form method="POST" action="{% url 'courses:complete_lesson' course_slug=course.slug lesson_id=lesson.id %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-success">
