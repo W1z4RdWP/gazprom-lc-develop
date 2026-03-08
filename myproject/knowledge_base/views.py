@@ -93,7 +93,7 @@ class KbHome(TemplateView):
         
         # Добавляем корневую папку
         breadcrumbs.append({
-            'name': 'База знаний',
+            'name': 'Панель управления курсами',
             'url': '/kb/',
             'is_root': True
         })
