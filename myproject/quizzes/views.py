@@ -108,6 +108,23 @@ def edit_quiz(request, quiz_id):
     })
 
 
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def delete_quiz(request, quiz_id):
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    if request.method == 'POST':
+        directory = quiz.directory
+        quiz.delete()
+        if directory:
+            return redirect('knowledge_base:kb_directory', directory_id=directory.id)
+        return redirect('knowledge_base:kb_home')
+
+    # Для GET-запроса просто возвращаем пользователя назад к базе знаний
+    if quiz.directory:
+        return redirect('knowledge_base:kb_directory', directory_id=quiz.directory.id)
+    return redirect('knowledge_base:kb_home')
+
+
 # ==================== AJAX API для вопросов и ответов ====================
 
 def _staff_required_json(user):

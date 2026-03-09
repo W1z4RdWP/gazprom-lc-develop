@@ -168,6 +168,17 @@
                                            title="Редактировать">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+                                        <form method="POST"
+                                              action="{% url 'courses:delete_lesson' lesson.id %}"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Вы уверены, что хотите удалить этот урок?');">
+                                            {% csrf_token %}
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    title="Удалить">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 {% endif %}
                             </div>
@@ -228,6 +239,17 @@
                                                 data-course-title="{{ course_data.course.title }}">
                                             <i class="bi bi-plus-circle"></i>
                                         </button>
+                                        <form method="POST"
+                                              action="{% url 'courses:delete_course' course_data.course.slug %}"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Вы уверены, что хотите удалить этот курс?');">
+                                            {% csrf_token %}
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    title="Удалить курс">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 {% endif %}
                             </div>
@@ -263,6 +285,17 @@
                                            title="Редактировать">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+                                        <form method="POST"
+                                              action="{% url 'quizzes:delete_quiz' quiz.id %}"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Вы уверены, что хотите удалить этот тест?');">
+                                            {% csrf_token %}
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    title="Удалить тест">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 {% endif %}
                             </div>
