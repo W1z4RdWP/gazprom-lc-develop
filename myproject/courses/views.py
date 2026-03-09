@@ -465,13 +465,22 @@ class CreateCourseView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+
+        # Назначаем курс выбранным пользователям
+        assigned_user_ids = self.request.POST.getlist('assigned_users')
+        if assigned_user_ids:
+            users = User.objects.filter(id__in=assigned_user_ids)
+            for user in users:
+                UserCourse.objects.get_or_create(user=user, course=self.object)
+
+        return response
     
 
     def get_context_data(self, **kwargs):
         """Добавление контекста для шаблона"""
         context = super().get_context_data(**kwargs)
-        
+
         # Получаем директорию из GET-параметра
         directory_id = self.request.GET.get('directory')
         if directory_id:
@@ -480,7 +489,12 @@ class CreateCourseView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 context['directory'] = Directory.objects.get(id=directory_id)
             except (Directory.DoesNotExist, ValueError):
                 pass
-        
+
+        # Список всех пользователей для назначения курса
+        context['all_users'] = User.objects.all().order_by('last_name', 'first_name', 'username')
+        # При создании курса изначально нет назначенных пользователей
+        context['assigned_user_ids'] = []
+
         return context
     
 
@@ -635,11 +649,28 @@ def delete_lesson(request, lesson_id):
 def edit_course(request, slug):
     course = get_object_or_404(Course, slug=slug)
     directory = course.directory
-    
+    all_users = User.objects.all().order_by('last_name', 'first_name', 'username')
+    assigned_user_ids = list(UserCourse.objects.filter(course=course).values_list('user_id', flat=True))
+
     if request.method == 'POST':
         form = CourseForm(request.POST, request.FILES, instance=course, user=request.user, directory=directory)
         if form.is_valid():
             form.save()
+            # Обновляем назначения курса пользователям
+            posted_user_ids = request.POST.getlist('assigned_users')
+            new_user_ids = set(int(uid) for uid in posted_user_ids if uid.isdigit())
+            current_user_ids = set(assigned_user_ids)
+
+            # Добавляем новые назначения
+            for user_id in new_user_ids - current_user_ids:
+                user = User.objects.filter(id=user_id).first()
+                if user:
+                    UserCourse.objects.get_or_create(user=user, course=course)
+
+            # Удаляем снятые назначения
+            for user_id in current_user_ids - new_user_ids:
+                UserCourse.objects.filter(course=course, user_id=user_id).delete()
+
             # Перенаправляем в зависимости от того, где находится курс
             if course.directory:
                 return redirect('knowledge_base:kb_directory', directory_id=course.directory.id)
@@ -647,10 +678,12 @@ def edit_course(request, slug):
                 return redirect('courses:course_detail', slug=course.slug)
     else:
         form = CourseForm(instance=course, user=request.user, directory=directory)
-    
+
     return render(request, 'courses/edit_course.html', {
         'form': form,
-        'course': course
+        'course': course,
+        'all_users': all_users,
+        'assigned_user_ids': assigned_user_ids,
     })
 
 

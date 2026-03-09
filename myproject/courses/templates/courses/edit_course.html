@@ -15,6 +15,22 @@
             
             <!-- Используем crispy для рендеринга формы -->
             {{ form|crispy }}
+            <div class="mt-3">
+                <label class="form-label fw-semibold">Назначить пользователям</label>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <button type="button"
+                            class="btn btn-outline-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#assignUsersModal">
+                        Выбрать пользователей
+                    </button>
+                    <span id="assignedUsersSummary" class="text-muted">
+                        Пользователи не выбраны
+                    </span>
+                </div>
+                <!-- Сюда будут добавляться скрытые инпуты assigned_users -->
+                <div id="assignedUsersHiddenInputs"></div>
+            </div>
         </fieldset>
         
         <div class="form-group mt-3">
@@ -26,5 +42,155 @@
             {% endif %}
         </div>
     </form>
+
+    <!-- Модальное окно выбора пользователей -->
+    <div class="modal fade" id="assignUsersModal" tabindex="-1" aria-labelledby="assignUsersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignUsersModalLabel">Назначить пользователям</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input type="text"
+                               id="userSearchInput"
+                               class="form-control"
+                               placeholder="Поиск по имени или фамилии...">
+                    </div>
+                    <div class="border rounded" style="max-height: 360px; overflow-y: auto;">
+                        <ul class="list-group list-group-flush" id="allUsersList">
+                            {% for user in all_users %}
+                                {% with full_name=user.get_full_name %}
+                                <li class="list-group-item d-flex align-items-center justify-content-between user-item"
+                                    data-user-id="{{ user.id }}"
+                                    data-user-name="{{ full_name|default:user.username }}"
+                                    data-user-username="{{ user.username }}"
+                                    data-user-search="{{ full_name|default:user.username }} {{ user.username }} {{ user.email|default:'' }}">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">
+                                            {{ full_name|default:user.username }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            {{ user.username }}{% if user.email %} · {{ user.email }}{% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="form-check ms-3">
+                                        <input class="form-check-input user-select-checkbox"
+                                               type="checkbox"
+                                               value="{{ user.id }}"
+                                               id="assignUser{{ user.id }}">
+                                    </div>
+                                </li>
+                                {% endwith %}
+                            {% empty %}
+                                <li class="list-group-item text-muted">
+                                    Пользователи не найдены
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="assignUsersSaveButton">Сохранить выбор</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock content %}
+
+{% block specific_scripts %}
+<script>
+    window.initialAssignedUserIds = {{ assigned_user_ids|default:'[]'|safe }};
+</script>
+<script>
+    (function() {
+        var modalEl = document.getElementById('assignUsersModal');
+        if (!modalEl) return;
+
+        var allUsersList = document.getElementById('allUsersList');
+        var searchInput = document.getElementById('userSearchInput');
+        var hiddenInputsContainer = document.getElementById('assignedUsersHiddenInputs');
+        var summaryEl = document.getElementById('assignedUsersSummary');
+        var saveButton = document.getElementById('assignUsersSaveButton');
+
+        var initialIds = Array.isArray(window.initialAssignedUserIds)
+            ? window.initialAssignedUserIds
+            : [];
+        var selectedUserIds = new Set(initialIds.map(String));
+
+        function syncStateFromCheckboxes() {
+            selectedUserIds.clear();
+            if (allUsersList) {
+                allUsersList.querySelectorAll('.user-select-checkbox').forEach(function(cb) {
+                    if (cb.checked) {
+                        selectedUserIds.add(String(cb.value));
+                    }
+                });
+            }
+
+            // Перестраиваем скрытые инпуты
+            if (hiddenInputsContainer) {
+                hiddenInputsContainer.innerHTML = '';
+                selectedUserIds.forEach(function(userId) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'assigned_users';
+                    input.value = userId;
+                    hiddenInputsContainer.appendChild(input);
+                });
+            }
+
+            // Обновляем текст-summary
+            if (summaryEl) {
+                var count = selectedUserIds.size;
+                summaryEl.textContent = count
+                    ? ('Выбрано пользователей: ' + count)
+                    : 'Пользователи не выбраны';
+            }
+        }
+
+        if (allUsersList) {
+            // Проставляем начальные значения чекбоксов
+            allUsersList.querySelectorAll('.user-select-checkbox').forEach(function(cb) {
+                if (selectedUserIds.has(String(cb.value))) {
+                    cb.checked = true;
+                }
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                var term = this.value.trim().toLowerCase();
+                if (!allUsersList) return;
+                allUsersList.querySelectorAll('.user-item').forEach(function(item) {
+                    var searchData = (item.getAttribute('data-user-search') || '').toLowerCase();
+                    if (!term || searchData.indexOf(term) !== -1) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        if (saveButton) {
+            saveButton.addEventListener('click', function() {
+                // Применяем выбор только при нажатии "Сохранить выбор"
+                syncStateFromCheckboxes();
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    var modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                }
+            });
+        }
+
+        // Инициализация начального состояния
+        syncStateFromCheckboxes();
+    })();
+</script>
+{% endblock %}
