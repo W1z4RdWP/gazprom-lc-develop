@@ -9,6 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.views.generic import FormView, TemplateView, CreateView
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 
 from myapp.models import UserCourse, UserProgress, QuizResult
 from courses.models import UserLessonTrajectory
@@ -361,6 +362,29 @@ def user_change_password(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, 'users/change_user_password.html', {'form': form, 'profile_user': profile_user})
         
     
+
+
+@login_required
+@require_POST
+def user_delete(request: HttpRequest, pk: int) -> HttpResponse:
+    """Удаление пользователя администратором (is_staff). Только POST."""
+    if not request.user.is_staff:
+        messages.info(request, 'У вас нет доступа к этой странице')
+        return redirect('home')
+
+    if request.user.pk == pk:
+        messages.error(request, 'Нельзя удалить текущего пользователя.')
+        return redirect('users:user_management')
+
+    target_user = get_object_or_404(User, pk=pk)
+    if target_user.is_superuser:
+        messages.error(request, 'Нельзя удалить суперпользователя.')
+        return redirect('users:user_management')
+
+    username = target_user.username
+    target_user.delete()
+    messages.success(request, f'Пользователь «{username}» удалён.')
+    return redirect('users:user_management')
 
 
 class UserManagementView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
