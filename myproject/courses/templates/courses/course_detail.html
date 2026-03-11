@@ -13,6 +13,16 @@
                         {{ course.description|safe }}
                     </div>
                 </div>
+                {% if request.user.is_staff %}
+                    <div class="card p-4">
+                        <h4>Назначено группам:</h4>
+                        <ul>
+                            {% for group in course.assigned_groups.all %}
+                                <li>{{ group }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

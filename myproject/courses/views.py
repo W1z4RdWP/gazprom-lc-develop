@@ -257,6 +257,7 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
         exp_earned = user_course.exp_reward() if user_course else 0
         show_final_quiz = self.should_show_final_quiz(has_started, completed_lessons, total_lessons, 
                                                       completed_quizzes, total_quizzes)
+        
 
         # Добавляем все в контекст
         context.update({
