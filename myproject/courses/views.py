@@ -671,12 +671,9 @@ def edit_course(request, slug):
             # Удаляем снятые назначения
             for user_id in current_user_ids - new_user_ids:
                 UserCourse.objects.filter(course=course, user_id=user_id).delete()
-
-            # Перенаправляем в зависимости от того, где находится курс
-            if course.directory:
-                return redirect('knowledge_base:kb_directory', directory_id=course.directory.id)
-            else:
-                return redirect('courses:course_detail', slug=course.slug)
+            
+            # Перенаправление обратно к курсу, после редактирования
+            return redirect('courses:course_detail', slug=course.slug)
     else:
         form = CourseForm(instance=course, user=request.user, directory=directory)
 
