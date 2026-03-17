@@ -11,6 +11,11 @@ class Quiz(models.Model):
       related_name='quizzes',
       verbose_name="Категория"
   )
+  course_only = models.BooleanField(
+      default=False,
+      verbose_name="Только для курса",
+      help_text="Тест существует только внутри курса и не отображается в базе знаний"
+  )
 
   class Meta:
     verbose_name = "Тест" # Как будет отображаться в админ панели

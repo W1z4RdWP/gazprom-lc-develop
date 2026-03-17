@@ -295,7 +295,7 @@
                                 Нет доступных тестов для добавления в этот курс.
                             </div>
                             <div class="mt-3">
-                                <button type="button" class="btn btn-light" data-create-unique-quiz="modal">Создать тест для курса "{{ course.title }}"</button>
+                                <a href="{% url 'quizzes:create_quiz_for_course' course.slug %}?unique=1" class="btn btn-light">Создать уникальный тест для курса "{{ course.title }}"</a>
                             </div>
                         </div>
                     </div>

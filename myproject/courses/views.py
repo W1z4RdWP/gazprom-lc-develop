@@ -941,10 +941,10 @@ def get_available_quizzes(request, course_slug):
     # Получаем ID тестов, которые уже привязаны к курсу
     course_quiz_ids = course.quizzes.values_list('id', flat=True)
     
-    # Получаем тесты, которые еще не привязаны к этому курсу
-    available_quizzes = Quiz.objects.exclude(id__in=course_quiz_ids).order_by('name')
-    
-    # Исключаем также финальный тест курса, если он есть
+    # Тесты для добавления: не в курсе, не уникальные (уникальные привязаны только к одному курсу)
+    available_quizzes = Quiz.objects.exclude(
+        id__in=course_quiz_ids
+    ).filter(course_only=False).order_by('name')
     if course.final_quiz:
         available_quizzes = available_quizzes.exclude(id=course.final_quiz.id)
 
@@ -972,7 +972,8 @@ def add_quiz_to_course(request, course_slug):
 
     try:
         quiz = Quiz.objects.get(id=quiz_id)
-        # Добавлеяем тест в курс через ManyToMany
+        if quiz.course_only:
+            return JsonResponse({'success': False, 'error': 'Уникальный тест курса нельзя добавить в другой курс'}, status=400)
         course.quizzes.add(quiz)
         return JsonResponse({'success': True, 'message': f'Тест "{quiz.name}" успешно добавлен в курс'})
     except Quiz.DoesNotExist:
@@ -1009,6 +1010,8 @@ def add_materials_to_course(request, course_slug):
             continue
         try:
             quiz = Quiz.objects.get(id=qid)
+            if quiz.course_only:
+                continue
             if not course.quizzes.filter(id=quiz.id).exists():
                 course.quizzes.add(quiz)
                 added_quizzes += 1

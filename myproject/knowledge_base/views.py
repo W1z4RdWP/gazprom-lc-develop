@@ -40,8 +40,11 @@ class KbHome(TemplateView):
             # Курсы в текущей папке
             courses = Course.objects.filter(directory=current_directory).select_related('author', 'final_quiz').order_by('title')
             
-            # Тесты в текущей папке
-            quizzes = Quiz.objects.filter(directory=current_directory).order_by('name')
+            # Тесты в текущей папке (исключаем уникальные тесты курсов)
+            quizzes = Quiz.objects.filter(
+                directory=current_directory,
+                course_only=False
+            ).order_by('name')
             
             # Уроки в текущей папке (исключаем уникальные уроки курсов — они не в БЗ)
             standalone_lessons = Lesson.objects.filter(
@@ -55,8 +58,11 @@ class KbHome(TemplateView):
             # Курсы без категории (directory=None)
             courses = Course.objects.filter(directory__isnull=True).select_related('author', 'final_quiz').order_by('title')
             
-            # Тесты без категории (directory=None)
-            quizzes = Quiz.objects.filter(directory__isnull=True).order_by('name')
+            # Тесты без категории (исключаем уникальные тесты курсов)
+            quizzes = Quiz.objects.filter(
+                directory__isnull=True,
+                course_only=False
+            ).order_by('name')
             
             # Уроки без категории (исключаем уникальные уроки курсов — они не в БЗ)
             standalone_lessons = Lesson.objects.filter(

@@ -17,15 +17,16 @@ class QuizForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         self.directory = kwargs.pop('directory', None)
+        self.course_only = kwargs.pop('course_only', False)
+        self.course = kwargs.pop('course', None)
         super().__init__(*args, **kwargs)
-        
-        # Делаем поле directory необязательным
-        self.fields['directory'].required = False
-        self.fields['directory'].empty_label = '--- Без категории ---'
-        
-        # Если директория передана явно, устанавливаем её значение
-        if self.directory:
-            self.fields['directory'].initial = self.directory
+        if self.course_only:
+            self.fields.pop('directory', None)
+        else:
+            self.fields['directory'].required = False
+            self.fields['directory'].empty_label = '--- Без категории ---'
+            if self.directory:
+                self.fields['directory'].initial = self.directory
 
 class QuestionForm(forms.ModelForm):
     class Meta:

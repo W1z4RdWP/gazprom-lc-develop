@@ -35,49 +35,73 @@ class CreateQuizView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def get_form_kwargs(self):
         """Передача дополнительных параметров в форму"""
         kwargs = super().get_form_kwargs()
-        
-        # Получаем directory_id из GET-параметра
-        directory_id = self.request.GET.get('directory')
-        if directory_id:
+        course_slug = self.kwargs.get('course_slug')
+        is_unique = self.request.GET.get('unique') == '1'
+
+        if is_unique and course_slug:
+            kwargs['course_only'] = True
             try:
-                from knowledge_base.models import Directory
-                directory = Directory.objects.get(id=directory_id)
-                kwargs['directory'] = directory
-            except (Directory.DoesNotExist, ValueError):
+                kwargs['course'] = Course.objects.get(slug=course_slug)
+            except Course.DoesNotExist:
                 pass
-        
+        else:
+            directory_id = self.request.GET.get('directory')
+            if directory_id:
+                try:
+                    from knowledge_base.models import Directory
+                    directory = Directory.objects.get(id=directory_id)
+                    kwargs['directory'] = directory
+                except (Directory.DoesNotExist, ValueError):
+                    pass
         return kwargs
 
 
     def form_valid(self, form):
         """Обработка валидной формы"""
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        course_slug = self.kwargs.get('course_slug')
+        is_unique = self.request.GET.get('unique') == '1'
+        if is_unique and course_slug:
+            course = Course.objects.get(slug=course_slug)
+            self.object.directory = None
+            self.object.course_only = True
+            self.object.save(update_fields=['directory', 'course_only'])
+            course.quizzes.add(self.object)
+        return response
     
 
     def get_context_data(self, **kwargs):
         """Добавление контекста для шаблона"""
         context = super().get_context_data(**kwargs)
-        
-        # Получаем директорию из GET-параметра
-        directory_id = self.request.GET.get('directory')
-        if directory_id:
+        course_slug = self.kwargs.get('course_slug')
+        context['is_unique_quiz'] = self.request.GET.get('unique') == '1' and course_slug
+        if course_slug:
             try:
-                from knowledge_base.models import Directory
-                context['directory'] = Directory.objects.get(id=directory_id)
-            except (Directory.DoesNotExist, ValueError):
+                context['course'] = Course.objects.get(slug=course_slug)
+            except Course.DoesNotExist:
                 pass
-        
+        if not context.get('is_unique_quiz'):
+            directory_id = self.request.GET.get('directory')
+            if directory_id:
+                try:
+                    from knowledge_base.models import Directory
+                    context['directory'] = Directory.objects.get(id=directory_id)
+                except (Directory.DoesNotExist, ValueError):
+                    pass
         return context
     
 
     def get_success_url(self):
         """Перенаправление после успешного создания"""
         quiz = self.object
+        course_slug = self.kwargs.get('course_slug')
+        if quiz.course_only and course_slug:
+            from django.urls import reverse
+            return reverse('courses:course_detail', kwargs={'slug': course_slug})
         if quiz.directory:
             from django.urls import reverse
             return reverse('knowledge_base:kb_directory', kwargs={'directory_id': quiz.directory.id})
-        else:
-            return reverse_lazy('knowledge_base:kb_home')
+        return reverse_lazy('knowledge_base:kb_home')
 
 
 

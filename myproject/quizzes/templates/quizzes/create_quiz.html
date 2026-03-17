@@ -4,8 +4,10 @@
 {% block title %}Создать тест{% endblock %}
 {% block content %}
 <div class="content-section">
-    <h2>Создать тест{% if directory %} в категории "{{ directory.name }}"{% endif %}</h2>
-    {% if directory %}
+    <h2>{% if is_unique_quiz %}Создать уникальный тест{% else %}Создать тест{% endif %}{% if course %} для курса "{{ course.title }}"{% elif directory %} в категории "{{ directory.name }}"{% endif %}</h2>
+    {% if is_unique_quiz %}
+        <p class="text-muted">Уникальный тест существует только внутри этого курса и не отображается в базе знаний.</p>
+    {% elif directory %}
         <p class="text-muted">Тест будет привязан к категории "{{ directory.name }}"</p>
     {% endif %}
     <form method="POST">
@@ -15,7 +17,9 @@
         </fieldset>
         <div class="form-group mt-4">
             <button class="btn btn-primary" type="submit">Создать тест</button>
-            {% if directory %}
+            {% if course %}
+                <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-secondary">Отмена</a>
+            {% elif directory %}
                 <a href="{% url 'knowledge_base:kb_directory' directory.id %}" class="btn btn-secondary">Отмена</a>
             {% else %}
                 <a href="{% url 'knowledge_base:kb_home' %}" class="btn btn-secondary">Отмена</a>
