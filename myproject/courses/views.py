@@ -260,6 +260,17 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
                                                       completed_quizzes, total_quizzes)
         
 
+        # Назначенные пользователи (для staff)
+        assigned_users = []
+        assigned_users_count = 0
+        if self.request.user.is_staff:
+            assigned_users = list(
+                User.objects.filter(
+                    started_courses__course=self.object
+                ).order_by('last_name', 'first_name', 'username').distinct()
+            )
+            assigned_users_count = len(assigned_users)
+
         # Добавляем все в контекст
         context.update({
             'user_course': user_course,
@@ -281,6 +292,8 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
             'show_final_quiz': show_final_quiz,
             'final_quiz_passed': final_quiz_passed,
             'show_completion_animation': show_completion_animation,
+            'assigned_users': assigned_users,
+            'assigned_users_count': assigned_users_count,
         })
 
         return context
