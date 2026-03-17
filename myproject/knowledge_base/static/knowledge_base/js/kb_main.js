@@ -696,35 +696,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     container.innerHTML = '';
                     
                     data.lessons.forEach(lesson => {
-                        const lessonItem = document.createElement('div');
-                        lessonItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                        const lessonItem = document.createElement('label');
+                        lessonItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center mb-0 cursor-pointer';
+                        lessonItem.style.cursor = 'pointer';
                         lessonItem.innerHTML = `
-                            <div>
-                                <h6 class="mb-1">${escapeHtml(lesson.title)}</h6>
-                                <small class="text-muted">
-                                    <i class="bi bi-book"></i> ${escapeHtml(lesson.current_course)} | 
-                                    <i class="bi bi-folder"></i> ${escapeHtml(lesson.directory)}
-                                </small>
+                            <div class="d-flex align-items-center flex-grow-1">
+                                <input type="checkbox" name="lesson_ids" value="${lesson.id}" class="form-check-input me-3 flex-shrink-0">
+                                <div>
+                                    <h6 class="mb-1">${escapeHtml(lesson.title)}</h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-book"></i> ${escapeHtml(lesson.current_course)} | 
+                                        <i class="bi bi-folder"></i> ${escapeHtml(lesson.directory)}
+                                    </small>
+                                </div>
                             </div>
-                            <button class="btn btn-sm btn-primary add-lesson-btn" 
-                                    data-lesson-id="${lesson.id}"
-                                    data-lesson-title="${escapeHtml(lesson.title)}">
-                                <i class="bi bi-plus-circle"></i> Добавить
-                            </button>
                         `;
                         container.appendChild(lessonItem);
                     });
                     
                     document.getElementById('lessons-list').style.display = 'block';
-                    
-                    // Добавляем обработчики для кнопок добавления
-                    document.querySelectorAll('.add-lesson-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const lessonId = this.getAttribute('data-lesson-id');
-                            const lessonTitle = this.getAttribute('data-lesson-title');
-                            addLessonToCourse(courseSlug, lessonId, lessonTitle, this);
-                        });
-                    });
                 } else {
                     document.getElementById('lessons-empty').style.display = 'block';
                 }
@@ -766,34 +756,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     container.innerHTML = '';
                     
                     data.quizzes.forEach(quiz => {
-                        const quizItem = document.createElement('div');
-                        quizItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                        const quizItem = document.createElement('label');
+                        quizItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center mb-0 cursor-pointer';
+                        quizItem.style.cursor = 'pointer';
                         quizItem.innerHTML = `
-                            <div>
-                                <h6 class="mb-1">${escapeHtml(quiz.name)}</h6>
-                                <small class="text-muted">
-                                    <i class="bi bi-folder"></i> ${escapeHtml(quiz.directory)}
-                                </small>
+                            <div class="d-flex align-items-center flex-grow-1">
+                                <input type="checkbox" name="quiz_ids" value="${quiz.id}" class="form-check-input me-3 flex-shrink-0">
+                                <div>
+                                    <h6 class="mb-1">${escapeHtml(quiz.name)}</h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-folder"></i> ${escapeHtml(quiz.directory)}
+                                    </small>
+                                </div>
                             </div>
-                            <button class="btn btn-sm btn-primary add-quiz-btn" 
-                                    data-quiz-id="${quiz.id}"
-                                    data-quiz-name="${escapeHtml(quiz.name)}">
-                                <i class="bi bi-plus-circle"></i> Добавить
-                            </button>
                         `;
                         container.appendChild(quizItem);
                     });
                     
                     document.getElementById('quizzes-list').style.display = 'block';
-                    
-                    // Добавляем обработчики для кнопок добавления
-                    document.querySelectorAll('.add-quiz-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const quizId = this.getAttribute('data-quiz-id');
-                            const quizName = this.getAttribute('data-quiz-name');
-                            addQuizToCourse(courseSlug, quizId, quizName, this);
-                        });
-                    });
                 } else {
                     document.getElementById('quizzes-empty').style.display = 'block';
                 }
@@ -805,114 +785,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Ошибка при загрузке списка тестов: ' + error.message;
                 document.getElementById('quizzes-error').style.display = 'block';
             });
-    }
-    
-    // Функция добавления урока в курс
-    function addLessonToCourse(courseSlug, lessonId, lessonTitle, button) {
-        button.disabled = true;
-        const originalHtml = button.innerHTML;
-        button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Добавление...';
-        
-        const formData = new FormData();
-        formData.append('lesson_id', lessonId);
-        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
-        
-        fetch(`/courses/course/${courseSlug}/add-lesson/`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                button.innerHTML = '<i class="bi bi-check-circle"></i> Добавлено';
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-success');
-                
-                // Удаляем элемент из списка после успешного добавления
-                const lessonItem = button.closest('.list-group-item');
-                if (lessonItem) {
-                    setTimeout(() => {
-                        lessonItem.style.transition = 'opacity 0.3s';
-                        lessonItem.style.opacity = '0';
-                        setTimeout(() => {
-                            lessonItem.remove();
-                            // Проверяем, остались ли еще уроки в списке
-                            const container = document.getElementById('lessons-container');
-                            if (!container || container.children.length === 0) {
-                                document.getElementById('lessons-list').style.display = 'none';
-                                document.getElementById('lessons-empty').style.display = 'block';
-                            }
-                        }, 300);
-                    }, 500);
-                }
-            } else {
-                button.innerHTML = originalHtml;
-                button.disabled = false;
-                alert('Ошибка: ' + (data.error || 'Не удалось добавить урок'));
-            }
-        })
-        .catch(error => {
-            button.innerHTML = originalHtml;
-            button.disabled = false;
-            alert('Ошибка при добавлении урока: ' + error.message);
-        });
-    }
-    
-    // Функция добавления теста в курс
-    function addQuizToCourse(courseSlug, quizId, quizName, button) {
-        button.disabled = true;
-        const originalHtml = button.innerHTML;
-        button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Добавление...';
-        
-        const formData = new FormData();
-        formData.append('quiz_id', quizId);
-        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
-        
-        fetch(`/courses/course/${courseSlug}/add-quiz/`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                button.innerHTML = '<i class="bi bi-check-circle"></i> Добавлено';
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-success');
-                
-                // Удаляем элемент из списка после успешного добавления
-                const quizItem = button.closest('.list-group-item');
-                if (quizItem) {
-                    setTimeout(() => {
-                        quizItem.style.transition = 'opacity 0.3s';
-                        quizItem.style.opacity = '0';
-                        setTimeout(() => {
-                            quizItem.remove();
-                            // Проверяем, остались ли еще тесты в списке
-                            const container = document.getElementById('quizzes-container');
-                            if (!container || container.children.length === 0) {
-                                document.getElementById('quizzes-list').style.display = 'none';
-                                document.getElementById('quizzes-empty').style.display = 'block';
-                            }
-                        }, 300);
-                    }, 500);
-                }
-            } else {
-                button.innerHTML = originalHtml;
-                button.disabled = false;
-                alert('Ошибка: ' + (data.error || 'Не удалось добавить тест'));
-            }
-        })
-        .catch(error => {
-            button.innerHTML = originalHtml;
-            button.disabled = false;
-            alert('Ошибка при добавлении теста: ' + error.message);
-        });
     }
     
     // Вспомогательная функция для получения CSRF токена

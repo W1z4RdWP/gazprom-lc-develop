@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import CreateView, DetailView, ListView
 
@@ -976,6 +977,54 @@ def add_quiz_to_course(request, course_slug):
         return JsonResponse({'success': True, 'message': f'Тест "{quiz.name}" успешно добавлен в курс'})
     except Quiz.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Тест не найден'}, status=404)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/')
+@require_POST
+def add_materials_to_course(request, course_slug):
+    """Массовое добавление выбранных уроков и тестов в курс (POST, редирект)."""
+    course = get_object_or_404(Course, slug=course_slug)
+    lesson_ids = request.POST.getlist('lesson_ids')
+    quiz_ids = request.POST.getlist('quiz_ids')
+    added_lessons = 0
+    added_quizzes = 0
+    messages_list = []
+
+    for lid in lesson_ids:
+        if not lid:
+            continue
+        try:
+            lesson = Lesson.objects.get(id=lid)
+            if lesson.course_only:
+                continue
+            if not lesson.courses.filter(id=course.id).exists():
+                lesson.courses.add(course)
+                added_lessons += 1
+        except (Lesson.DoesNotExist, ValueError):
+            pass
+
+    for qid in quiz_ids:
+        if not qid:
+            continue
+        try:
+            quiz = Quiz.objects.get(id=qid)
+            if not course.quizzes.filter(id=quiz.id).exists():
+                course.quizzes.add(quiz)
+                added_quizzes += 1
+        except (Quiz.DoesNotExist, ValueError):
+            pass
+
+    if added_lessons or added_quizzes:
+        if added_lessons:
+            messages_list.append(f'Добавлено уроков: {added_lessons}')
+        if added_quizzes:
+            messages_list.append(f'Добавлено тестов: {added_quizzes}')
+        messages.success(request, '; '.join(messages_list))
+    else:
+        messages.info(request, 'Ничего не выбрано или выбранные материалы уже в курсе.')
+
+    return redirect('courses:course_detail', slug=course_slug)
 
 
 @login_required
