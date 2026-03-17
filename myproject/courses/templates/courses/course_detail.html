@@ -269,6 +269,7 @@
                         <div id="lessons-list" style="display: none;">
                             <p class="text-muted mb-3">Выберите урок для добавления в курс:</p>
                             <div class="list-group" id="lessons-container"></div>
+                            <a href="{% url 'courses:create_lesson_for_course' course.slug %}?unique=1" class="btn btn-light mt-3">Создать уникальный урок для курса "{{ course.title }}"</a>
                         </div>
                         <div id="lessons-empty" class="alert alert-info" style="display: none;">
                             Нет доступных уроков для добавления в этот курс.
@@ -285,6 +286,7 @@
                         <div id="quizzes-list" style="display: none;">
                             <p class="text-muted mb-3">Выберите тест для добавления в курс:</p>
                             <div class="list-group" id="quizzes-container"></div>
+                            <button type="button" class="btn btn-light mt-3" data-create-unique-quiz="modal">Создать тест для курса "{{ course.title }}"</button>
                         </div>
                         <div id="quizzes-empty" class="alert alert-info" style="display: none;">
                             Нет доступных тестов для добавления в этот курс.

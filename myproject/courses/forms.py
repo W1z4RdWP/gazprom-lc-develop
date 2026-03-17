@@ -142,32 +142,28 @@ class LessonForm(forms.ModelForm):
 
 
     def __init__(self, *args, **kwargs):
-        self.course = kwargs.pop('course', None)  # Для обратной совместимости
+        self.course = kwargs.pop('course', None)
         self.directory = kwargs.pop('directory', None)
+        self.course_only = kwargs.pop('course_only', False)  # Уникальный урок только для курса
         super().__init__(*args, **kwargs)
 
-        # Делаем поле courses необязательным
-        self.fields['courses'].required = False
-        
-        # Делаем поле directory необязательным
-        self.fields['directory'].required = False
-        self.fields['directory'].empty_label = '--- Без категории ---'
-        
-        # Если курс передан явно (для обратной совместимости), добавляем его к courses
-        if self.course:
-            if self.instance and self.instance.pk:
-                # При редактировании добавляем курс, если его еще нет
-                if self.course not in self.instance.courses.all():
-                    self.initial['courses'] = list(self.instance.courses.all()) + [self.course]
-            else:
-                # При создании устанавливаем курс
-                self.initial['courses'] = [self.course]
+        if self.course_only:
+            # Уникальный урок: убираем выбор категории и курсов (привязка только к текущему курсу)
+            self.fields.pop('directory', None)
+            self.fields.pop('courses', None)
+        else:
+            self.fields['courses'].required = False
+            self.fields['directory'].required = False
+            self.fields['directory'].empty_label = '--- Без категории ---'
+            if self.course:
+                if self.instance and self.instance.pk:
+                    if self.course not in self.instance.courses.all():
+                        self.initial['courses'] = list(self.instance.courses.all()) + [self.course]
+                else:
+                    self.initial['courses'] = [self.course]
+            if self.directory:
+                self.fields['directory'].initial = self.directory
 
-        # Если директория передана явно, устанавливаем её значение
-        if self.directory:
-            self.fields['directory'].initial = self.directory
-
-        # Делаем поле order необязательным (будет автоматически вычисляться)
         self.fields['order'].required = False
         self.fields['order'].help_text = 'Порядок урока (необязательно, будет автоматически вычислен)'
 

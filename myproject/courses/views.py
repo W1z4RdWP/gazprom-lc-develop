@@ -526,33 +526,44 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def get_form_kwargs(self):
         """Передача дополнительных параметров в форму"""
         kwargs = super().get_form_kwargs()
-        # Получаем course_slug из URL, если он есть (для обратной совместимости)
         course_slug = self.kwargs.get('course_slug')
+        is_unique = self.request.GET.get('unique') == '1'
+
         if course_slug:
             try:
                 course = Course.objects.get(slug=course_slug)
                 kwargs['course'] = course
             except Course.DoesNotExist:
                 pass
-        
-        # Получаем directory_id из GET-параметра
-        directory_id = self.request.GET.get('directory')
-        if directory_id:
-            try:
-                from knowledge_base.models import Directory
-                directory = Directory.objects.get(id=directory_id)
-                kwargs['directory'] = directory
-            except (Directory.DoesNotExist, ValueError):
-                pass
-        
+
+        if is_unique and course_slug:
+            kwargs['course_only'] = True
+        else:
+            directory_id = self.request.GET.get('directory')
+            if directory_id:
+                try:
+                    from knowledge_base.models import Directory
+                    directory = Directory.objects.get(id=directory_id)
+                    kwargs['directory'] = directory
+                except (Directory.DoesNotExist, ValueError):
+                    pass
+
         return kwargs
 
 
     def form_valid(self, form):
         """Обработка валидной формы и загрузки файлов"""
         response = super().form_valid(form)
-        
-        # Обрабатываем загруженные файлы
+
+        is_unique = self.request.GET.get('unique') == '1'
+        course_slug = self.kwargs.get('course_slug')
+        if is_unique and course_slug:
+            course = Course.objects.get(slug=course_slug)
+            self.object.directory = None
+            self.object.course_only = True
+            self.object.save(update_fields=['directory', 'course_only'])
+            self.object.courses.set([course])
+
         files = self.request.FILES.getlist('attachments')
         for file in files:
             LessonAttachment.objects.create(
@@ -560,33 +571,31 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 file=file,
                 name=file.name
             )
-        
         return response
     
     
     def get_context_data(self, **kwargs):
         """Добавление контекста для шаблона"""
         context = super().get_context_data(**kwargs)
-        # Получаем курс из URL, если он есть
         course_slug = self.kwargs.get('course_slug')
+        context['is_unique_lesson'] = self.request.GET.get('unique') == '1' and course_slug
+
         if course_slug:
             try:
                 context['course'] = Course.objects.get(slug=course_slug)
             except Course.DoesNotExist:
                 pass
-        
-        # Получаем директорию из GET-параметра
-        directory_id = self.request.GET.get('directory')
-        if directory_id:
-            try:
-                from knowledge_base.models import Directory
-                context['directory'] = Directory.objects.get(id=directory_id)
-            except (Directory.DoesNotExist, ValueError):
-                pass
-        
-        # Форма для загрузки файлов
+
+        if not context.get('is_unique_lesson'):
+            directory_id = self.request.GET.get('directory')
+            if directory_id:
+                try:
+                    from knowledge_base.models import Directory
+                    context['directory'] = Directory.objects.get(id=directory_id)
+                except (Directory.DoesNotExist, ValueError):
+                    pass
+
         context['attachments_form'] = LessonAttachmentsForm()
-        
         return context
     
 
@@ -878,8 +887,10 @@ def get_available_lessons(request, course_slug):
     # Получаем ID уроков, которые уже привязаны к этому курсу
     course_lesson_ids = course.lessons.values_list('id', flat=True)
     
-    # Получаем уроки, которые еще не привязаны к этому курсу
-    available_lessons = Lesson.objects.exclude(id__in=course_lesson_ids).order_by('title')
+    # Уроки для добавления: не в курсе и не уникальные (уникальные привязаны только к одному курсу)
+    available_lessons = Lesson.objects.exclude(
+        id__in=course_lesson_ids
+    ).filter(course_only=False).order_by('title')
     
     lessons_data = []
     for lesson in available_lessons:
@@ -909,11 +920,10 @@ def add_lesson_to_course(request, course_slug):
     
     try:
         lesson = Lesson.objects.get(id=lesson_id)
-        # Проверяем, не добавлен ли уже урок в этот курс
+        if lesson.course_only:
+            return JsonResponse({'success': False, 'error': 'Уникальный урок курса нельзя добавить в другой курс'}, status=400)
         if lesson.courses.filter(id=course.id).exists():
             return JsonResponse({'success': False, 'error': 'Урок уже добавлен в этот курс'}, status=400)
-        
-        # Добавляем урок в курс через ManyToMany
         lesson.courses.add(course)
         
         return JsonResponse({'success': True, 'message': f'Урок "{lesson.title}" успешно добавлен в курс'})

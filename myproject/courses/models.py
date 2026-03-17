@@ -110,7 +110,11 @@ class Lesson(models.Model):
         related_name='lessons',
         verbose_name="Категория"
     )
-
+    course_only = models.BooleanField(
+        default=False,
+        verbose_name="Только для курса",
+        help_text="Урок существует только внутри курса и не отображается в базе знаний"
+    )
 
     class Meta:
         verbose_name = 'Урок'
