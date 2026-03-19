@@ -644,11 +644,14 @@ def delete_course(request, slug):
 @user_passes_test(is_admin, login_url='/')
 def delete_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
+    course_slug = request.GET.get('course_slug')
     if request.method == 'POST':
         # Сохраняем информацию о курсах и директории до удаления
         courses = list(lesson.courses.all())
         directory = lesson.directory
         lesson.delete()
+        if course_slug:
+            return redirect('courses:course_detail', slug=course_slug)
         if courses:
             return redirect('courses:course_detail', slug=courses[0].slug)
         elif directory:
@@ -657,6 +660,8 @@ def delete_lesson(request, lesson_id):
         else:
             return redirect('knowledge_base:kb_home')
     # Для GET запроса
+    if course_slug:
+        return redirect('courses:course_detail', slug=course_slug)
     if lesson.courses.exists():
         return redirect('courses:course_detail', slug=lesson.courses.first().slug)
     elif lesson.directory:

@@ -136,14 +136,19 @@ def edit_quiz(request, quiz_id):
 @user_passes_test(lambda u: u.is_staff)
 def delete_quiz(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
+    course_slug = request.GET.get('course_slug')
     if request.method == 'POST':
         directory = quiz.directory
         quiz.delete()
+        if course_slug:
+            return redirect('courses:course_detail', slug=course_slug)
         if directory:
             return redirect('knowledge_base:kb_directory', directory_id=directory.id)
         return redirect('knowledge_base:kb_home')
 
     # Для GET-запроса просто возвращаем пользователя назад к базе знаний
+    if course_slug:
+        return redirect('courses:course_detail', slug=course_slug)
     if quiz.directory:
         return redirect('knowledge_base:kb_directory', directory_id=quiz.directory.id)
     return redirect('knowledge_base:kb_home')

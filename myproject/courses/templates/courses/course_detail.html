@@ -86,11 +86,23 @@
                             </div>
                             <div class="d-flex align-items-center gap-2">
                                 {% if user.is_staff or user.is_superuser %}
-                                <span class="btn btn-sm btn-outline-warning py-0 px-1" style="width: 50%!important;"
+                                <span class="btn btn-sm btn-outline-warning py-0 px-1 d-inline-flex align-items-center justify-content-center"
+                                      style="width: 1.4rem; height: 1.4rem; font-size: 0.75rem;"
                                       onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{% url 'courses:edit_lesson' lesson_id=lesson.id %}';"
                                       title="Редактировать урок">
                                     <i class="bi bi-pencil"></i>
                                 </span>
+                                {% if lesson.course_only %}
+                                <span class="btn btn-sm btn-outline-danger py-0 px-1 d-inline-flex align-items-center justify-content-center"
+                                      style="width: 1.4rem; height: 1.4rem; font-size: 0.75rem;"
+                                      onclick="event.preventDefault(); event.stopPropagation(); if(confirm('Удалить уникальный урок &quot;{{ lesson.title|escapejs }}&quot;? Это действие необратимо.')) { document.getElementById('delete-lesson-{{ lesson.id }}').submit(); }"
+                                      title="Удалить урок">
+                                    <i class="bi bi-trash"></i>
+                                </span>
+                                <form id="delete-lesson-{{ lesson.id }}" method="post" action="{% url 'courses:delete_lesson' lesson_id=lesson.id %}?course_slug={{ course.slug }}" style="display: none;">
+                                    {% csrf_token %}
+                                </form>
+                                {% endif %}
                                 {% endif %}
                                 {% if has_started and lesson.id in completed_lessons_ids %}
                                     <span class="badge bg-success rounded-pill">
@@ -126,11 +138,23 @@
                             </div>
                             <div class="d-flex align-items-center gap-2">
                                 {% if user.is_staff or user.is_superuser %}
-                                <span class="btn btn-sm btn-outline-warning py-0 px-1" style="width: 50%!important;"
+                                <span class="btn btn-sm btn-outline-warning py-0 px-1 d-inline-flex align-items-center justify-content-center"
+                                      style="width: 1.4rem; height: 1.4rem; font-size: 0.75rem;"
                                       onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{% url 'quizzes:edit_quiz' quiz_id=quiz.id %}';"
                                       title="Редактировать тест">
                                     <i class="bi bi-pencil"></i>
                                 </span>
+                                {% if quiz.course_only %}
+                                <span class="btn btn-sm btn-outline-danger py-0 px-1 d-inline-flex align-items-center justify-content-center"
+                                      style="width: 1.4rem; height: 1.4rem; font-size: 0.75rem;"
+                                      onclick="event.preventDefault(); event.stopPropagation(); if(confirm('Удалить уникальный тест &quot;{{ quiz.name|escapejs }}&quot;? Это действие необратимо.')) { document.getElementById('delete-quiz-{{ quiz.id }}').submit(); }"
+                                      title="Удалить тест">
+                                    <i class="bi bi-trash"></i>
+                                </span>
+                                <form id="delete-quiz-{{ quiz.id }}" method="post" action="{% url 'quizzes:delete_quiz' quiz_id=quiz.id %}?course_slug={{ course.slug }}" style="display: none;">
+                                    {% csrf_token %}
+                                </form>
+                                {% endif %}
                                 {% endif %}
                                 {% if has_started and quiz.id in completed_quizzes_ids %}
                                     <span class="badge bg-success rounded-pill">
