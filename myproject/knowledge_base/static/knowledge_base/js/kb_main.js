@@ -592,6 +592,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Модальное окно добавления материалов в курс
 document.addEventListener('DOMContentLoaded', function() {
     const addLessonModal = document.getElementById('addLessonModal');
+    const addMaterialsForm = document.getElementById('addMaterialsForm');
     let currentCourseSlug = null;
     let currentCourseTitle = null;
     
@@ -604,6 +605,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Обновляем заголовок модального окна
         document.getElementById('addLessonModalLabel').textContent = 
             `Добавить в курс: ${currentCourseTitle}`;
+
+        if (addMaterialsForm && currentCourseSlug) {
+            addMaterialsForm.action = `/courses/course/${currentCourseSlug}/add-materials/`;
+        }
         
         // Сбрасываем табы на первую вкладку
         const lessonsTab = document.getElementById('lessons-tab');
@@ -660,6 +665,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Обработчик события shown.bs.tab (срабатывает после переключения)
         quizzesTab.addEventListener('shown.bs.tab', handleQuizzesTabLoad);
+    }
+
+    if (addMaterialsForm) {
+        addMaterialsForm.addEventListener('submit', function(event) {
+            const selectedMaterials = addMaterialsForm.querySelectorAll(
+                'input[name="lesson_ids"]:checked, input[name="quiz_ids"]:checked'
+            );
+
+            if (!selectedMaterials.length) {
+                event.preventDefault();
+                alert('Выберите хотя бы один материал для добавления в курс.');
+            }
+        });
     }
     
     // Функции для сброса состояния
