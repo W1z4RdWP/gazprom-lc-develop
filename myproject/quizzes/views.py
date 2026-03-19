@@ -113,24 +113,94 @@ def edit_quiz(request, quiz_id):
     """Функция для редактирования теста"""
     quiz = get_object_or_404(Quiz, id=quiz_id)
     directory = quiz.directory
-    
+
     if request.method == 'POST':
-        form = QuizForm(request.POST, instance=quiz, directory=directory)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Тест успешно сохранён.')
+        action = request.POST.get('action', 'settings')
+
+        if action == 'save_all':
+            form = QuizForm(request.POST, instance=quiz, directory=directory)
+            if form.is_valid():
+                form.save()
+                _save_questions_from_post(request.POST, quiz)
+                messages.success(request, 'Тест успешно сохранён.')
+                return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
+        elif action == 'save_questions':
+            _save_questions_from_post(request.POST, quiz)
+            messages.success(request, 'Вопросы успешно сохранены.')
             return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
+        else:
+            form = QuizForm(request.POST, instance=quiz, directory=directory)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Настройки теста успешно сохранены.')
+                return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
     else:
         form = QuizForm(instance=quiz, directory=directory)
-    
-    # Загружаем вопросы с ответами для отображения
+
     questions = Question.objects.filter(quiz=quiz).order_by('id').prefetch_related('answer_set')
-    
+
     return render(request, 'quizzes/edit_quiz.html', {
         'form': form,
         'quiz': quiz,
         'questions': questions,
     })
+
+
+def _save_questions_from_post(post, quiz):
+    """Сохранение всех вопросов и ответов из единого POST-запроса."""
+    questions_count = int(post.get('questions_count', 0))
+    submitted_question_ids = []
+
+    for qi in range(questions_count):
+        q_id = post.get(f'q_id_{qi}', '').strip()
+        q_text = post.get(f'q_text_{qi}', '').strip()
+        q_type = post.get(f'q_type_{qi}', Question.SINGLE)
+
+        if not q_text:
+            continue
+        if q_type not in [Question.SINGLE, Question.MULTIPLE]:
+            q_type = Question.SINGLE
+
+        if q_id:
+            try:
+                question = Question.objects.get(id=int(q_id), quiz=quiz)
+                question.text = q_text
+                question.question_type = q_type
+                question.save()
+            except Question.DoesNotExist:
+                question = Question.objects.create(quiz=quiz, text=q_text, question_type=q_type)
+        else:
+            question = Question.objects.create(quiz=quiz, text=q_text, question_type=q_type)
+
+        submitted_question_ids.append(question.id)
+
+        answers_count = int(post.get(f'answers_count_{qi}', 0))
+        submitted_answer_ids = []
+
+        for ai in range(answers_count):
+            a_id = post.get(f'a_id_{qi}_{ai}', '').strip()
+            a_text = post.get(f'a_text_{qi}_{ai}', '').strip()
+            a_correct = f'a_correct_{qi}_{ai}' in post
+
+            if not a_text:
+                continue
+
+            if a_id:
+                try:
+                    answer = Answer.objects.get(id=int(a_id), question=question)
+                    answer.text = a_text
+                    answer.is_correct = a_correct
+                    answer.save()
+                except Answer.DoesNotExist:
+                    answer = Answer.objects.create(question=question, text=a_text, is_correct=a_correct)
+            else:
+                answer = Answer.objects.create(question=question, text=a_text, is_correct=a_correct)
+
+            submitted_answer_ids.append(answer.id)
+
+        Answer.objects.filter(question=question).exclude(id__in=submitted_answer_ids).delete()
+
+    Question.objects.filter(quiz=quiz).exclude(id__in=submitted_question_ids).delete()
 
 
 @login_required

@@ -341,3 +341,26 @@
     margin-top: 2rem;
     flex-wrap: wrap;
 }
+
+/* Кнопка сохранения вопросов */
+.eq-save-questions-bar {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Round toggle для вопросов с одним правильным ответом */
+[data-question-type="single"] .eq-correct-toggle {
+    border-radius: 50%;
+}
+[data-question-type="single"] .eq-correct-toggle:checked::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
