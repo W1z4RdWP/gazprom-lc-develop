@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const questionsCountInput = document.getElementById('questions-count-input');
     const countBadge = document.getElementById('questions-count');
     const emptyState = document.getElementById('empty-state');
+    const mainForm = document.getElementById('main-form');
+    const validationErrorEl = document.getElementById('validation-error');
 
     /* ============ Переиндексация ============
      * Вызывается после каждого добавления / удаления вопроса или ответа.
@@ -172,4 +174,59 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* Первичная нумерация */
     reindex();
+
+    /* ============ Валидация перед сохранением ============ */
+    if (mainForm) {
+        mainForm.addEventListener('submit', function (e) {
+            // Сброс прошлых ошибок
+            container.querySelectorAll('.eq-question-card.eq-invalid').forEach(card => {
+                card.classList.remove('eq-invalid');
+            });
+            if (validationErrorEl) {
+                validationErrorEl.style.display = 'none';
+                validationErrorEl.textContent = '';
+            }
+
+            const invalidQuestionNumbers = [];
+            const cards = container.querySelectorAll('.eq-question-card');
+
+            cards.forEach(card => {
+                const qTextInput = card.querySelector('input[name^="q_text_"]');
+                const qText = qTextInput ? qTextInput.value.trim() : '';
+                // Не валидируем пустые/не заполненные карточки вопроса
+                if (!qText) return;
+
+                const answersContainer = card.querySelector('.js-answers-container');
+                const answerInputs = answersContainer
+                    ? answersContainer.querySelectorAll('.eq-answer-input')
+                    : [];
+
+                const hasAnyAnswer = Array.from(answerInputs).some(inp => inp.value.trim().length > 0);
+
+                if (!hasAnyAnswer) {
+                    card.classList.add('eq-invalid');
+                    const numText = card.querySelector('.eq-question-number')?.textContent;
+                    const num = parseInt(numText, 10);
+                    if (!Number.isNaN(num)) invalidQuestionNumbers.push(num);
+                }
+            });
+
+            if (invalidQuestionNumbers.length > 0) {
+                e.preventDefault();
+                const uniq = Array.from(new Set(invalidQuestionNumbers)).sort((a, b) => a - b);
+
+                if (validationErrorEl) {
+                    validationErrorEl.textContent =
+                        `Сохранение невозможно. Вопрос(ы) №${uniq.join(', ')}: нет вариантов ответов.`;
+                    validationErrorEl.style.display = 'block';
+                }
+
+                const firstInvalid = container.querySelector('.eq-question-card.eq-invalid');
+                if (firstInvalid) {
+                    const firstInvalidInput = firstInvalid.querySelector('input[name^="q_text_"]');
+                    if (firstInvalidInput) firstInvalidInput.focus();
+                }
+            }
+        });
+    }
 });
