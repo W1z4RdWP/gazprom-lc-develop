@@ -93,11 +93,12 @@ class CreateQuizView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def get_success_url(self):
         """Перенаправление после успешного создания"""
-        quiz = self.object
         course_slug = self.kwargs.get('course_slug')
-        if quiz.course_only and course_slug:
+        is_unique = self.request.GET.get('unique') == '1'
+        if is_unique and course_slug:
             from django.urls import reverse
             return reverse('courses:course_detail', kwargs={'slug': course_slug})
+        quiz = self.object
         if quiz.directory:
             from django.urls import reverse
             return reverse('knowledge_base:kb_directory', kwargs={'directory_id': quiz.directory.id})

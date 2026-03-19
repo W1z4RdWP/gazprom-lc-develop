@@ -616,6 +616,9 @@ class CreateLessonView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def get_success_url(self):
         """Перенаправление после успешного создания"""
         lesson = self.object
+        course_slug = self.kwargs.get('course_slug')
+        if lesson.course_only and course_slug:
+            return reverse_lazy('courses:course_detail', kwargs={'slug': course_slug})
         if lesson.courses.exists():
             # Если урок привязан к курсам, берем первый курс
             return reverse_lazy('courses:course_detail', kwargs={'slug': lesson.courses.first().slug})
