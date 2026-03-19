@@ -120,26 +120,49 @@ def edit_quiz(request, quiz_id):
         if action == 'save_all':
             form = QuizForm(request.POST, instance=quiz, directory=directory)
             if form.is_valid():
-                invalid_questions = _validate_questions_have_answers(request.POST)
-                if invalid_questions:
+                invalid_no_answers = _validate_questions_have_answers(request.POST)
+                if invalid_no_answers:
                     messages.error(
                         request,
-                        f'Сохранение невозможно. Вопрос(ы) №{", ".join(map(str, invalid_questions))}: нет вариантов ответов.'
+                        f'Сохранение невозможно. Вопрос(ы) №{", ".join(map(str, invalid_no_answers))}: нет вариантов ответов.'
                     )
                     return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
+
+                invalid_no_correct = _validate_questions_have_correct_answers(request.POST)
+                if invalid_no_correct:
+                    messages.error(request, 'Выберите хотя бы 1 правильный вариант ответа!')
+                    return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
+
                 form.save()
-                _save_questions_from_post(request.POST, quiz)
+                try:
+                    _save_questions_from_post(request.POST, quiz)
+                except ValueError:
+                    # На случай обхода клиентской валидации
+                    messages.error(request, 'Сохранение невозможно: проверьте заполнение вопроса и вариантов ответов.')
+                    return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
+
                 messages.success(request, 'Тест успешно сохранён.')
                 return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
         elif action == 'save_questions':
-            invalid_questions = _validate_questions_have_answers(request.POST)
-            if invalid_questions:
+            invalid_no_answers = _validate_questions_have_answers(request.POST)
+            if invalid_no_answers:
                 messages.error(
                     request,
-                    f'Сохранение невозможно. Вопрос(ы) №{", ".join(map(str, invalid_questions))}: нет вариантов ответов.'
+                    f'Сохранение невозможно. Вопрос(ы) №{", ".join(map(str, invalid_no_answers))}: нет вариантов ответов.'
                 )
                 return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
-            _save_questions_from_post(request.POST, quiz)
+
+            invalid_no_correct = _validate_questions_have_correct_answers(request.POST)
+            if invalid_no_correct:
+                messages.error(request, 'Выберите хотя бы 1 правильный вариант ответа!')
+                return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
+
+            try:
+                _save_questions_from_post(request.POST, quiz)
+            except ValueError:
+                messages.error(request, 'Сохранение невозможно: проверьте заполнение вопроса и вариантов ответов.')
+                return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
+
             messages.success(request, 'Вопросы успешно сохранены.')
             return redirect('quizzes:edit_quiz', quiz_id=quiz.id)
         else:
@@ -194,11 +217,57 @@ def _validate_questions_have_answers(post) -> list[int]:
     return invalid_questions
 
 
+def _validate_questions_have_correct_answers(post) -> list[int]:
+    """
+    Возвращает номера (1-based) вопросов, где вопрос заполнен,
+    есть хотя бы 1 непустой вариант ответа, но ни один из них не отмечен как правильный.
+    """
+    try:
+        questions_count = int(post.get('questions_count', 0))
+    except (TypeError, ValueError):
+        questions_count = 0
+
+    invalid_questions = []
+
+    for qi in range(questions_count):
+        q_text = (post.get(f'q_text_{qi}', '') or '').strip()
+        if not q_text:
+            continue
+
+        try:
+            answers_count = int(post.get(f'answers_count_{qi}', 0))
+        except (TypeError, ValueError):
+            answers_count = 0
+
+        has_any_answer = False
+        has_correct = False
+
+        for ai in range(answers_count):
+            a_text = (post.get(f'a_text_{qi}_{ai}', '') or '').strip()
+            if not a_text:
+                continue
+
+            has_any_answer = True
+
+            if f'a_correct_{qi}_{ai}' in post:
+                has_correct = True
+                break
+
+        if has_any_answer and not has_correct:
+            invalid_questions.append(qi + 1)
+
+    return invalid_questions
+
+
 def _save_questions_from_post(post, quiz):
     """Сохранение всех вопросов и ответов из единого POST-запроса."""
     invalid_questions = _validate_questions_have_answers(post)
     if invalid_questions:
         raise ValueError(f'Нет вариантов ответов у вопроса(ов): {invalid_questions}')
+
+    invalid_no_correct = _validate_questions_have_correct_answers(post)
+    if invalid_no_correct:
+        raise ValueError(f'Нет правильных ответов у вопроса(ов): {invalid_no_correct}')
 
     questions_count = int(post.get('questions_count', 0))
     submitted_question_ids = []

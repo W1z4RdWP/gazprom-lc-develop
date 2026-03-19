@@ -182,12 +182,16 @@ document.addEventListener('DOMContentLoaded', function () {
             container.querySelectorAll('.eq-question-card.eq-invalid').forEach(card => {
                 card.classList.remove('eq-invalid');
             });
+            container.querySelectorAll('.eq-answers-section.eq-invalid-correct').forEach(section => {
+                section.classList.remove('eq-invalid-correct');
+            });
             if (validationErrorEl) {
                 validationErrorEl.style.display = 'none';
                 validationErrorEl.textContent = '';
             }
 
-            const invalidQuestionNumbers = [];
+            const invalidNoAnswersNumbers = [];
+            const invalidNoCorrectNumbers = [];
             const cards = container.querySelectorAll('.eq-question-card');
 
             cards.forEach(card => {
@@ -197,23 +201,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!qText) return;
 
                 const answersContainer = card.querySelector('.js-answers-container');
-                const answerInputs = answersContainer
-                    ? answersContainer.querySelectorAll('.eq-answer-input')
+                const answerRows = answersContainer
+                    ? answersContainer.querySelectorAll('.eq-answer-row')
                     : [];
 
-                const hasAnyAnswer = Array.from(answerInputs).some(inp => inp.value.trim().length > 0);
+                let hasAnyAnswer = false;
+                let hasCorrect = false;
+
+                Array.from(answerRows).forEach(row => {
+                    const textInput = row.querySelector('.eq-answer-input');
+                    const correctInput = row.querySelector('.js-answer-correct');
+
+                    const aText = textInput ? textInput.value.trim() : '';
+                    if (!aText) return; // пустые варианты не учитываем
+
+                    hasAnyAnswer = true;
+                    if (correctInput && correctInput.checked) {
+                        hasCorrect = true;
+                    }
+                });
+
+                const numText = card.querySelector('.eq-question-number')?.textContent;
+                const num = parseInt(numText, 10);
 
                 if (!hasAnyAnswer) {
                     card.classList.add('eq-invalid');
-                    const numText = card.querySelector('.eq-question-number')?.textContent;
-                    const num = parseInt(numText, 10);
-                    if (!Number.isNaN(num)) invalidQuestionNumbers.push(num);
+                    if (!Number.isNaN(num)) invalidNoAnswersNumbers.push(num);
+                    return;
+                }
+
+                if (hasAnyAnswer && !hasCorrect) {
+                    if (answersContainer) answersContainer.classList.add('eq-invalid-correct');
+                    if (!Number.isNaN(num)) invalidNoCorrectNumbers.push(num);
                 }
             });
 
-            if (invalidQuestionNumbers.length > 0) {
+            if (invalidNoAnswersNumbers.length > 0) {
                 e.preventDefault();
-                const uniq = Array.from(new Set(invalidQuestionNumbers)).sort((a, b) => a - b);
+                const uniq = Array.from(new Set(invalidNoAnswersNumbers)).sort((a, b) => a - b);
 
                 if (validationErrorEl) {
                     validationErrorEl.textContent =
@@ -225,6 +250,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (firstInvalid) {
                     const firstInvalidInput = firstInvalid.querySelector('input[name^="q_text_"]');
                     if (firstInvalidInput) firstInvalidInput.focus();
+                }
+                return;
+            }
+
+            if (invalidNoCorrectNumbers.length > 0) {
+                e.preventDefault();
+                if (validationErrorEl) {
+                    validationErrorEl.textContent = 'Выберите хотя бы 1 правильный вариант ответа!';
+                    validationErrorEl.style.display = 'block';
+                }
+
+                const firstInvalidCorrectCard = container.querySelector('.eq-answers-section.eq-invalid-correct')?.closest('.eq-question-card');
+                if (firstInvalidCorrectCard) {
+                    const firstCorrectInput = firstInvalidCorrectCard.querySelector('.js-answer-correct');
+                    if (firstCorrectInput) firstCorrectInput.focus();
                 }
             }
         });
