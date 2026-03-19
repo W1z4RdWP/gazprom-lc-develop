@@ -112,7 +112,7 @@
                 </div>
             {% else %}
                 <div class="text-center mt-4">
-                    {% if quiz.directory %}
+                    {% if request.user.is_staff and quiz.directory %}
                         <a href="{% url 'knowledge_base:kb_directory' quiz.directory.id %}" 
                            class="btn btn-secondary">
                             <i class="bi bi-arrow-left me-2"></i>
