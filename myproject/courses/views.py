@@ -1,5 +1,6 @@
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Max, Count
 from django.db import transaction
@@ -18,6 +19,17 @@ from myapp.models import UserProgress, UserCourse, QuizResult
 from myapp.views import is_admin, is_author_or_admin
 
 
+def _safe_redirect_url(request, url):
+    """Разрешить только относительные URL того же хоста (для поля next из форм)."""
+    if not url:
+        return None
+    if url_has_allowed_host_and_scheme(
+        url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return url
+    return None
 
 
 class CourseDetailView(LoginRequiredMixin, DetailView):
@@ -649,26 +661,31 @@ def delete_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
     course_slug = request.GET.get('course_slug')
     if request.method == 'POST':
+        next_url = _safe_redirect_url(request, request.POST.get('next'))
         # Сохраняем информацию о курсах и директории до удаления
         courses = list(lesson.courses.all())
         directory = lesson.directory
         lesson.delete()
+        # Явный next (например, с панели БЗ) — не уводим на страницу курса
+        if next_url:
+            return redirect(next_url)
         if course_slug:
             return redirect('courses:course_detail', slug=course_slug)
         if courses:
             return redirect('courses:course_detail', slug=courses[0].slug)
         elif directory:
-            from django.urls import reverse
             return redirect('knowledge_base:kb_directory', directory_id=directory.id)
         else:
             return redirect('knowledge_base:kb_home')
     # Для GET запроса
+    next_url = _safe_redirect_url(request, request.GET.get('next'))
+    if next_url:
+        return redirect(next_url)
     if course_slug:
         return redirect('courses:course_detail', slug=course_slug)
     if lesson.courses.exists():
         return redirect('courses:course_detail', slug=lesson.courses.first().slug)
     elif lesson.directory:
-        from django.urls import reverse
         return redirect('knowledge_base:kb_directory', directory_id=lesson.directory.id)
     else:
         return redirect('knowledge_base:kb_home')
