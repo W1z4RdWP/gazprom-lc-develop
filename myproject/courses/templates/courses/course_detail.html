@@ -208,12 +208,6 @@
                                 {% endif %}
                             {% endif %}
                             
-                            {% if next_lesson and not all_completed %}
-                            <a href="{% url 'courses:lesson_detail' course_slug=course.slug lesson_id=next_lesson.id %}" 
-                               class="btn btn-primary w-100 btn-lg mb-3">
-                                <i class="bi bi-play-fill me-2"></i>Продолжить обучение
-                            </a>
-                            {% endif %}
                         </div>
                     {% else %}
                         <div class="text-center mb-4">

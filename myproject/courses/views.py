@@ -2,7 +2,6 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Max, Count
 from django.db import transaction
 from django.http import JsonResponse
 from django.contrib.auth.models import User
@@ -126,43 +125,6 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
         return completed_count, completed_quizzes
 
     
-    def get_next_lesson(self, trajectory, lesson_ids):
-        """Определение следующего урока для изучения"""
-        if trajectory:
-            lessons = trajectory.lessons.all()
-            max_completed_order = UserProgress.objects.filter(
-                user=self.request.user,
-                course=self.object,
-                completed=True,
-                lesson_id__in=lesson_ids
-            ).aggregate(max_order=Max('lesson__order'))['max_order'] or 0
-
-            next_lesson = Lesson.objects.filter(
-                id__in=lesson_ids,
-                order__gt=max_completed_order
-            ).order_by('order').first()
-
-            if not next_lesson:
-                next_lesson = lessons.first()
-
-        else:
-            max_completed_order = UserProgress.objects.filter(
-                user=self.request.user,
-                course=self.object,
-                completed=True
-            ).aggregate(max_order=Max('lesson__order'))['max_order'] or 0
-
-            next_lesson = Lesson.objects.filter(
-                courses=self.object,
-                order__gt=max_completed_order
-            ).order_by('order').first()
-
-            if not next_lesson:
-                next_lesson = self.object.lessons.first()
-
-        return next_lesson
-        
-
     def calculate_progress(self, completed_lessons, total_lessons, completed_quizzes, total_quizzes):
         """Вычисление процента прогресса с учетом уроков и тестов"""
         total_items = total_lessons + total_quizzes
@@ -227,9 +189,6 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
 
         # Вычисляем прогресс с учетом уроков и тестов
         progress = self.calculate_progress(completed_lessons, total_lessons, completed_quizzes, total_quizzes)
-
-        # Следующий урок
-        next_lesson = self.get_next_lesson(trajectory, lesson_ids) if has_started else None
 
         # Курс с 0 материалами не может быть завершён
         total_items = total_lessons + total_quizzes
@@ -298,7 +257,6 @@ class CourseDetailView(LoginRequiredMixin, DetailView):
             'completed_lessons_ids': completed_lessons_ids,
             'completed_quizzes_ids': completed_quizzes_ids,
             'progress': progress,
-            'next_lesson': next_lesson,
             'all_completed': all_completed,
             'exp_earned': exp_earned,
             'show_final_quiz': show_final_quiz,
