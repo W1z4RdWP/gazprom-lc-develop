@@ -8,13 +8,18 @@ import json
 from .models import Directory
 from courses.models import Course, Lesson
 from quizzes.models import Quiz
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 
 
 
-class KbHome(TemplateView):
+class KbHome(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'knowledge_base/kb_home.html'
 
+    def test_func(self):
+        """Проверка прав доступа - только для администраторов"""
+        return self.request.user.is_staff
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
